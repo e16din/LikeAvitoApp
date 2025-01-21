@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LikeAvitoApp</string>
+
+    <string name="autorization_title">Авторизация</string>
+    <string name="authorization_failed">Authorization failed</string>
+    <string name="email_error_text">Введите email вида: sendme@email.com</string>
+    <string name="password_field">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="email_field">Электронная почта</string>
+</resources>
