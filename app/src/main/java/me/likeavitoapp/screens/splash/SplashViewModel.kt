@@ -2,45 +2,51 @@ package me.likeavitoapp.screens.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.likeavitoapp.AppModel
-import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.AuthScreen
+import me.likeavitoapp.DataSources
 import me.likeavitoapp.MainScreen
 import me.likeavitoapp.SplashScreen
-import me.likeavitoapp.screens.splash.SplashViewModel
+import me.likeavitoapp.UserDataSource
+import me.likeavitoapp.exceptionHandler
 
 
-class SplashViewModel(
-    val startUseCase: StartUseCase = StartUseCase()
-) : ViewModel() {
+class SplashViewModel: ViewModel() {
+    val userDataSource = SplashDataSource()
+
+    private val sources = DataSources(userDataSource)
+
+    private val startUseCase: StartUseCase = StartUseCase(viewModelScope, sources)
 
     fun onStart() {
-        viewModelScope.launch {
-            startUseCase.run()
-        }
+        startUseCase.run()
     }
 }
 
+class SplashDataSource : UserDataSource
+
 class StartUseCase(
-    val app: AppModel = AppModel,
-    val platform: AppPlatform = AppPlatform.get
+    val scope: CoroutineScope,
+    val sources: DataSources<SplashDataSource>
 ) {
     var startMs: Long = System.currentTimeMillis()
 
-    suspend fun run() {
-        app.screens.emit(SplashScreen())
-        app.user.id = platform.userIdStore.load()
+    fun run() {
+        scope.launch(exceptionHandler) {
+            sources.app.currentScreenFlow.emit(SplashScreen())
+            sources.app.user.id = sources.platform.userIdStore.load()
 
-        val finishMs = System.currentTimeMillis()
-        val delayMs = 1000 - (finishMs - startMs)
-        delay(delayMs)
+            val finishMs = System.currentTimeMillis()
+            val delayMs = 1000 - (finishMs - startMs)
+            delay(delayMs)
 
-        val nextScreen = if (app.user.id != null)
-            MainScreen()
-        else
-            AuthScreen()
-        app.screens.emit(nextScreen)
+            val nextScreen = if (sources.app.user.id != null)
+                MainScreen()
+            else
+                AuthScreen()
+            sources.app.currentScreenFlow.emit(nextScreen)
+        }
     }
 }

@@ -8,7 +8,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
+
+val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    throwable.printStackTrace()
+}
 
 class AppPlatform : Application() {
 
@@ -27,16 +34,16 @@ class AppPlatform : Application() {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-    inner class UserIdStore {
+    inner class UserIdStore() {
         private val USER_ID_KEY = longPreferencesKey("user_id")
 
         suspend fun load(): Long? {
-            val prefs = this@AppPlatform.dataStore.data.first()
+            val prefs = dataStore.data.first()
             return prefs[USER_ID_KEY]
         }
 
         suspend fun save(userId: Long) {
-            this@AppPlatform.dataStore.edit { settings ->
+            dataStore.edit { settings ->
                 settings[USER_ID_KEY] = userId
             }
         }

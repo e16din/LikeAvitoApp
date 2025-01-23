@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.0-alpha09"
+coilCompose = "3.0.4"
 datastorePreferences = "1.1.2"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
@@ -24,6 +25,7 @@ serialization = "2.1.0"
 
 [libraries]
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation" }
 ktor-client-gson = { module = "io.ktor:ktor-client-gson", version.ref = "ktorClientGson" }

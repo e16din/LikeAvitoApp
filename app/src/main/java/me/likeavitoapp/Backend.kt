@@ -6,9 +6,6 @@ import kotlinx.coroutines.delay
 
 
 class Backend(val client: HttpClient) {
-    fun getSearchTips(query: String) {
-        TODO("Not yet implemented")
-    }
 
     interface UserServiceContract {
         suspend fun login(username: String, password: String): Result<User>
@@ -65,7 +62,13 @@ class Backend(val client: HttpClient) {
         }
 
         override suspend fun getSearchTips(query: String): Result<List<String>> {
-            TODO("Not yet implemented")
+            return Result.success(listOf(
+                "Mac Book",
+                "Mac Book Pro",
+                "Mac Book Pro 14",
+                "Mac Book Pro 16",
+                "Mac Book Pro 16 2025",
+            ))
         }
     }
 

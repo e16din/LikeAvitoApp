@@ -4,8 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -37,7 +42,7 @@ inline fun Launch(
 @Composable
 inline fun OnTextChanged(
     debounceMs: Long = 0,
-    crossinline onStart: (value: TextFieldValue)-> Unit = {},
+    crossinline onStart: (value: TextFieldValue) -> Unit = {},
     crossinline content: (value: TextFieldValue) -> Unit
 ): (value: TextFieldValue) -> Unit {
 
@@ -69,5 +74,22 @@ inline fun OnTextChanged(
         scope.launch {
             valueFlow.emit(value)
         }
+    }
+}
+
+class CollapsingAppBarNestedScrollConnection(
+    val appBarMaxHeight: Int
+) : NestedScrollConnection {
+
+    var appBarOffset: Int by mutableIntStateOf(0)
+        private set
+
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val delta = available.y.toInt()
+        val newOffset = appBarOffset + delta
+        val previousOffset = appBarOffset
+        appBarOffset = newOffset.coerceIn(-appBarMaxHeight, 0)
+        val consumed = appBarOffset - previousOffset
+        return Offset(0f, consumed.toFloat())
     }
 }

@@ -1,6 +1,6 @@
 package me.likeavitoapp
 
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 object NavRoutes {
@@ -13,37 +13,11 @@ object NavRoutes {
 }
 
 object AppModel {
-
     val user = User()
 
-    var screens = MutableSharedFlow<Screen>()
+    var screens = mutableListOf<Screen>()
+    var currentScreenFlow = MutableStateFlow<Screen>(SplashScreen())
 }
-
-// splash screen
-fun showSplashView() {}
-
-fun requestFromStorageUser() {}
-fun requestFromPlatformTimeout() {}
-fun showNextViewAuthOrMain() {}
-
-// auth screen
-fun showAuthView() {}
-
-fun requestFromUserEmail() {}
-fun checkEmail() {}
-fun updateEmail() {}
-fun updateEmailError() {}
-fun updateLoginButtonEnabledState() {}
-
-fun requestFromUserPassword() {}
-fun showPassword() {}
-// updateLoginButtonEnabledState() {}
-
-fun requestFromUserClickToLogin() {}
-// updateLoginButtonEnabledState() {}
-fun updateLoginInProgressState() {}
-fun requestFromServerLogin() {}
-fun showNextViewErrorOrMain() {}
 
 // main screen
 fun showMainView() {}
@@ -102,8 +76,8 @@ interface Screen {
 data class User(
     var id: Long? = null,
     var name: String? = null,
-    val contacts: Contacts? = null,
-    val ownAds: List<Ad>? = null
+    var contacts: Contacts? = null,
+    var ownAds: List<Ad>? = null
 ) {
     fun isAuth(): Boolean {
         return id != null
