@@ -1,82 +1,19 @@
 package me.likeavitoapp.screens.auth
 
-import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import me.likeavitoapp.DataSources
-import me.likeavitoapp.MainScreen
-import me.likeavitoapp.UserDataSource
 import me.likeavitoapp.exceptionHandler
+import me.likeavitoapp.screens.main.search.SearchScreen
 import java.util.regex.Pattern
 
-
-class AuthViewModel : ViewModel() {
-    val userDataSource = AuthDataSource()
-
-    private val sources = DataSources(userDataSource)
-
-    private val changeEmailUserCase = ChangeEmailUseCase(viewModelScope, sources)
-    private val changePasswordUserCase = ChangePasswordUseCase(sources)
-    private val loginUserCase = LoginUseCase(viewModelScope, sources)
-    private val hideLoginErrorUserCase = HideLoginErrorUseCase(sources)
-
-    init {
-        with(sources.user.input) {
-            onEmail = { email ->
-                changeEmailUserCase.runWith(email)
-            }
-
-            onPassword = { password ->
-                changePasswordUserCase.runWith(password)
-            }
-
-            onLogin = {
-                loginUserCase.run()
-            }
-
-            onErrorToastClick = {
-                hideLoginErrorUserCase.run()
-            }
-        }
-    }
-}
-
-class AuthDataSource(
-    val input: Input = Input(),
-    val state: State = State()
-) : UserDataSource {
-    class Input(
-        var onEmail: (email: String) -> Unit = {},
-        var onPassword: (password: String) -> Unit = {},
-        var onLogin: () -> Unit = {},
-        var onErrorToastClick: () -> Unit = {}
-    )
-
-    // ADVICE: set states only from use cases
-    class State {
-        var email by mutableStateOf("")
-        var password by mutableStateOf("")
-
-        var emailErrorEnabled by mutableStateOf(false)
-        var loginButtonEnabled by mutableStateOf(false)
-        var loginLoadingEnabled by mutableStateOf(false)
-
-        var loginErrorMessage by mutableStateOf(false)
-    }
-}
-
 class HideLoginErrorUseCase(
-    val sources: DataSources<AuthDataSource>
+    val sources: DataSources<AuthScreen>
 ) {
-    fun run() = with(sources.user) {
+    fun run() = with(sources.screen) {
         if (state.loginErrorMessage) {
             state.loginErrorMessage = false
         }
@@ -85,7 +22,7 @@ class HideLoginErrorUseCase(
 
 class ChangeEmailUseCase(
     val scope: CoroutineScope,
-    val sources: DataSources<AuthDataSource>
+    val sources: DataSources<AuthScreen>
 ) {
     private var emailFlow: MutableStateFlow<String>? = null
 
@@ -105,7 +42,7 @@ class ChangeEmailUseCase(
             .matches()
     }
 
-    fun runWith(newEmail: String) = with(sources.user.state) {
+    fun runWith(newEmail: String) = with(sources.screen.state) {
         if (newEmail != email) {
             email = newEmail
         }
@@ -136,8 +73,8 @@ class ChangeEmailUseCase(
     }
 }
 
-class ChangePasswordUseCase(val sources: DataSources<AuthDataSource>) {
-    fun runWith(newPassword: String) = with(sources.user.state) {
+class ChangePasswordUseCase(val sources: DataSources<AuthScreen>) {
+    fun runWith(newPassword: String) = with(sources.screen.state) {
         password = newPassword
         val isEmailValid = !emailErrorEnabled
         loginButtonEnabled = email.isNotBlank()
@@ -148,9 +85,9 @@ class ChangePasswordUseCase(val sources: DataSources<AuthDataSource>) {
 
 class LoginUseCase(
     val scope: CoroutineScope,
-    val sources: DataSources<AuthDataSource>
+    val sources: DataSources<AuthScreen>
 ) {
-    fun run() = with(sources.user) {
+    fun run() = with(sources.screen) {
         state.loginButtonEnabled = false
         state.loginLoadingEnabled = true
 
@@ -166,7 +103,7 @@ class LoginUseCase(
                 }
                 sources.platform.userIdStore.save(newUser.id!!) // NOTE: please throw NPE if it is null
 
-                sources.app.currentScreenFlow.emit(MainScreen())
+                sources.app.currentScreenFlow.emit(SearchScreen())
 
             } else {
                 state.loginErrorMessage = true

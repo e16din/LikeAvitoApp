@@ -6,20 +6,33 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.likeavitoapp.DataSources
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun SplashScreenView(viewModel: SplashViewModel = viewModel()) {
+fun SplashScreenProvider() {
+    val scope = rememberCoroutineScope()
+
+    val sources = DataSources<SplashScreen>()
+
+    val startUseCase = StartUseCase(scope, sources)
+
+    SplashScreenView()
 
     LaunchedEffect(Unit) {
-        viewModel.onStart()
+        startUseCase.run()
     }
+}
 
+@Composable
+fun SplashScreenView() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

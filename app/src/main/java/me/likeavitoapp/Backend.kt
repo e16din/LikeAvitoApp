@@ -14,9 +14,10 @@ class Backend(val client: HttpClient) {
     }
 
     interface AdsServiceContract {
-        suspend fun getAds(page: Int = 0, query: String = ""): Result<AdsList>
+        suspend fun getCategories(): Result<List<Category>>
+        suspend fun getAds(categoryId: Int = 0, page: Int = 0, query: String = ""): Result<AdsList>
         suspend fun getAdDetails(adId: Long): Result<Ad>
-        suspend fun getSearchTips(query: String): Result<List<String>>
+        suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>>
     }
 
     var userService = UserService()
@@ -24,21 +25,23 @@ class Backend(val client: HttpClient) {
 
 
     // NOTE: this is mock for an example
-    inner class UserService: UserServiceContract {
+    inner class UserService : UserServiceContract {
 
         override suspend fun login(username: String, password: String): Result<User> {
             delay(1500)
-            return Result.success(User(
-                id = 1,
-                name = "Александр Кундрюков",
-                contacts = Contacts(
-                    phone = null,
-                    whatsapp = null,
-                    telegram = "@alex_ku_san",
-                    email = null
-                ),
-                ownAds = listOf()
-            ))
+            return Result.success(
+                User(
+                    id = 1,
+                    name = "Александр Кундрюков",
+                    contacts = Contacts(
+                        phone = null,
+                        whatsapp = null,
+                        telegram = "@alex_ku_san",
+                        email = null
+                    ),
+                    ownAds = listOf()
+                )
+            )
         }
 
         override suspend fun logout(userId: Long): Result<Boolean> {
@@ -52,8 +55,12 @@ class Backend(val client: HttpClient) {
     }
 
     // NOTE: this is mock for an example
-    inner class AdsService: AdsServiceContract {
-        override suspend fun getAds(page: Int, query: String): Result<AdsList> {
+    inner class AdsService : AdsServiceContract {
+        override suspend fun getCategories(): Result<List<Category>> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getAds(categoryId: Int, page: Int, query: String): Result<AdsList> {
             TODO("Not yet implemented")
         }
 
@@ -61,15 +68,16 @@ class Backend(val client: HttpClient) {
             TODO("Not yet implemented")
         }
 
-        override suspend fun getSearchTips(query: String): Result<List<String>> {
-            return Result.success(listOf(
-                "Mac Book",
-                "Mac Book Pro",
-                "Mac Book Pro 14",
-                "Mac Book Pro 16",
-                "Mac Book Pro 16 2025",
-            ))
+        override suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
+            return Result.success(
+                listOf(
+                    "Mac Book",
+                    "Mac Book Pro",
+                    "Mac Book Pro 14",
+                    "Mac Book Pro 16",
+                    "Mac Book Pro 16 2025",
+                )
+            )
         }
     }
-
 }

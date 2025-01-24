@@ -1,35 +1,17 @@
 package me.likeavitoapp.screens.splash
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.likeavitoapp.AuthScreen
 import me.likeavitoapp.DataSources
-import me.likeavitoapp.MainScreen
-import me.likeavitoapp.SplashScreen
-import me.likeavitoapp.UserDataSource
 import me.likeavitoapp.exceptionHandler
+import me.likeavitoapp.screens.auth.AuthScreen
+import me.likeavitoapp.screens.main.search.SearchScreen
 
-
-class SplashViewModel: ViewModel() {
-    val userDataSource = SplashDataSource()
-
-    private val sources = DataSources(userDataSource)
-
-    private val startUseCase: StartUseCase = StartUseCase(viewModelScope, sources)
-
-    fun onStart() {
-        startUseCase.run()
-    }
-}
-
-class SplashDataSource : UserDataSource
 
 class StartUseCase(
     val scope: CoroutineScope,
-    val sources: DataSources<SplashDataSource>
+    val sources: DataSources<SplashScreen>
 ) {
     var startMs: Long = System.currentTimeMillis()
 
@@ -43,7 +25,7 @@ class StartUseCase(
             delay(delayMs)
 
             val nextScreen = if (sources.app.user.id != null)
-                MainScreen()
+                SearchScreen()
             else
                 AuthScreen()
             sources.app.currentScreenFlow.emit(nextScreen)

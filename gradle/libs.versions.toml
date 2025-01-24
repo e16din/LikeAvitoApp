@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.0-alpha09"
+agp = "8.10.0-alpha01"
 coilCompose = "3.0.4"
 datastorePreferences = "1.1.2"
 kotlin = "2.1.0"
@@ -8,16 +8,13 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
-kotlinxSerializationJson = "1.7.3"
-ktorClientJsonJvm = "1.0.1"
-ktorClientGson = "1.0.1"
 material = "1.12.0"
 constraintlayout = "2.2.0"
 navigationFragmentKtx = "2.8.5"
 navigationUiKtx = "2.8.5"
 lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.12.01"
+activityCompose = "1.10.0"
+composeBom = "2025.01.00"
 navigationCompose = "2.8.5"
 ktor = "3.0.3"
 lottie = "5.0.3"
@@ -26,15 +23,7 @@ serialization = "2.1.0"
 [libraries]
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation" }
-ktor-client-gson = { module = "io.ktor:ktor-client-gson", version.ref = "ktorClientGson" }
-ktor-client-json-jvm = { module = "io.ktor:ktor-client-json-jvm", version.ref = "ktorClientJsonJvm" }
-ktor-client-logging = { module = "io.ktor:ktor-client-logging" }
-ktor-client-serialization = { module = "io.ktor:ktor-client-serialization" }
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -26,27 +26,59 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import me.likeavitoapp.DataSources
 import me.likeavitoapp.R
 import me.likeavitoapp.Toast
 
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun AuthScreenProvider() {
+    val scope = rememberCoroutineScope()
+
+    val sources = DataSources<AuthScreen>()
+
+    val changeEmailUserCase = ChangeEmailUseCase(scope, sources)
+    val changePasswordUserCase = ChangePasswordUseCase(sources)
+    val loginUserCase = LoginUseCase(scope, sources)
+    val hideLoginErrorUserCase = HideLoginErrorUseCase(sources)
+
+    AuthScreenView(sources.screen)
+
+    LaunchedEffect(Unit) {
+        with(sources.screen.input) {
+            onEmail = { email ->
+                changeEmailUserCase.runWith(email)
+            }
+
+            onPassword = { password ->
+                changePasswordUserCase.runWith(password)
+            }
+
+            onLogin = {
+                loginUserCase.run()
+            }
+
+            onErrorToastClick = {
+                hideLoginErrorUserCase.run()
+            }
+        }
+    }
+}
+
 @ExperimentalLayoutApi
 @Composable
-fun AuthScreenView(
-    viewModel: AuthViewModel = viewModel()
-) = with(viewModel.userDataSource) {
+fun AuthScreenView(screen: AuthScreen) {
     val localFocusManager = LocalFocusManager.current
     val errorMessage = stringResource(R.string.authorization_failed)
 
@@ -68,8 +100,8 @@ fun AuthScreenView(
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
-                value = state.email,
-                onValueChange = { value -> input.onEmail(value) },
+                value = screen.state.email,
+                onValueChange = { value -> screen.input.onEmail(value) },
                 label = { Text(stringResource(R.string.email_field)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -79,9 +111,9 @@ fun AuthScreenView(
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                isError = state.emailErrorEnabled,
+                isError = screen.state.emailErrorEnabled,
                 supportingText = {
-                    if (state.emailErrorEnabled) {
+                    if (screen.state.emailErrorEnabled) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(R.string.email_error_text),
@@ -90,7 +122,7 @@ fun AuthScreenView(
                     }
                 },
                 trailingIcon = {
-                    if (state.emailErrorEnabled) {
+                    if (screen.state.emailErrorEnabled) {
                         Icon(Icons.Default.Info, "error", tint = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -99,8 +131,8 @@ fun AuthScreenView(
             Spacer(modifier = Modifier.height(8.dp))
 
             TextField(
-                value = state.password,
-                onValueChange = { value -> input.onPassword(value) },
+                value = screen.state.password,
+                onValueChange = { value -> screen.input.onPassword(value) },
                 label = { Text(stringResource(R.string.password_field)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
@@ -110,11 +142,11 @@ fun AuthScreenView(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { input.onLogin() },
+                onClick = { screen.input.onLogin() },
                 modifier = Modifier.width(200.dp),
-                enabled = state.loginButtonEnabled
+                enabled = screen.state.loginButtonEnabled
             ) {
-                if (state.loginLoadingEnabled) {
+                if (screen.state.loginLoadingEnabled) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
                     Text(text = stringResource(R.string.login_button))
@@ -122,7 +154,7 @@ fun AuthScreenView(
             }
         }
 
-        AnimatedVisibility(state.loginErrorMessage) {
+        AnimatedVisibility(screen.state.loginErrorMessage) {
             Toast(
                 message = errorMessage,
                 modifier = Modifier
@@ -137,7 +169,5 @@ fun AuthScreenView(
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    AuthScreenView(
-        viewModel = AuthViewModel()
-    )
+    AuthScreenView(screen = AuthScreen())
 }
