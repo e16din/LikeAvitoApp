@@ -1,6 +1,6 @@
 package me.likeavitoapp.screens.auth
 
-import androidx.compose.animation.AnimatedVisibility
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,52 +25,66 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import me.likeavitoapp.DataSources
 import me.likeavitoapp.R
-import me.likeavitoapp.Toast
+import me.likeavitoapp.defaultContext
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AuthScreenProvider() {
-    val scope = rememberCoroutineScope()
-
-    val sources = DataSources<AuthScreen>()
-
-    val changeEmailUserCase = ChangeEmailUseCase(scope, sources)
-    val changePasswordUserCase = ChangePasswordUseCase(sources)
-    val loginUserCase = LoginUseCase(scope, sources)
-    val hideLoginErrorUserCase = HideLoginErrorUseCase(sources)
+    val scope = rememberCoroutineScope { defaultContext }
+    val sources = remember { DataSources<AuthScreen>() }
 
     AuthScreenView(sources.screen)
 
+    var emailFlow: MutableStateFlow<String>? = null
     LaunchedEffect(Unit) {
         with(sources.screen.input) {
-            onEmail = { email ->
-                changeEmailUserCase.runWith(email)
+            onEmailChanged = { newEmail ->
+                ChangeEmailUseCase(scope, sources, newEmail, justUpdate = true)
+                if (emailFlow == null) {
+                    scope.launch {
+                        emailFlow = MutableStateFlow(newEmail)
+                        emailFlow?.debounce(390)?.collect { lastEmail ->
+                            ChangeEmailUseCase(scope, sources, lastEmail)
+                        }
+                    }
+
+                } else {
+                    emailFlow?.tryEmit(newEmail)
+                }
             }
 
             onPassword = { password ->
-                changePasswordUserCase.runWith(password)
+                ChangePasswordUseCase(scope, sources, password)
             }
 
             onLogin = {
-                loginUserCase.run()
+                LoginUseCase(scope, sources)
             }
 
             onErrorToastClick = {
-                hideLoginErrorUserCase.run()
+                HideLoginErrorUseCase(scope, sources)
             }
         }
     }
@@ -80,7 +94,6 @@ fun AuthScreenProvider() {
 @Composable
 fun AuthScreenView(screen: AuthScreen) {
     val localFocusManager = LocalFocusManager.current
-    val errorMessage = stringResource(R.string.authorization_failed)
 
     Box {
         Column(
@@ -101,7 +114,7 @@ fun AuthScreenView(screen: AuthScreen) {
 
             TextField(
                 value = screen.state.email,
-                onValueChange = { value -> screen.input.onEmail(value) },
+                onValueChange = { value -> screen.input.onEmailChanged(value) },
                 label = { Text(stringResource(R.string.email_field)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -146,21 +159,21 @@ fun AuthScreenView(screen: AuthScreen) {
                 modifier = Modifier.width(200.dp),
                 enabled = screen.state.loginButtonEnabled
             ) {
-                if (screen.state.loginLoadingEnabled) {
+                if (screen.state.login.loading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
                     Text(text = stringResource(R.string.login_button))
                 }
             }
         }
+    }
 
-        AnimatedVisibility(screen.state.loginErrorMessage) {
-            Toast(
-                message = errorMessage,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(24.dp)
-            )
+    val context = LocalContext.current
+    val errorMessage = stringResource(R.string.authorization_failed)
+    LaunchedEffect(screen.state.login) {
+        if (screen.state.login.loadingFailed) {
+            screen.state.login.loadingFailed = false
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }
 }

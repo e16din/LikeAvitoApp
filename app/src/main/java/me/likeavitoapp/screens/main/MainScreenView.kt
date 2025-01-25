@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.main
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,22 +34,28 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.DataSources
 import me.likeavitoapp.R
+import me.likeavitoapp.defaultContext
+import me.likeavitoapp.screens.main.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.profile.ProfileScreenProvider
 import me.likeavitoapp.screens.main.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun MainScreenProvider() {
-    val scope = rememberCoroutineScope()
-
-    val sources = DataSources<MainScreen>()
-
-    val selectTabUseCase = SelectTabUseCases(sources)
+    val scope = rememberCoroutineScope { defaultContext }
+    val sources = remember { DataSources<MainScreen>() }
 
     MainScreenView(sources.screen)
 
     LaunchedEffect(Unit) {
         sources.screen.input.onTabSelected = { tab ->
-            selectTabUseCase.runWith(tab)
+            SelectTabUseCases(scope, sources, tab)
+        }
+    }
+
+    BackHandler {
+        sources.screen.input.onBackPressed = {
+            PressBackUseCases(scope, sources)
         }
     }
 }
@@ -59,13 +66,8 @@ fun MainScreenView(screen: MainScreen) {
         // Content:
         when (screen.state.selectedTab) {
             MainScreen.Tabs.Search -> SearchScreenProvider()
-            MainScreen.Tabs.Favorites -> {
-
-//                TODO()
-            }
-            MainScreen.Tabs.Profile -> {
-//                TODO()
-            }
+            MainScreen.Tabs.Favorites -> FavoritesScreenProvider()
+            MainScreen.Tabs.Profile -> ProfileScreenProvider()
         }
 
         // Tabs:
@@ -125,18 +127,20 @@ fun MainScreenView(screen: MainScreen) {
                     Text(text = stringResource(R.string.search_tab))
                 }
 
-                Box(modifier = modifier.clickable {
-                    screen.input.onTabSelected(MainScreen.Tabs.Favorites)
+                Box(
+                    modifier = modifier.clickable {
+                        screen.input.onTabSelected(MainScreen.Tabs.Favorites)
 
-                }, contentAlignment = Alignment.Center
+                    }, contentAlignment = Alignment.Center
                 ) {
                     Text(text = stringResource(R.string.favorite_tab))
                 }
 
-                Box(modifier = modifier.clickable {
-                    screen.input.onTabSelected(MainScreen.Tabs.Profile)
+                Box(
+                    modifier = modifier.clickable {
+                        screen.input.onTabSelected(MainScreen.Tabs.Profile)
 
-                }, contentAlignment = Alignment.Center
+                    }, contentAlignment = Alignment.Center
                 ) {
                     Text(text = stringResource(R.string.profile_tab))
                 }

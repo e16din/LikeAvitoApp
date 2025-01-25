@@ -1,7 +1,6 @@
 package me.likeavitoapp
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.screens.main.MainScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
 
@@ -13,35 +12,34 @@ object NavRoutes {
     val AdDetails = "ad_details"
     val OwnAdDetails = "own_ad_details"
     val EditOwnAd = "edit_own_ad"
+
 }
 
-object AppModel {
+class AppModel {
+    var user: User? = null
 
-    var user = User()
-
-    var screens = mutableListOf<Screen>()
-    var currentScreenFlow = MutableStateFlow<Screen>(SplashScreen())
+    private val initialScreen = SplashScreen()
+    var screens = mutableListOf<Screen>(initialScreen)
+    var currentScreenFlow = MutableStateFlow<Screen>(initialScreen)
 }
 
 interface Screen {
     val route: Route
 }
 
+val RouteTabStub = Route("tab_stub")
 class Route(
-    val path: String = "",
+    val path: String,
     val isRoot: Boolean = false
 )
 
 data class User(
-    var id: Long? = null,
-    var name: String? = null,
-    var contacts: Contacts? = null,
-    var ownAds: List<Ad>? = null
-) {
-    fun isAuth(): Boolean {
-        return id != null
-    }
-}
+    val id: Long,
+    var name: String,
+    var contacts: Contacts,
+    var ownAds: List<Ad>,
+    var photoUrl: String
+)
 
 data class Contacts(
     val phone: String? = null,

@@ -10,17 +10,13 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import me.likeavitoapp.screens.auth.AuthScreenProvider
 import me.likeavitoapp.screens.main.MainScreenProvider
-import me.likeavitoapp.screens.main.search.MainScreenPreview
-import me.likeavitoapp.screens.main.search.SearchScreenView
 import me.likeavitoapp.screens.splash.SplashScreen
 import me.likeavitoapp.screens.splash.SplashScreenProvider
-import me.likeavitoapp.screens.splash.SplashScreenView
-
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NavigationGraph(app: AppModel = AppModel) {
+fun NavigationGraph(app: AppModel = AppPlatform.get.app) {
 
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = NavRoutes.Splash) {
@@ -29,15 +25,15 @@ fun NavigationGraph(app: AppModel = AppModel) {
         composable(NavRoutes.Main) { MainScreenProvider() }
     }
 
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { defaultContext }
     LaunchedEffect(Unit) {
-        scope.launch(exceptionHandler) {
+        scope.launch {
             app.currentScreenFlow.collect { screen ->
-                app.screens.add(screen)
-
                 if (screen is SplashScreen) {
                     return@collect // NOTE: return because it is started as startDestination
                 }
+
+                app.screens.add(screen)
 
                 navController.navigate(screen.route.path) {
                     if (screen.route.isRoot) {

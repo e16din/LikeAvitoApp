@@ -1,117 +1,106 @@
 package me.likeavitoapp.screens.auth
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import me.likeavitoapp.DataSources
-import me.likeavitoapp.exceptionHandler
+import me.likeavitoapp.UseCaseResult
 import me.likeavitoapp.screens.main.search.SearchScreen
 import java.util.regex.Pattern
 
-class HideLoginErrorUseCase(
-    val sources: DataSources<AuthScreen>
-) {
-    fun run() = with(sources.screen) {
-        if (state.loginErrorMessage) {
-            state.loginErrorMessage = false
-        }
+fun HideLoginErrorUseCase(
+    scope: CoroutineScope,
+    sources: DataSources<AuthScreen>
+): UseCaseResult<AuthScreen> = with(sources.screen) {
+    if (state.login.loadingFailed) {
+        state.login.loadingFailed = false
     }
+
+    return@with UseCaseResult(sources, scope)
 }
 
-class ChangeEmailUseCase(
-    val scope: CoroutineScope,
-    val sources: DataSources<AuthScreen>
-) {
-    private var emailFlow: MutableStateFlow<String>? = null
 
-    private val checkEmailPattern = Pattern.compile(
-        "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                "\\@" +
-                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                "(" +
-                "\\." +
-                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                ")+"
-    )
+fun ChangeEmailUseCase(
+    scope: CoroutineScope,
+    sources: DataSources<AuthScreen>,
+    newEmail: String,
+    justUpdate: Boolean = false
+): UseCaseResult<AuthScreen> = with(sources.screen.state) {
 
-    fun checkEmail(email: String): Boolean {
-        return checkEmailPattern
-            .matcher(email)
-            .matches()
+    email = newEmail
+
+    if (justUpdate) {
+        return@with UseCaseResult(sources, scope)
     }
 
-    fun runWith(newEmail: String) = with(sources.screen.state) {
-        if (newEmail != email) {
-            email = newEmail
-        }
-        if (emailFlow == null) {
-            scope.launch(exceptionHandler) {
-                emailFlow = MutableStateFlow(newEmail)
-                emailFlow
-                    ?.debounce(390)
-                    ?.collect { lastEmail ->
-                        var isEmailValid = false
-                        if (lastEmail.isNotBlank()) {
-                            isEmailValid = checkEmail(lastEmail)
-                            emailErrorEnabled = !isEmailValid
-                        } else {
-                            isEmailValid = true
-                            emailErrorEnabled = false
-                        }
+    var isEmailValid = false
+    if (newEmail.isNotBlank()) {
+        fun checkEmail(email: String): Boolean {
+            val checkEmailPattern = Pattern.compile(
+                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                        "\\@" +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                        "(" +
+                        "\\." +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                        ")+"
+            )
 
-                        loginButtonEnabled = lastEmail.isNotBlank()
-                                && password.isNotBlank()
-                                && isEmailValid
-                    }
-            }
+            return checkEmailPattern
+                .matcher(email)
+                .matches()
+        }
+
+        isEmailValid = checkEmail(newEmail)
+        emailErrorEnabled = !isEmailValid
+
+    } else {
+        isEmailValid = true
+        emailErrorEnabled = false
+    }
+
+    loginButtonEnabled = newEmail.isNotBlank()
+            && password.isNotBlank()
+            && isEmailValid
+
+
+    return@with UseCaseResult(sources, scope)
+}
+
+fun ChangePasswordUseCase(
+    scope: CoroutineScope,
+    sources: DataSources<AuthScreen>,
+    newPassword: String
+): UseCaseResult<AuthScreen> = with(sources.screen.state) {
+    password = newPassword
+    val isEmailValid = !emailErrorEnabled
+    loginButtonEnabled = email.isNotBlank()
+            && newPassword.isNotBlank()
+            && isEmailValid
+
+    return@with UseCaseResult(sources, scope)
+}
+
+fun LoginUseCase(
+    scope: CoroutineScope,
+    sources: DataSources<AuthScreen>
+): UseCaseResult<AuthScreen> = with(sources.screen) {
+    state.loginButtonEnabled = false
+    state.login.loading = true
+
+    val job = scope.launch {
+        val result = sources.backend.userService.login(state.email, state.password)
+        val loginData = result.getOrNull()
+        if (loginData?.user != null) {
+            sources.app.user = loginData.user
+
+            sources.platform.authDataStore.saveId(loginData.user.id)
+
+            sources.app.currentScreenFlow.emit(SearchScreen())
 
         } else {
-            emailFlow?.tryEmit(newEmail)
+            state.login.loadingFailed = true
         }
     }
-}
 
-class ChangePasswordUseCase(val sources: DataSources<AuthScreen>) {
-    fun runWith(newPassword: String) = with(sources.screen.state) {
-        password = newPassword
-        val isEmailValid = !emailErrorEnabled
-        loginButtonEnabled = email.isNotBlank()
-                && newPassword.isNotBlank()
-                && isEmailValid
-    }
-}
-
-class LoginUseCase(
-    val scope: CoroutineScope,
-    val sources: DataSources<AuthScreen>
-) {
-    fun run() = with(sources.screen) {
-        state.loginButtonEnabled = false
-        state.loginLoadingEnabled = true
-
-        scope.launch(exceptionHandler) {
-            val result = sources.backend.userService.login(state.email, state.password)
-            val newUser = result.getOrNull()
-            if (newUser?.id != null) {
-                sources.app.user.apply {
-                    id = newUser.id
-                    name = newUser.name
-                    contacts = newUser.contacts
-                    ownAds = newUser.ownAds
-                }
-                sources.platform.userIdStore.save(newUser.id!!) // NOTE: please throw NPE if it is null
-
-                sources.app.currentScreenFlow.emit(SearchScreen())
-
-            } else {
-                state.loginErrorMessage = true
-                delay(2000)
-                if (state.loginErrorMessage) {
-                    state.loginErrorMessage = false
-                }
-            }
-        }
-    }
+    return@with UseCaseResult(sources, scope, job)
 }

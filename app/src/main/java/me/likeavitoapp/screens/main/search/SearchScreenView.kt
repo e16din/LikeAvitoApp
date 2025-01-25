@@ -47,66 +47,72 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import me.likeavitoapp.Ad
 import me.likeavitoapp.CollapsingAppBarNestedScrollConnection
 import me.likeavitoapp.DataSources
+import me.likeavitoapp.defaultContext
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
 fun SearchScreenProvider() {
-    val scope = rememberCoroutineScope()
-
-    val sources = DataSources<SearchScreen>()
-
-    val reloadUseCase = ReloadUseCase(scope, sources)
-    val getCategoriesUseCase = GetCategoriesUseCase(scope, sources)
-    val getAdsUseCase = GetAdsUseCase(scope, sources)
-    val changeSearchQueryUseCase = ChangeSearchQueryUseCase(scope, sources)
-    val adDetailsUseCase = AdDetailsUseCase(sources)
+    val scope = rememberCoroutineScope { defaultContext }
+    val sources = remember { DataSources<SearchScreen>() }
 
     SearchScreenView(sources.screen)
 
+    var queryFlow: MutableStateFlow<String>? = null
     LaunchedEffect(Unit) {
-        fun reload() {
-            reloadUseCase.runWith {
-                getCategoriesUseCase.run()?.join()
-                getAdsUseCase.runWith("")?.join()
-            }
-        }
-
-        reload()
+        // list
+        ReloadDataUseCase(scope, sources)
 
         with(sources.screen.input) {
             onReloadClick = {
-                reload()
+                ReloadDataUseCase(scope, sources)
             }
 
             onPullToRefresh = {
-                reload()
+                ReloadDataUseCase(scope, sources)
             }
 
             onScrollToEnd = {
-                getAdsUseCase.runWith()
-            }
-
-            onSearchQuery = { query ->
-                changeSearchQueryUseCase.runWith(query)
-            }
-
-            onClearClick = {
-                changeSearchQueryUseCase.runWith("")
-            }
-
-            onTipClick = { tip ->
-                getAdsUseCase.runWith(tip)
-            }
-            onSearchClick = { query ->
-                getAdsUseCase.runWith(query)
+                GetAdsUseCase(scope, sources, sources.screen.state.searchFilter.query)
             }
 
             onAdClick = { ad ->
-                adDetailsUseCase.runWith(ad)
+                GetAdDetailsUseCase(scope, sources, ad)
+            }
+        }
+
+        // search bar
+        with(sources.screen.input) {
+            onSearchQuery = { newQuery ->
+                ChangeSearchQueryUseCase(scope, sources, newQuery, justUpdate = true)
+
+                if (queryFlow == null) {
+                    queryFlow = MutableStateFlow(newQuery)
+                    scope.launch {
+                        queryFlow?.debounce(390)?.collect { lastQuery ->
+                            ChangeSearchQueryUseCase(scope, sources, lastQuery, true)
+                        }
+                    }
+                } else {
+                    queryFlow.tryEmit(newQuery)
+                }
+            }
+
+            onClearSearchClick = {
+                ChangeSearchQueryUseCase(scope, sources, "", true)
+            }
+
+            onSearchTipClick = { tip ->
+                GetAdsUseCase(scope, sources, tip)
+            }
+            onSearchClick = { newQuery ->
+                GetAdsUseCase(scope, sources, newQuery)
             }
         }
     }
@@ -134,8 +140,8 @@ fun SearchScreenView(screen: SearchScreen) {
                     start = 16.dp, top = 72.dp, end = 16.dp, bottom = 16.dp
                 ), verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                items(count = screen.state.ads.size) { index ->
-                    AdView(screen.state.ads[index], onClick = { ad ->
+                items(count = screen.state.ads.data.size) { index ->
+                    AdView(screen.state.ads.data[index], onClick = { ad ->
                         screen.input.onAdClick(ad)
                     })
                 }
@@ -149,13 +155,13 @@ fun SearchScreenView(screen: SearchScreen) {
                 modifier = Modifier.padding(horizontal = 16.dp),
                 height = SEARCH_VIEW_HEIGHT_DP,
                 query = screen.state.searchFilter.query,
-                tips = screen.state.searchTips,
+                tips = screen.state.searchTips.data,
                 clearEnabled = screen.state.searchFilter.query.isNotEmpty(),
                 onQueryChanged = { value ->
                     screen.input.onSearchQuery(value)
                 },
                 onClearClick = {
-                    screen.input.onClearClick()
+                    screen.input.onClearSearchClick()
                 },
                 onSearchClick = { query ->
                     screen.input.onSearchClick(query)
@@ -166,12 +172,13 @@ fun SearchScreenView(screen: SearchScreen) {
 
 @Composable
 inline fun AdView(ad: Ad, crossinline onClick: (ad: Ad) -> Unit) {
-    val color = if(ad.isPremium) Color(0xff00c000)  else Color(0xffffffff)
-    Card(modifier =
-        Modifier.background(color = color),
+    val color = if (ad.isPremium) Color(0xff00c000) else Color(0xffffffff)
+    Card(
+        modifier =
+            Modifier.background(color = color),
         onClick = {
-        onClick(ad)
-    }) {
+            onClick(ad)
+        }) {
         Text(
             text = ad.title,
             modifier = Modifier

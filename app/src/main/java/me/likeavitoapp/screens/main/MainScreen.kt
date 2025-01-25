@@ -22,9 +22,12 @@ class MainScreen(
 
     class Input(
         var onTabSelected: (tab: Tabs) -> Unit = {},
+        var onBackPressed: () -> Unit = {},
     )
 
     class State {
+        var navHistory = mutableListOf<Tabs>()
+
         var selectedTab by mutableStateOf(Tabs.Search)
     }
 }

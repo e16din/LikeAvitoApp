@@ -10,4 +10,9 @@
     <string name="search_tab">Поиск</string>
     <string name="favorite_tab">Избранное</string>
     <string name="profile_tab">Профиль</string>
+    <string name="contacts_title">Контакты</string>
+    <string name="phone_title">Телефон</string>
+    <string name="email_title">Email</string>
+    <string name="whatsapp_title">Whatsapp</string>
+    <string name="telegram_title">Telegram</string>
 </resources>
