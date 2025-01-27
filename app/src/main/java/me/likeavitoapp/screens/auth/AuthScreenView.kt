@@ -25,10 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -39,61 +40,41 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import me.likeavitoapp.DataSources
 import me.likeavitoapp.R
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.actualScope
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AuthScreenProvider() {
-    val scope = rememberCoroutineScope { defaultContext }
-    val sources = remember { DataSources<AuthScreen>() }
+fun AuthScreenProvider(screen: AuthScreen) {
+    AuthScreenView(screen)
+}
 
-    AuthScreenView(sources.screen)
-
-    var emailFlow: MutableStateFlow<String>? = null
+@Composable
+fun <T> StateFlow<T>.collectAsStateSavable(): State<T> {
+    val state = rememberSaveable { mutableStateOf(value) }
     LaunchedEffect(Unit) {
-        with(sources.screen.input) {
-            onEmailChanged = { newEmail ->
-                ChangeEmailUseCase(scope, sources, newEmail, justUpdate = true)
-                if (emailFlow == null) {
-                    scope.launch {
-                        emailFlow = MutableStateFlow(newEmail)
-                        emailFlow?.debounce(390)?.collect { lastEmail ->
-                            ChangeEmailUseCase(scope, sources, lastEmail)
-                        }
-                    }
-
-                } else {
-                    emailFlow?.tryEmit(newEmail)
-                }
-            }
-
-            onPassword = { password ->
-                ChangePasswordUseCase(scope, sources, password)
-            }
-
-            onLogin = {
-                LoginUseCase(scope, sources)
-            }
-
-            onErrorToastClick = {
-                HideLoginErrorUseCase(scope, sources)
-            }
+        collect {
+            state.value = it
         }
     }
+    return state
 }
 
 @ExperimentalLayoutApi
 @Composable
 fun AuthScreenView(screen: AuthScreen) {
+    val scope = actualScope()
     val localFocusManager = LocalFocusManager.current
+
+    val email = screen.state.email.collectAsStateSavable()
+    val password = screen.state.password.collectAsState()
+    val emailErrorEnabled = screen.state.emailErrorEnabled.collectAsState()
+    val loginButtonEnabled = screen.state.loginButtonEnabled.collectAsState()
+    val loginLoading = screen.state.login.loading.collectAsState()
+    val loginLoadingFailed = screen.state.login.loadingFailed.collectAsState()
 
     Box {
         Column(
@@ -113,8 +94,12 @@ fun AuthScreenView(screen: AuthScreen) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
-                value = screen.state.email,
-                onValueChange = { value -> screen.input.onEmailChanged(value) },
+                value = email.value,
+                onValueChange = { value ->
+                    scope.launch {
+                        screen.ChangeEmail(value)
+                    }
+                },
                 label = { Text(stringResource(R.string.email_field)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -124,9 +109,9 @@ fun AuthScreenView(screen: AuthScreen) {
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                isError = screen.state.emailErrorEnabled,
+                isError = emailErrorEnabled.value,
                 supportingText = {
-                    if (screen.state.emailErrorEnabled) {
+                    if (emailErrorEnabled.value) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(R.string.email_error_text),
@@ -135,8 +120,12 @@ fun AuthScreenView(screen: AuthScreen) {
                     }
                 },
                 trailingIcon = {
-                    if (screen.state.emailErrorEnabled) {
-                        Icon(Icons.Default.Info, "error", tint = MaterialTheme.colorScheme.error)
+                    if (emailErrorEnabled.value) {
+                        Icon(
+                            Icons.Default.Info,
+                            "error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             )
@@ -144,8 +133,8 @@ fun AuthScreenView(screen: AuthScreen) {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextField(
-                value = screen.state.password,
-                onValueChange = { value -> screen.input.onPassword(value) },
+                value = password.value,
+                onValueChange = { value -> screen.ChangePassword(value) },
                 label = { Text(stringResource(R.string.password_field)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
@@ -155,11 +144,15 @@ fun AuthScreenView(screen: AuthScreen) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { screen.input.onLogin() },
+                onClick = {
+                    scope.launch {
+                        screen.Login()
+                    }
+                },
                 modifier = Modifier.width(200.dp),
-                enabled = screen.state.loginButtonEnabled
+                enabled = loginButtonEnabled.value
             ) {
-                if (screen.state.login.loading) {
+                if (loginLoading.value) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
                     Text(text = stringResource(R.string.login_button))
@@ -170,9 +163,9 @@ fun AuthScreenView(screen: AuthScreen) {
 
     val context = LocalContext.current
     val errorMessage = stringResource(R.string.authorization_failed)
-    LaunchedEffect(screen.state.login) {
-        if (screen.state.login.loadingFailed) {
-            screen.state.login.loadingFailed = false
+    LaunchedEffect(loginLoadingFailed.value) {
+        if (loginLoadingFailed.value) {
+            screen.state.login.loadingFailed.value = false
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }

@@ -6,26 +6,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.scenariosEnabled
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun SplashScreenProvider() {
-    val scope = rememberCoroutineScope { defaultContext }
-    val sources = remember { DataSources<SplashScreen>() }
-
+fun SplashScreenProvider(screen: SplashScreen) {
     SplashScreenView()
 
     LaunchedEffect(Unit) {
-        var startMs = System.currentTimeMillis()
-        StartAppUseCase(scope, sources, startMs)
+        if (scenariosEnabled) {
+//            RunSplashScreenScenarios(scope, sources)
+
+        } else {
+            var startMs = System.currentTimeMillis()
+            screen.StartApp(startMs)
+        }
     }
 }
 

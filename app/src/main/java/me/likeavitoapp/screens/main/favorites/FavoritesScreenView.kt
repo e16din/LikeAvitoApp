@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 
 
 @Composable
-fun FavoritesScreenProvider() {}
+fun FavoritesScreenProvider(tabScreen: FavoritesScreen) {}
 
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {

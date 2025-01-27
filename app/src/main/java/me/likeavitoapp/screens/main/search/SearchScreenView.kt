@@ -30,10 +30,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -52,69 +50,78 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import me.likeavitoapp.Ad
 import me.likeavitoapp.CollapsingAppBarNestedScrollConnection
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.Launcher
+import me.likeavitoapp.actualScope
+import me.likeavitoapp.dataSources
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun SearchScreenProvider() {
-    val scope = rememberCoroutineScope { defaultContext }
-    val sources = remember { DataSources<SearchScreen>() }
+fun SearchScreenProvider(screen: SearchScreen) {
+    val sources = dataSources<SearchScreen>()
+    val searchBarUseCases = SearchBarUseCases(sources)
+    val searchListUseCases = SearchListUseCases(sources)
 
-    SearchScreenView(sources.screen)
+    val scope = actualScope()
 
     var queryFlow: MutableStateFlow<String>? = null
-    LaunchedEffect(Unit) {
+    Launcher(launchOnce = {
         // list
-        ReloadDataUseCase(scope, sources)
+        searchListUseCases.ReloadDataUseCase()
 
         with(sources.screen.input) {
             onReloadClick = {
-                ReloadDataUseCase(scope, sources)
+                scope.launch {
+                    searchListUseCases.ReloadDataUseCase()
+                }
             }
 
             onPullToRefresh = {
-                ReloadDataUseCase(scope, sources)
+                scope.launch {
+                    searchListUseCases.ReloadDataUseCase()
+                }
             }
 
             onScrollToEnd = {
-                GetAdsUseCase(scope, sources, sources.screen.state.searchFilter.query)
+                scope.launch {
+                    searchListUseCases.GetAdsNextPageUseCase()
+                }
             }
 
             onAdClick = { ad ->
-                GetAdDetailsUseCase(scope, sources, ad)
+                searchListUseCases.GetAdDetailsUseCase(ad)
             }
         }
 
         // search bar
         with(sources.screen.input) {
             onSearchQuery = { newQuery ->
-                ChangeSearchQueryUseCase(scope, sources, newQuery, justUpdate = true)
+                scope.launch {
+                    searchBarUseCases.ChangeSearchQueryUseCase(newQuery, justUpdate = true)
 
-                if (queryFlow == null) {
-                    queryFlow = MutableStateFlow(newQuery)
-                    scope.launch {
-                        queryFlow?.debounce(390)?.collect { lastQuery ->
-                            ChangeSearchQueryUseCase(scope, sources, lastQuery, true)
-                        }
-                    }
-                } else {
-                    queryFlow.tryEmit(newQuery)
+
                 }
             }
 
             onClearSearchClick = {
-                ChangeSearchQueryUseCase(scope, sources, "", true)
+                scope.launch {
+                    searchBarUseCases.ChangeSearchQueryUseCase("", true)
+                }
             }
 
             onSearchTipClick = { tip ->
-                GetAdsUseCase(scope, sources, tip)
+                scope.launch {
+                    searchListUseCases.GetAdsUseCase(tip, 0)
+                }
             }
             onSearchClick = { newQuery ->
-                GetAdsUseCase(scope, sources, newQuery)
+                scope.launch {
+                    searchListUseCases.GetAdsUseCase(newQuery, 0)
+                }
             }
         }
+    }) {
+        SearchScreenView(sources.screen)
     }
 }
 
@@ -282,8 +289,12 @@ inline fun SearchView(
 
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
+fun SearchScreenPreview() {
     LikeAvitoAppTheme {
-        SearchScreenView(SearchScreen())
+        SearchScreenView(
+            SearchScreen(
+                prevScreen = null
+            )
+        )
     }
 }

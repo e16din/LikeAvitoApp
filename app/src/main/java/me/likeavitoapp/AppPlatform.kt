@@ -2,6 +2,8 @@ package me.likeavitoapp
 
 import android.app.Application
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -10,14 +12,25 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import me.likeavitoapp.AppPlatform.Companion.get
+import me.likeavitoapp.screens.auth.AuthUseCases
 
-private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-    throwable.printStackTrace()
-}
-val defaultContext = Dispatchers.Default + Job() + exceptionHandler
+class AuthFiledException: Exception()
+
+ fun dataSources() = DataSources(
+    app = get.app,
+    platform = get,
+    backend = get.backend,
+)
+
+@Composable
+fun actualScope() = rememberCoroutineScope { get.defaultContext }
 
 class AppPlatform : Application() {
 
@@ -28,13 +41,24 @@ class AppPlatform : Application() {
     init {
         get = this
     }
-    
-    val app = AppModel()
 
-    val backend = Backend(
-        HttpClient()
-    )
-    
+        val app = AppModel()
+        val backend = Backend()
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        if (throwable is AuthFiledException) {
+            GlobalScope.launch {
+                app.Logout()
+            }
+
+        } else {
+            throwable.printStackTrace()
+        }
+    }
+    val defaultContext = Dispatchers.Default + Job() + exceptionHandler
+
+
     val authDataStore = AuthDataStore()
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -62,6 +86,12 @@ class AppPlatform : Application() {
         suspend fun saveToken(token: String) {
             dataStore.edit { settings ->
                 settings[TOKEN_KEY] = token
+            }
+        }
+
+        suspend fun clear() {
+            dataStore.edit { settings ->
+                settings.clear()
             }
         }
     }

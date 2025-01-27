@@ -1,15 +1,16 @@
 package me.likeavitoapp.screens.main.favorites
 
-import me.likeavitoapp.Route
-import me.likeavitoapp.RouteTabStub
+import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.Screen
 
 
 class FavoritesScreen(
     val input: Input = Input(),
     val state: State = State(),
-    override val route: Route = RouteTabStub
+    override var prevScreen: Screen? = null,
+    override var innerScreen: MutableStateFlow<Screen>? = null,
 ) : Screen {
+
     class Input {}
     class State {}
 }

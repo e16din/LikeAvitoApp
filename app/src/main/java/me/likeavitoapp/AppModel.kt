@@ -1,37 +1,46 @@
 package me.likeavitoapp
 
 import kotlinx.coroutines.flow.MutableStateFlow
+import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
 
-object NavRoutes {
-    val Splash = "splash"
-    val Auth = "auth"
-    val Main = "main"
-    val SearchFilter = "search_filter"
-    val AdDetails = "ad_details"
-    val OwnAdDetails = "own_ad_details"
-    val EditOwnAd = "edit_own_ad"
+val scenariosEnabled = false
 
-}
-
-class AppModel {
+class AppModel(
+    val backend: Backend = Backend(),
+    val platform: AppPlatform = AppPlatform.get
+) {
     var user: User? = null
 
-    private val initialScreen = SplashScreen()
-    var screens = mutableListOf<Screen>(initialScreen)
-    var currentScreenFlow = MutableStateFlow<Screen>(initialScreen)
+    var currentScreen = MutableStateFlow<Screen>(SplashScreen())
+
+    val nav = Navigation()
+
+    class Navigation(val roots: Roots = Roots()) {
+        class Roots {
+            fun authScreen() = AuthScreen()
+        }
+    }
+
+    // UseCases:
+
+    fun PressBack(screen: Screen) {
+        screen.prevScreen?.let {
+            currentScreen.value = it
+        }
+    }
+
+    suspend fun Logout() {
+        currentScreen.value = nav.roots.authScreen()
+        platform.authDataStore.clear()
+    }
 }
 
 interface Screen {
-    val route: Route
+    var prevScreen: Screen?
+    var innerScreen: MutableStateFlow<Screen>?
 }
-
-val RouteTabStub = Route("tab_stub")
-class Route(
-    val path: String,
-    val isRoot: Boolean = false
-)
 
 data class User(
     val id: Long,
@@ -58,6 +67,7 @@ data class Ad(
     val contacts: Contacts,
     val price: Double,
     val isPremium: Boolean,
+    val isFavorite: Boolean,
     val category: Category,
     val address: Address,
     val owner: Owner
@@ -77,11 +87,30 @@ data class AdsList(
 )
 
 data class SearchSettings(
-    var category: Category,
-    var query: String,
-    var region: Region,
-    var priceRange: PriceRange
+    var category: MutableStateFlow<Category>,
+    var query: MutableStateFlow<String>,
+    var region: MutableStateFlow<Region>,
+    var priceRange: MutableStateFlow<PriceRange>
 ) {
     data class Region(val name: String, val id: Int)
     data class PriceRange(val from: Int, val to: Int)
+}
+
+data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
+    enum class State {
+        New,
+        Active,
+        Archived
+    }
+
+    sealed class BuyType {
+        class Pickup(address: Ad.Address)
+        class Delivery(delivery: DeliveryType)
+    }
+
+    enum class DeliveryType {
+        Post,
+        Cdek,
+        Boxberry,
+    }
 }

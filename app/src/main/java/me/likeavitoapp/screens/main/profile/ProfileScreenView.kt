@@ -22,12 +22,11 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.Contacts
 import me.likeavitoapp.R
 import me.likeavitoapp.User
-import me.likeavitoapp.screens.splash.SplashScreenView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun ProfileScreenProvider() {
+fun ProfileScreenProvider(tabScreen: ProfileScreen) {
 
 }
 
@@ -96,12 +95,15 @@ fun ContactItem(title: String, value: String) {
 @Composable
 fun ProfileScreenPreview() {
     LikeAvitoAppTheme {
-        ProfileScreenView(ProfileScreen(User(
-            id = 0,
-            name = "Иван Иванов",
-            contacts = Contacts(telegram = "@alex_ku_san"),
-            ownAds = emptyList(),
-            photoUrl = ""
-        )))
+        ProfileScreenView(ProfileScreen(
+            User(
+                id = 0,
+                name = "Иван Иванов",
+                contacts = Contacts(telegram = "@alex_ku_san"),
+                ownAds = emptyList(),
+                photoUrl = ""
+            ),
+            prevScreen = null
+        ))
     }
 }

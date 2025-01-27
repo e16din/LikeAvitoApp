@@ -5,7 +5,7 @@ import io.ktor.client.*
 import kotlinx.coroutines.delay
 
 
-class Backend(val client: HttpClient) {
+class Backend(val client: HttpClient = HttpClient()) {
 
     interface UserServiceContract {
         suspend fun login(username: String, password: String): Result<LoginResult>
@@ -20,10 +20,20 @@ class Backend(val client: HttpClient) {
         suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>>
     }
 
+    interface CartServiceContract {
+        suspend fun reserve(adId: Long): Result<Boolean>
+        suspend fun order(adId: Long, buyType: Order.BuyType): Result<Boolean>
+
+        suspend fun getOrders(userId: Long): Result<List<Order>>
+    }
+
     var token: String? = null
 
     var userService = UserService()
     var adsService = AdsService()
+    var cartService = CartService()
+
+    var mockDataProvider = MockDataProvider()
 
     data class LoginResult(val user: User, val token: String)
 
@@ -34,16 +44,7 @@ class Backend(val client: HttpClient) {
             delay(1500)
             return Result.success(
                 LoginResult(
-                    user =
-                        User(
-                            id = 1, name = "Александр Кундрюков", contacts = Contacts(
-                                phone = null,
-                                whatsapp = null,
-                                telegram = "@alex_ku_san",
-                                email = null
-                            ), ownAds = listOf(),
-                            photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
-                        ),
+                    user = mockDataProvider.getUser(),
                     token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
                 )
             )
@@ -54,7 +55,7 @@ class Backend(val client: HttpClient) {
         }
 
         override suspend fun getUser(userId: Long): Result<User> {
-            TODO("Not yet implemented")
+            return Result.success(mockDataProvider.getUser())
         }
 
     }
@@ -90,7 +91,8 @@ class Backend(val client: HttpClient) {
                                 id = 100500,
                                 name = "Петр Петрович",
                                 contacts = Contacts(phone = "8950XXXXX07")
-                            )
+                            ),
+                            isFavorite = false
                         )
                     )
                 )
@@ -112,5 +114,24 @@ class Backend(val client: HttpClient) {
                 )
             )
         }
+    }
+
+    // NOTE: this is mock for an example
+    inner class CartService : CartServiceContract {
+        override suspend fun reserve(adId: Long): Result<Boolean> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun order(
+            adId: Long,
+            buyType: Order.BuyType
+        ): Result<Boolean> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getOrders(userId: Long): Result<List<Order>> {
+            TODO("Not yet implemented")
+        }
+
     }
 }

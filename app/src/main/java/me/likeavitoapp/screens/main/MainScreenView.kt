@@ -15,72 +15,84 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.DataSources
 import me.likeavitoapp.R
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.Screen
+import me.likeavitoapp.dataSources
+import me.likeavitoapp.screens.main.MainScreen.Tabs
+import me.likeavitoapp.screens.main.cart.CartScreen
+import me.likeavitoapp.screens.main.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.createad.CreateAdScreen
+import me.likeavitoapp.screens.main.createad.CreateAdScreenProvider
+import me.likeavitoapp.screens.main.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.profile.ProfileScreen
 import me.likeavitoapp.screens.main.profile.ProfileScreenProvider
+import me.likeavitoapp.screens.main.search.SearchScreen
 import me.likeavitoapp.screens.main.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
-fun MainScreenProvider() {
-    val scope = rememberCoroutineScope { defaultContext }
-    val sources = remember { DataSources<MainScreen>() }
+fun MainScreenProvider(screen: MainScreen) {
+    val dataSources = remember { dataSources() }
+    val tabScreen = screen.innerScreen?.collectAsState()
 
-    MainScreenView(sources.screen)
-
-    LaunchedEffect(Unit) {
-        sources.screen.input.onTabSelected = { tab ->
-            SelectTabUseCases(scope, sources, tab)
-        }
-    }
+    MainScreenView(
+        screen = screen,
+        tabScreen = tabScreen!!.value
+    )
 
     BackHandler {
-        sources.screen.input.onBackPressed = {
-            PressBackUseCases(scope, sources)
-        }
+        dataSources.app.PressBack(screen)
     }
 }
 
 @Composable
-fun MainScreenView(screen: MainScreen) {
+fun MainScreenView(screen: MainScreen, tabScreen: Screen) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Content:
-        when (screen.state.selectedTab) {
-            MainScreen.Tabs.Search -> SearchScreenProvider()
-            MainScreen.Tabs.Favorites -> FavoritesScreenProvider()
-            MainScreen.Tabs.Profile -> ProfileScreenProvider()
+        when (tabScreen) {
+            is SearchScreen -> SearchScreenProvider(tabScreen)
+            is FavoritesScreen -> FavoritesScreenProvider(tabScreen)
+            is ProfileScreen -> ProfileScreenProvider(tabScreen)
+            is CreateAdScreen -> CreateAdScreenProvider(tabScreen)
+            is CartScreen -> CartScreenProvider(tabScreen)
         }
 
         // Tabs:
-        val TABS_COUNT = 3
+        val TABS_COUNT = Tabs.entries.size
 
         val INDICATOR_PADDING_DP = 4.dp
         var tabWidth by remember { mutableStateOf(0.dp) }
 
+        val tabIndex = screen.state.selectedTab.ordinal.toFloat() + 1
         val selectedTabIndicatorOffsetDp: Dp by animateDpAsState(
             when (screen.state.selectedTab) {
-                MainScreen.Tabs.Search -> tabWidth * (1f / TABS_COUNT)
-                MainScreen.Tabs.Favorites -> tabWidth * (2f / TABS_COUNT) - INDICATOR_PADDING_DP
-                MainScreen.Tabs.Profile -> tabWidth * (3f / TABS_COUNT) - INDICATOR_PADDING_DP
+                Tabs.Search -> tabWidth * (tabIndex / TABS_COUNT)
+                else -> tabWidth * (tabIndex / TABS_COUNT) - INDICATOR_PADDING_DP
             }
         )
 
@@ -120,29 +132,35 @@ fun MainScreenView(screen: MainScreen) {
 //                        indication = null
 //                    ) */{ screen.input.onTabSelected(index) }
 
-                Box(modifier = modifier.clickable {
-                    screen.input.onTabSelected(MainScreen.Tabs.Search)
 
-                }, contentAlignment = Alignment.Center) {
-                    Text(text = stringResource(R.string.search_tab))
+                fun getTabIcon(tab: Tabs): ImageVector {
+                    return when (tab) {
+                        Tabs.Search -> Icons.Rounded.Search
+                        Tabs.Favorites -> Icons.Rounded.Favorite
+                        Tabs.CreateAd -> Icons.Rounded.AddCircle
+                        Tabs.Cart -> Icons.Rounded.ShoppingCart
+                        Tabs.Profile -> Icons.Rounded.Person
+                    }
                 }
 
-                Box(
-                    modifier = modifier.clickable {
-                        screen.input.onTabSelected(MainScreen.Tabs.Favorites)
-
-                    }, contentAlignment = Alignment.Center
-                ) {
-                    Text(text = stringResource(R.string.favorite_tab))
+                fun getTabText(tab: Tabs): Int {
+                    return when (tab) {
+                        Tabs.Search -> R.string.search_tab
+                        Tabs.Favorites -> R.string.favorite_tab
+                        Tabs.CreateAd -> R.string.create_new_tab
+                        Tabs.Cart -> R.string.cart_tab
+                        Tabs.Profile -> R.string.profile_tab
+                    }
                 }
 
-                Box(
-                    modifier = modifier.clickable {
-                        screen.input.onTabSelected(MainScreen.Tabs.Profile)
+                Tabs.entries.forEach { tab ->
+                    Column(modifier = modifier.clickable {
+                        screen.SelectTabUseCase(tab)
 
-                    }, contentAlignment = Alignment.Center
-                ) {
-                    Text(text = stringResource(R.string.profile_tab))
+                    }, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(getTabIcon(tab), contentDescription = "cart")
+                        Text(text = stringResource(getTabText(tab)))
+                    }
                 }
             }
         }
@@ -153,6 +171,9 @@ fun MainScreenView(screen: MainScreen) {
 @Composable
 fun MainScreenPreview() {
     LikeAvitoAppTheme {
-        MainScreenView(MainScreen())
+        MainScreenView(
+            screen = MainScreen(),
+            tabScreen = SearchScreen(prevScreen = null, innerScreen = null)
+        )
     }
 }

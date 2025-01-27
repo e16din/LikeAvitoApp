@@ -1,33 +1,93 @@
 package me.likeavitoapp.screens.auth
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import me.likeavitoapp.DataSources
 import me.likeavitoapp.Loadable
-import me.likeavitoapp.NavRoutes
-import me.likeavitoapp.Route
 import me.likeavitoapp.Screen
+import me.likeavitoapp.dataSources
+import me.likeavitoapp.screens.main.MainScreen
+import java.util.regex.Pattern
 
 
 class AuthScreen(
-    val input: Input = Input(),
-    val state: State = State(),
-    override val route: Route = Route(NavRoutes.Auth, true)
+    val sources: DataSources = dataSources(),
+    override var prevScreen: Screen? = null,
+    override var innerScreen: MutableStateFlow<Screen>? = null
 ) : Screen {
-    class Input(
-        var onEmailChanged: (email: String) -> Unit = {},
-        var onPassword: (password: String) -> Unit = {},
-        var onLogin: () -> Unit = {},
-        var onErrorToastClick: () -> Unit = {}
-    )
+
+    val state = State()
+    val nav = Navigation()
 
     class State {
-        var email by mutableStateOf("")
-        var password by mutableStateOf("")
+        val email = MutableStateFlow("")
+        val password = MutableStateFlow("")
 
-        var emailErrorEnabled by mutableStateOf(false)
-        var loginButtonEnabled by mutableStateOf(false)
+        val emailErrorEnabled = MutableStateFlow(false)
+        val loginButtonEnabled = MutableStateFlow(false)
 
-        var login = Loadable(emptyList<Unit>())
+        val login = Loadable(emptyList<Unit>())
+    }
+
+    class Navigation(val roots: Roots = Roots()) {
+        class Roots {
+            fun mainScreen() = MainScreen()
+        }
+    }
+
+    // UseCases:
+
+    suspend fun ChangeEmail(newEmail: String) {
+        state.email.value = newEmail
+
+        if (state.email.subscriptionCount.value == 0) {
+            state.email.debounce(390)?.collect { lastEmail ->
+                var isEmailValid = false
+                if (lastEmail.isNotBlank()) {
+                    fun checkEmail(email: String): Boolean {
+                        val checkEmailPattern = Pattern.compile(
+                            "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" + "\\@" + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" + "(" + "\\." + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" + ")+"
+                        )
+
+                        return checkEmailPattern.matcher(email).matches()
+                    }
+
+                    isEmailValid = checkEmail(lastEmail)
+                    state.emailErrorEnabled.value = !isEmailValid
+
+                } else {
+                    isEmailValid = true
+                    state.emailErrorEnabled.value = false
+                }
+
+                state.loginButtonEnabled.value =
+                    lastEmail.isNotBlank() && state.password.value.isNotBlank() && isEmailValid
+            }
+        }
+    }
+
+    fun ChangePassword(newPassword: String) {
+        state.password.value = newPassword
+        val isEmailValid = !state.emailErrorEnabled.value
+        state.loginButtonEnabled.value =
+            state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
+    }
+
+    suspend fun Login() {
+        state.loginButtonEnabled.value = false
+        state.login.loading.value = true
+
+        val result = sources.backend.userService.login(state.email.value, state.password.value)
+        val loginData = result.getOrNull()
+        if (loginData?.user != null) {
+            sources.app.user = loginData.user
+
+            sources.platform.authDataStore.saveId(loginData.user.id)
+
+            sources.app.currentScreen.value = nav.roots.mainScreen()
+
+        } else {
+            state.login.loadingFailed.value = true
+        }
     }
 }
