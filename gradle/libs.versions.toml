@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.0-alpha01"
+agp = "8.10.0-alpha02"
 coilCompose = "3.0.4"
 datastorePreferences = "1.1.2"
 kotlin = "2.1.0"

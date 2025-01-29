@@ -23,14 +23,18 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -48,9 +52,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,6 +67,7 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.Ad
 import me.likeavitoapp.Loadable
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.R
 import me.likeavitoapp.screens.main.search.SearchScreen.State
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -101,51 +109,8 @@ fun SearchScreenView(screen: SearchScreen) {
 
     fun hasSelectedCategory(): Boolean = selectedCategory.id != 0
 
-    Column(
-        modifier = Modifier
-            .systemBarsPadding()
-    ) {
-        androidx.compose.material3.SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    onSearch = { searchBarExpanded = false },
-                    expanded = searchBarExpanded,
-                    onExpandedChange = { searchBarExpanded = it },
-                    placeholder = { Text("Hinted search text") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
-                    query = query,
-                    onQueryChange = { newQuery ->
-                        screen.ChangeSearchQueryUseCase(newQuery)
-                    },
-                )
-            },
-            expanded = searchBarExpanded,
-            onExpandedChange = { expanded ->
-                searchBarExpanded = expanded
-            }
-        ) {
-            // onExpanded
 
-        }
-        if (hasSelectedCategory()) {
-            Column(
-                modifier = Modifier
-                    .systemBarsPadding()
-            ) {
-                Text(
-                    text = selectedCategory.name,
-                    modifier = Modifier
-                        .background(Color.Yellow)
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                        .fillMaxWidth()
-                )
-            }
-        }
-    }
-
-
-    Box {
+    Box(modifier = Modifier.background(Color.Black)) {
 
         Column(
         ) {
@@ -158,14 +123,20 @@ fun SearchScreenView(screen: SearchScreen) {
                 ) {
 
                 item {
-                    val spacerSize = (36 + if(hasSelectedCategory()) 32 else 0).dp
-                    Spacer(modifier = Modifier.size(spacerSize).systemBarsPadding())
+                    val spacerSize = (36 + if (hasSelectedCategory()) 32 else 0).dp
+                    Spacer(
+                        modifier = Modifier
+                            .size(spacerSize)
+                            .systemBarsPadding()
+                            .background(Color.Black)
+                    )
                 }
 
                 if (!hasSelectedCategory()) {
                     item {
                         Column(
                             modifier = Modifier
+                                .background(Color.Black)
                                 .height(136.dp)
                         ) {
                             LazyHorizontalStaggeredGrid(
@@ -196,16 +167,76 @@ fun SearchScreenView(screen: SearchScreen) {
 
                 items(count = ads.size) { index ->
                     val ad = ads[index]
-                    AdView(ad, onClick = { ad ->
-                        screen.ClickToAdUseCase(ad)
-                    })
-
+                    AdView(
+                        ad,
+                        onItemClick = { ad ->
+                            screen.ClickToAdUseCase(ad)
+                        },
+                        onFavoriteClick = {
+                            screen.ClickToFavoriteIconUseCase()
+                        })
                 }
                 item {
                     LaunchedEffect(Unit) {
                         screen.ScrollToEndUseCase()
                     }
                 }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .systemBarsPadding()
+    ) {
+        SearchBar(
+            inputField = {
+                SearchBarDefaults.InputField(
+                    onSearch = { searchBarExpanded = false },
+                    expanded = searchBarExpanded,
+                    onExpandedChange = { searchBarExpanded = it },
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "searchbar_leading_icon"
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.baseline_tune_24),
+                            "searchbar_trailing_icon",
+                            modifier = Modifier.clickable {
+                                screen.ClickToFilterButtonUseCase()
+                            })
+                    },
+                    query = query,
+                    onQueryChange = { newQuery ->
+                        screen.ChangeSearchQueryUseCase(newQuery)
+                    },
+
+                    )
+            },
+            expanded = searchBarExpanded,
+            onExpandedChange = { expanded ->
+                searchBarExpanded = expanded
+            }
+        ) {
+            // onExpanded
+
+        }
+        if (hasSelectedCategory()) {
+            Column(
+                modifier = Modifier
+                    .systemBarsPadding()
+            ) {
+                Text(
+                    text = selectedCategory.name,
+                    modifier = Modifier
+                        .background(Color.Yellow)
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .fillMaxWidth()
+                )
             }
         }
     }
@@ -291,36 +322,53 @@ fun SearchScreenView(screen: SearchScreen) {
 }
 
 @Composable
-inline fun AdView(ad: Ad, crossinline onClick: (ad: Ad) -> Unit) {
+inline fun AdView(
+    ad: Ad,
+    crossinline onItemClick: (ad: Ad) -> Unit,
+    crossinline onFavoriteClick: (ad: Ad) -> Unit,
+) {
     val color = if (ad.isPremium) Color(0xff00c000) else Color(0xffffffff)
-    Card(
-        modifier =
-            Modifier.background(color = color),
-        onClick = {
-            onClick(ad)
-        }) {
-        Text(
-            text = ad.title,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    Box {
+        Card(
+            modifier =
+                Modifier.background(color = color),
+            onClick = {
+                onItemClick(ad)
+            }) {
+            Text(
+                text = ad.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-        AsyncImage(
-            model = "https://example.com/image.jpg",
-            contentDescription = null,
-        )
+            AsyncImage(
+                model = "https://example.com/image.jpg",
+                contentDescription = null,
+            )
 
-        Text(
-            text = ad.description,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+            Text(
+                text = ad.description,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(text = "${ad.price}₽")
+        }
+        IconButton(
+            onClick = { onFavoriteClick(ad) }
+        ) {
+            if (ad.isFavorite) {
+                Icon(Icons.Default.Favorite, "favorite_selected")
+            } else {
+                Icon(Icons.Default.FavoriteBorder, "favorite_unselected")
+            }
+        }
     }
 }
 

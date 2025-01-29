@@ -9,6 +9,7 @@ import me.likeavitoapp.Loadable
 import me.likeavitoapp.Screen
 import me.likeavitoapp.SearchSettings
 import me.likeavitoapp.dataSources
+import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.addetails.AdDetailsScreen
 import kotlin.collections.emptyList
 
@@ -45,6 +46,7 @@ class SearchScreen(
     // SearchBarUseCases:
 
     fun ChangeSearchQueryUseCase(newQuery: String) {
+        recordScenarioStep(newQuery)
         state.searchFilter.query.value = newQuery
     }
 
@@ -83,7 +85,6 @@ class SearchScreen(
 
         GetCategoriesUseCase()
 
-        searchFilter.query.value = ""
         adsPage.value = 0
 
         GetAdsUseCase()
@@ -156,4 +157,9 @@ class SearchScreen(
         state.searchFilter.category.value = category
         GetAdsUseCase()
     }
+
+    fun ClickToFilterButtonUseCase() {
+        recordScenarioStep()
+    }
+
 }

@@ -17,4 +17,5 @@
     <string name="telegram_title">Telegram</string>
     <string name="create_new_tab">Создать</string>
     <string name="cart_tab">Корзина</string>
+    <string name="search_hint">Искать</string>
 </resources>
