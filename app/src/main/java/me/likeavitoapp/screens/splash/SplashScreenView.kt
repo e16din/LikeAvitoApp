@@ -19,11 +19,11 @@ fun SplashScreenProvider(screen: SplashScreen) {
 
     LaunchedEffect(Unit) {
         if (scenariosEnabled) {
-//            RunSplashScreenScenarios(scope, sources)
+            RunAppFromScratchScenario()
 
         } else {
             var startMs = System.currentTimeMillis()
-            screen.StartApp(startMs)
+            screen.StartScreenUseCase(startMs)
         }
     }
 }

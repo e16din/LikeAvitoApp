@@ -10,7 +10,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -18,38 +17,49 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import me.likeavitoapp.AppPlatform.Companion.get
-import me.likeavitoapp.screens.auth.AuthUseCases
+import me.likeavitoapp.AppPlatform.Companion.platform
+import me.likeavitoapp.screens.auth.AuthScreen
 
-class AuthFiledException: Exception()
+class AuthFiledException : Exception()
 
- fun dataSources() = DataSources(
-    app = get.app,
-    platform = get,
-    backend = get.backend,
+fun dataSources() = DataSources(
+    app = app,
+    platform = platform,
+    backend = backend,
 )
 
+inline fun <reified T : Screen> dataSourcesWithScreen() = DataSourcesWithScreen(
+    app = app,
+    platform = platform,
+    backend = backend,
+    screen = app.currentScreen.value as T
+)
+
+val app = AppModel()
+val backend = Backend()
+
 @Composable
-fun actualScope() = rememberCoroutineScope { get.defaultContext }
+fun actualScope() = rememberCoroutineScope { platform.defaultContext }
 
 class AppPlatform : Application() {
 
     companion object {
-        lateinit var get: AppPlatform
+        lateinit var platform: AppPlatform
     }
 
     init {
-        get = this
+        platform = this
     }
-
-        val app = AppModel()
-        val backend = Backend()
 
     @OptIn(DelicateCoroutinesApi::class)
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        println("Error!")
+        println(throwable.message)
         if (throwable is AuthFiledException) {
-            GlobalScope.launch {
-                app.Logout()
+            if (app.currentScreen.value !is AuthScreen) {
+                GlobalScope.launch {
+                    app.Logout()
+                }
             }
 
         } else {

@@ -24,15 +24,13 @@ class MainActivity : ComponentActivity() {
                 Main()
             }
         }
-
-        onSaveInstanceState(savedInstanceState!!)
     }
 }
 
 
 @Composable
 fun Main() {
-    val screen = AppPlatform.get.app.currentScreen.collectAsState()
+    val screen = app.currentScreen.collectAsState()
 
     when (screen.value){
         is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)

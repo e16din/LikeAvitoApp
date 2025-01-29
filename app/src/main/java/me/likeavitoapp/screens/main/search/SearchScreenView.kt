@@ -30,12 +30,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
@@ -45,88 +52,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import me.likeavitoapp.Ad
-import me.likeavitoapp.CollapsingAppBarNestedScrollConnection
 import me.likeavitoapp.Launcher
 import me.likeavitoapp.actualScope
-import me.likeavitoapp.dataSources
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
 fun SearchScreenProvider(screen: SearchScreen) {
-    val sources = dataSources<SearchScreen>()
-    val searchBarUseCases = SearchBarUseCases(sources)
-    val searchListUseCases = SearchListUseCases(sources)
 
-    val scope = actualScope()
+    SearchScreenView(screen)
 
-    var queryFlow: MutableStateFlow<String>? = null
-    Launcher(launchOnce = {
-        // list
-        searchListUseCases.ReloadDataUseCase()
-
-        with(sources.screen.input) {
-            onReloadClick = {
-                scope.launch {
-                    searchListUseCases.ReloadDataUseCase()
-                }
-            }
-
-            onPullToRefresh = {
-                scope.launch {
-                    searchListUseCases.ReloadDataUseCase()
-                }
-            }
-
-            onScrollToEnd = {
-                scope.launch {
-                    searchListUseCases.GetAdsNextPageUseCase()
-                }
-            }
-
-            onAdClick = { ad ->
-                searchListUseCases.GetAdDetailsUseCase(ad)
-            }
-        }
-
-        // search bar
-        with(sources.screen.input) {
-            onSearchQuery = { newQuery ->
-                scope.launch {
-                    searchBarUseCases.ChangeSearchQueryUseCase(newQuery, justUpdate = true)
-
-
-                }
-            }
-
-            onClearSearchClick = {
-                scope.launch {
-                    searchBarUseCases.ChangeSearchQueryUseCase("", true)
-                }
-            }
-
-            onSearchTipClick = { tip ->
-                scope.launch {
-                    searchListUseCases.GetAdsUseCase(tip, 0)
-                }
-            }
-            onSearchClick = { newQuery ->
-                scope.launch {
-                    searchListUseCases.GetAdsUseCase(newQuery, 0)
-                }
-            }
-        }
-    }) {
-        SearchScreenView(sources.screen)
-    }
 }
 
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
+    LaunchedEffect(Unit) {
+        screen.ReloadDataUseCase()
+    }
+
     val SEARCH_VIEW_HEIGHT_DP = 64.dp
 
     val appBarMaxHeight = with(LocalDensity.current) {
@@ -135,6 +80,10 @@ fun SearchScreenView(screen: SearchScreen) {
     val connection = remember {
         CollapsingAppBarNestedScrollConnection(appBarMaxHeight.toInt())
     }
+    val scope = actualScope()
+    val ads by screen.state.ads.data.collectAsState()
+    val query by screen.state.searchFilter.query.collectAsState()
+    val searchTips by screen.state.searchTips.data.collectAsState()
 
     Box(
         Modifier
@@ -147,10 +96,17 @@ fun SearchScreenView(screen: SearchScreen) {
                     start = 16.dp, top = 72.dp, end = 16.dp, bottom = 16.dp
                 ), verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                items(count = screen.state.ads.data.size) { index ->
-                    AdView(screen.state.ads.data[index], onClick = { ad ->
-                        screen.input.onAdClick(ad)
+                items(count = ads.size) { index ->
+                    val ad = ads[index]
+                    AdView(ad, onClick = { ad ->
+                        screen.ClickToAdUseCase(ad)
                     })
+
+                }
+                item {
+                    LaunchedEffect(Unit) {
+                        screen.ScrollToEndUseCase()
+                    }
                 }
             }
         }
@@ -161,17 +117,23 @@ fun SearchScreenView(screen: SearchScreen) {
             SearchView(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 height = SEARCH_VIEW_HEIGHT_DP,
-                query = screen.state.searchFilter.query,
-                tips = screen.state.searchTips.data,
-                clearEnabled = screen.state.searchFilter.query.isNotEmpty(),
+                query = query,
+                tips = searchTips,
+                clearEnabled = query.isNotEmpty(),
                 onQueryChanged = { value ->
-                    screen.input.onSearchQuery(value)
+                    scope.launch {
+                        screen.ChangeSearchQueryUseCase(value)
+                    }
                 },
                 onClearClick = {
-                    screen.input.onClearSearchClick()
+                    scope.launch {
+                        screen.ClickToClearQueryUseCase()
+                    }
                 },
-                onSearchClick = { query ->
-                    screen.input.onSearchClick(query)
+                onImeSearchClick = {
+                    scope.launch {
+                        screen.ClickToSearchUseCase()
+                    }
                 })
         }
     }
@@ -220,7 +182,7 @@ inline fun SearchView(
     clearEnabled: Boolean,
     crossinline onQueryChanged: (query: String) -> Unit,
     crossinline onClearClick: () -> Unit,
-    crossinline onSearchClick: (query: String) -> Unit
+    crossinline onImeSearchClick: () -> Unit
 ) {
     val animatedColor by animateColorAsState(
         if (tips.isNotEmpty()) Color.Green else Color.Blue, label = "color"
@@ -265,7 +227,7 @@ inline fun SearchView(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    onSearchClick(query)
+                    onImeSearchClick()
                 }
             ))
 
@@ -284,6 +246,23 @@ inline fun SearchView(
                     .padding(horizontal = 16.dp, vertical = 4.dp))
         }
 
+    }
+}
+
+class CollapsingAppBarNestedScrollConnection(
+    val appBarMaxHeight: Int
+) : NestedScrollConnection {
+
+    var appBarOffset: Int by mutableIntStateOf(0)
+        private set
+
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val delta = available.y.toInt()
+        val newOffset = appBarOffset + delta
+        val previousOffset = appBarOffset
+        appBarOffset = newOffset.coerceIn(-appBarMaxHeight, 0)
+        val consumed = appBarOffset - previousOffset
+        return Offset(0f, consumed.toFloat())
     }
 }
 

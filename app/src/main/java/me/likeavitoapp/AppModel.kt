@@ -4,16 +4,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
+fun checkState(condition:Boolean) {
+    assert(condition)
+}
 
 val scenariosEnabled = false
 
 class AppModel(
     val backend: Backend = Backend(),
-    val platform: AppPlatform = AppPlatform.get
+    val platform: AppPlatform = AppPlatform.platform
 ) {
     var user: User? = null
 
-    var currentScreen = MutableStateFlow<Screen>(SplashScreen())
+    var currentScreen = MutableStateFlow<Screen>(
+        SplashScreen(
+            sources = DataSources(
+                app = this,
+                platform = platform,
+                backend = backend
+            )
+        )
+    )
 
     val nav = Navigation()
 

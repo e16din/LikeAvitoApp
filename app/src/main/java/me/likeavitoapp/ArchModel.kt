@@ -9,6 +9,13 @@ class DataSources(
     val backend: Backend
 )
 
+class DataSourcesWithScreen<T: Screen>(
+    val app: AppModel,
+    val platform: AppPlatform,
+    val backend: Backend,
+    val screen: T
+)
+
 class Loadable<T>(initial: T) {
     var data = MutableStateFlow(initial)
     var loading = MutableStateFlow(false)

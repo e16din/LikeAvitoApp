@@ -42,12 +42,16 @@ class Backend(val client: HttpClient = HttpClient()) {
 
         override suspend fun login(username: String, password: String): Result<LoginResult> {
             delay(1500)
-            return Result.success(
-                LoginResult(
-                    user = mockDataProvider.getUser(),
-                    token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
+            if(username == "ss@ss.ss" && password == "123456") {
+                return Result.success(
+                    LoginResult(
+                        user = mockDataProvider.getUser(),
+                        token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
+                    )
                 )
-            )
+            } else {
+                return Result.failure(AuthFiledException())
+            }
         }
 
         override suspend fun logout(userId: Long): Result<Boolean> {

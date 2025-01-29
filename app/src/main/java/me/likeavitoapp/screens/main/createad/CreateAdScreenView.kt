@@ -9,7 +9,7 @@ import me.likeavitoapp.dataSources
 fun CreateAdScreenProvider(screen: CreateAdScreen) {
     BackHandler {
         screen.input.onBackClick = {
-            PressBackUseCase(sources)
+            screen.PressBackUseCase()
         }
     }
 }

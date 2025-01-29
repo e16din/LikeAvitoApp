@@ -1,8 +1,5 @@
 package me.likeavitoapp.screens.main
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.DataSources
 import me.likeavitoapp.Screen
@@ -24,21 +21,8 @@ class MainScreen(
     val state = State()
     val nav = Navigation()
 
-    init {
-        StartScreenUseCase()
-    }
 
-    enum class Tabs {
-        Search,
-        Favorites,
-        CreateAd,
-        Cart,
-        Profile
-    }
-
-    class State {
-        var selectedTab by mutableStateOf(Tabs.Search)
-    }
+    class State {}
 
     class Navigation(
         val roots: Roots = Roots(),
@@ -55,9 +39,9 @@ class MainScreen(
         }
 
         class Stack {
-            fun createAdScreen(initialScreen: Screen) = CreateAdScreen(
-                prevScreen = initialScreen,
-                innerScreen = initialScreen
+            fun createAdScreen(prevScreen: Screen) = CreateAdScreen(
+                prevScreen = prevScreen,
+                innerScreen = null
             )
         }
     }
@@ -70,31 +54,32 @@ class MainScreen(
     val cartScreen = nav.pages.cartScreen()
 
     fun StartScreenUseCase() {
-        innerScreen = MutableStateFlow(
-            nav.pages.searchScreen()
-        )
+        innerScreen = MutableStateFlow(searchScreen)
     }
 
-    fun SelectTabUseCase(tab: Tabs) = with(this) {
-        state.selectedTab = tab
-
-        if (tab == Tabs.CreateAd) {
-            innerScreen?.value = nav.stack.createAdScreen(this)
-
-        } else {
-            innerScreen?.value = when (tab) {
-                Tabs.Search -> searchScreen
-                Tabs.Favorites -> favoritesScreen
-                Tabs.Profile -> profileScreen
-                Tabs.Cart -> cartScreen
-                else -> throw IllegalArgumentException("Tab key is incorrect.")
-            }.apply {
-                prevScreen = if (innerScreen?.value is SearchScreen) {
-                    null
-                } else {
-                    innerScreen?.value
-                }
-            }
+    private fun onClickTo(screen: Screen) {
+        innerScreen?.value = screen.apply {
+            prevScreen = innerScreen?.value?.prevScreen
         }
+    }
+
+    fun ClickToSearchUseCase() {
+        onClickTo(searchScreen)
+    }
+
+    fun ClickToFavoritesUseCase() {
+        onClickTo(favoritesScreen)
+    }
+
+    fun ClickToCreateAdUseCase() {
+        innerScreen?.value = nav.stack.createAdScreen(this)
+    }
+
+    fun ClickToCartUseCase() {
+        onClickTo(cartScreen)
+    }
+
+    fun ClickToProfileUseCase() {
+        onClickTo(profileScreen)
     }
 }

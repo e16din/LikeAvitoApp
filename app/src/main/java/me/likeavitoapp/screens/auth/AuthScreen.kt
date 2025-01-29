@@ -35,13 +35,9 @@ class AuthScreen(
         }
     }
 
-    // UseCases:
 
-    suspend fun ChangeEmail(newEmail: String) {
-        state.email.value = newEmail
-
-        if (state.email.subscriptionCount.value == 0) {
-            state.email.debounce(390)?.collect { lastEmail ->
+    suspend fun SubscribeChangeEmailUseCase() {
+        state.email.debounce(390).collect { lastEmail ->
                 var isEmailValid = false
                 if (lastEmail.isNotBlank()) {
                     fun checkEmail(email: String): Boolean {
@@ -63,17 +59,19 @@ class AuthScreen(
                 state.loginButtonEnabled.value =
                     lastEmail.isNotBlank() && state.password.value.isNotBlank() && isEmailValid
             }
-        }
+    }
+    fun ChangeEmailUseCase(newEmail: String) {
+        state.email.value = newEmail
     }
 
-    fun ChangePassword(newPassword: String) {
+    fun ChangePasswordUseCase(newPassword: String) {
         state.password.value = newPassword
         val isEmailValid = !state.emailErrorEnabled.value
         state.loginButtonEnabled.value =
             state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
     }
 
-    suspend fun Login() {
+    suspend fun LoginUseCase() {
         state.loginButtonEnabled.value = false
         state.login.loading.value = true
 
@@ -87,6 +85,7 @@ class AuthScreen(
             sources.app.currentScreen.value = nav.roots.mainScreen()
 
         } else {
+            state.login.loading.value = false
             state.login.loadingFailed.value = true
         }
     }

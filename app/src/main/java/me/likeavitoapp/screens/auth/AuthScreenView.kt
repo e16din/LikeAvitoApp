@@ -44,12 +44,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import me.likeavitoapp.R
 import me.likeavitoapp.actualScope
+import me.likeavitoapp.scenariosEnabled
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AuthScreenProvider(screen: AuthScreen) {
     AuthScreenView(screen)
+
+    LaunchedEffect(Unit) {
+        screen.SubscribeChangeEmailUseCase()
+    }
+    LaunchedEffect(Unit) {
+        if (scenariosEnabled) {
+            RunAllAuthScenarios()
+        }
+    }
 }
 
 @Composable
@@ -96,9 +106,7 @@ fun AuthScreenView(screen: AuthScreen) {
             TextField(
                 value = email.value,
                 onValueChange = { value ->
-                    scope.launch {
-                        screen.ChangeEmail(value)
-                    }
+                    screen.ChangeEmailUseCase(value)
                 },
                 label = { Text(stringResource(R.string.email_field)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -134,7 +142,7 @@ fun AuthScreenView(screen: AuthScreen) {
 
             TextField(
                 value = password.value,
-                onValueChange = { value -> screen.ChangePassword(value) },
+                onValueChange = { value -> screen.ChangePasswordUseCase(value) },
                 label = { Text(stringResource(R.string.password_field)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
@@ -146,7 +154,7 @@ fun AuthScreenView(screen: AuthScreen) {
             Button(
                 onClick = {
                     scope.launch {
-                        screen.Login()
+                        screen.LoginUseCase()
                     }
                 },
                 modifier = Modifier.width(200.dp),

@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.splash
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.DataSources
 import me.likeavitoapp.Screen
 import me.likeavitoapp.dataSources
@@ -11,7 +12,7 @@ import me.likeavitoapp.screens.main.MainScreen
 class SplashScreen(
     val sources: DataSources = dataSources(),
     override var prevScreen: Screen? = null,
-    override var innerScreen: Screen? = null
+    override var innerScreen: MutableStateFlow<Screen>? = null
 ) : Screen {
 
     val nav: Navigation = Navigation()
@@ -29,7 +30,7 @@ class SplashScreen(
 
     // UseCases:
 
-    suspend fun StartApp(startMs: Long) {
+    suspend fun StartScreenUseCase(startMs: Long) {
         sources.backend.token = sources.platform.authDataStore.loadToken()
         val userId = sources.platform.authDataStore.loadId()
         if (userId != null) {

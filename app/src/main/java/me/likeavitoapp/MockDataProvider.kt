@@ -1,6 +1,14 @@
 package me.likeavitoapp
 
+import androidx.compose.runtime.Composable
+
 class MockDataProvider {
+    fun dataSources(): DataSources = DataSources(
+        app = AppModel().apply { user = getUser() },
+        platform = AppPlatform(),
+        backend = Backend()
+    )
+
     fun getUser(): User {
         return User(
             id = 1, name = "Александр Кундрюков", contacts = Contacts(

@@ -1,11 +1,7 @@
 package me.likeavitoapp.screens.main.search
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 import me.likeavitoapp.Ad
 import me.likeavitoapp.Category
 import me.likeavitoapp.DataSources
@@ -15,7 +11,6 @@ import me.likeavitoapp.SearchSettings
 import me.likeavitoapp.dataSources
 import me.likeavitoapp.screens.addetails.AdDetailsScreen
 import kotlin.collections.emptyList
-import kotlin.collections.plusAssign
 
 class SearchScreen(
     val sources: DataSources = dataSources(),
@@ -72,58 +67,66 @@ class SearchScreen(
 
     // AdListUseCases:
 
-    suspend fun ReloadDataUseCase() {
-        state.ads.loading = true
+    suspend fun ReloadDataUseCase() = with(state) {
+        ads.loading.value = true
 
         GetCategoriesUseCase()
 
-        state.searchFilter.query = ""
-        state.adsPage = 0
+        searchFilter.query.value = ""
+        adsPage.value = 0
 
-        GetAdsUseCase(state.searchFilter.query, state.adsPage)
+        GetAdsUseCase(searchFilter.query.value, adsPage.value)
 
-        state.ads.loading = false
+        ads.loading.value = false
     }
 
-    suspend fun GetCategoriesUseCase() {
-        state.categories.loading = true
+    suspend fun GetCategoriesUseCase()= with(state) {
+        categories.loading.value = true
 
         val result = sources.backend.adsService.getCategories()
-        val categories = result.getOrNull()
-        state.categories.loading = false
+        val newCategories = result.getOrNull()
+        categories.loading.value = false
 
-        if (categories != null) {
-            state.categories.data = categories
+        if (newCategories != null) {
+            state.categories.data.value = newCategories
         } else {
-            state.categories.loadingFailed = true
+            state.categories.loadingFailed.value = true
         }
     }
 
-    fun GetAdDetailsUseCase(ad: Ad) {
-        sources.app.currentScreen = AdDetailsScreen(
+    fun ClickToAdUseCase(ad: Ad) {
+        sources.app.currentScreen.value = AdDetailsScreen(
             ad = ad,
-            prevScreen = sources.app.currentScreen
+            prevScreen = sources.app.currentScreen.value
         )
     }
 
-    suspend fun GetAdsNextPageUseCase() {
-        GetAdsUseCase(state.searchFilter.query, state.adsPage+1)
-        state.adsPage += 1
+    suspend fun ScrollToEndUseCase() {
+        GetAdsUseCase(state.searchFilter.query.value, state.adsPage.value+1)
+        state.adsPage.value += 1
     }
 
 
-    suspend fun GetAdsUseCase(query: String = "", page: Int){
-        if (state.ads.loading) {
+    suspend fun GetAdsUseCase(query: String = "", page: Int) = with(state){
+        if (ads.loading.value) {
             return
         }
 
-        val result = sources.backend.adsService.getAds(page = state.adsPage, query = query)
-        val adsList = result.getOrNull()
+        val result = sources.backend.adsService.getAds(page = adsPage.value, query = query)
+        val newAds = result.getOrNull()
 
-        if (result.isSuccess && adsList != null) {
-            state.ads.data = adsList.ads
+        if (result.isSuccess && newAds != null) {
+            ads.data.value = newAds.ads
         } else {
-            state.ads.loadingFailed = true
+            ads.loadingFailed.value= true
         }
+    }
+
+    suspend fun ClickToClearQueryUseCase() {
+        ChangeSearchQueryUseCase("")
+    }
+
+    suspend fun ClickToSearchUseCase() = with(state.searchFilter) {
+        GetAdsUseCase(query.value, 0)
     }
 }
