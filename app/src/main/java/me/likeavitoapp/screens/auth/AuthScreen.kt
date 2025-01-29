@@ -36,7 +36,7 @@ class AuthScreen(
     }
 
 
-    suspend fun SubscribeChangeEmailUseCase() {
+    suspend fun ListenChangeEmailUseCase() {
         state.email.debounce(390).collect { lastEmail ->
                 var isEmailValid = false
                 if (lastEmail.isNotBlank()) {

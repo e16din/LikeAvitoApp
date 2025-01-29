@@ -91,12 +91,6 @@ data class Ad(
     )
 }
 
-data class AdsList(
-    var ads: List<Ad>,
-    var query: String,
-    var page: Int
-)
-
 data class SearchSettings(
     var category: MutableStateFlow<Category>,
     var query: MutableStateFlow<String>,

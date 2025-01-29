@@ -8,24 +8,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -34,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -43,29 +50,33 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
 import me.likeavitoapp.Ad
-import me.likeavitoapp.Launcher
-import me.likeavitoapp.actualScope
+import me.likeavitoapp.Loadable
+import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.screens.main.search.SearchScreen.State
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
 fun SearchScreenProvider(screen: SearchScreen) {
 
+    LaunchedEffect(Unit) {
+        screen.ListenGetAdsUseCase()
+    }
+    LaunchedEffect(Unit) {
+        screen.ListenChangeSearchQueryUseCase()
+    }
     SearchScreenView(screen)
-
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
     LaunchedEffect(Unit) {
@@ -80,22 +91,109 @@ fun SearchScreenView(screen: SearchScreen) {
     val connection = remember {
         CollapsingAppBarNestedScrollConnection(appBarMaxHeight.toInt())
     }
-    val scope = actualScope()
+
     val ads by screen.state.ads.data.collectAsState()
     val query by screen.state.searchFilter.query.collectAsState()
     val searchTips by screen.state.searchTips.data.collectAsState()
+    val selectedCategory by screen.state.searchFilter.category.collectAsState()
+    val categories by screen.state.categories.data.collectAsState()
+    var searchBarExpanded by remember { mutableStateOf(false) }
 
-    Box(
-        Modifier
+    fun hasSelectedCategory(): Boolean = selectedCategory.id != 0
+
+    Column(
+        modifier = Modifier
             .systemBarsPadding()
-            .nestedScroll(connection)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        androidx.compose.material3.SearchBar(
+            inputField = {
+                SearchBarDefaults.InputField(
+                    onSearch = { searchBarExpanded = false },
+                    expanded = searchBarExpanded,
+                    onExpandedChange = { searchBarExpanded = it },
+                    placeholder = { Text("Hinted search text") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    query = query,
+                    onQueryChange = { newQuery ->
+                        screen.ChangeSearchQueryUseCase(newQuery)
+                    },
+                )
+            },
+            expanded = searchBarExpanded,
+            onExpandedChange = { expanded ->
+                searchBarExpanded = expanded
+            }
+        ) {
+            // onExpanded
+
+        }
+        if (hasSelectedCategory()) {
+            Column(
+                modifier = Modifier
+                    .systemBarsPadding()
+            ) {
+                Text(
+                    text = selectedCategory.name,
+                    modifier = Modifier
+                        .background(Color.Yellow)
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
+
+
+    Box {
+
+        Column(
+        ) {
             LazyColumn(
                 contentPadding = PaddingValues(
                     start = 16.dp, top = 72.dp, end = 16.dp, bottom = 16.dp
-                ), verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
+                ),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+
+                ) {
+
+                item {
+                    val spacerSize = (36 + if(hasSelectedCategory()) 32 else 0).dp
+                    Spacer(modifier = Modifier.size(spacerSize).systemBarsPadding())
+                }
+
+                if (!hasSelectedCategory()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .height(136.dp)
+                        ) {
+                            LazyHorizontalStaggeredGrid(
+                                modifier = Modifier.wrapContentHeight(),
+                                rows = StaggeredGridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalItemSpacing = 8.dp,
+                                contentPadding = PaddingValues(horizontal = 16.dp)
+                            ) {
+                                items(categories.size) { index ->
+                                    Card(
+                                        modifier = Modifier
+                                            .wrapContentHeight()
+                                            .clickable {
+                                                screen.ClickToCategoryUseCase(categories[index])
+                                            }
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.padding(16.dp),
+                                            text = categories[index].name
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 items(count = ads.size) { index ->
                     val ad = ads[index]
                     AdView(ad, onClick = { ad ->
@@ -110,33 +208,86 @@ fun SearchScreenView(screen: SearchScreen) {
                 }
             }
         }
-        Column(
-            modifier = Modifier
-                .offset { IntOffset(0, connection.appBarOffset) }) {
-
-            SearchView(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                height = SEARCH_VIEW_HEIGHT_DP,
-                query = query,
-                tips = searchTips,
-                clearEnabled = query.isNotEmpty(),
-                onQueryChanged = { value ->
-                    scope.launch {
-                        screen.ChangeSearchQueryUseCase(value)
-                    }
-                },
-                onClearClick = {
-                    scope.launch {
-                        screen.ClickToClearQueryUseCase()
-                    }
-                },
-                onImeSearchClick = {
-                    scope.launch {
-                        screen.ClickToSearchUseCase()
-                    }
-                })
-        }
     }
+
+
+//    SearchView(
+//        modifier = Modifier.padding(horizontal = 16.dp),
+//        height = SEARCH_VIEW_HEIGHT_DP,
+//        query = query,
+//        tips = searchTips,
+//        clearEnabled = query.isNotEmpty(),
+//        onQueryChanged = { value ->
+//            scope.launch {
+//                screen.ChangeSearchQueryUseCase(value)
+//            }
+//        },
+//        onClearClick = {
+//            scope.launch {
+//                screen.ClickToClearQueryUseCase()
+//            }
+//        },
+//        onImeSearchClick = {
+//            scope.launch {
+//                screen.ClickToSearchUseCase()
+//            }
+//        })
+
+//    Box(
+//        Modifier
+//            .systemBarsPadding()
+//            .nestedScroll(connection)
+//    ) {
+//
+//        Column(modifier = Modifier.fillMaxSize()) {
+//
+//            LazyColumn(
+//                contentPadding = PaddingValues(
+//                    start = 16.dp, top = 72.dp, end = 16.dp, bottom = 16.dp
+//                ), verticalArrangement = Arrangement.spacedBy(24.dp)
+//            ) {
+//
+//                items(count = ads.size) { index ->
+//                    val ad = ads[index]
+//                    AdView(ad, onClick = { ad ->
+//                        screen.ClickToAdUseCase(ad)
+//                    })
+//
+//                }
+//                item {
+//                    LaunchedEffect(Unit) {
+//                        screen.ScrollToEndUseCase()
+//                    }
+//                }
+//            }
+//        }
+//        Column(
+//            modifier = Modifier
+//                .offset { IntOffset(0, connection.appBarOffset) }) {
+//
+//            SearchView(
+//                modifier = Modifier.padding(horizontal = 16.dp),
+//                height = SEARCH_VIEW_HEIGHT_DP,
+//                query = query,
+//                tips = searchTips,
+//                clearEnabled = query.isNotEmpty(),
+//                onQueryChanged = { value ->
+//                    scope.launch {
+//                        screen.ChangeSearchQueryUseCase(value)
+//                    }
+//                },
+//                onClearClick = {
+//                    scope.launch {
+//                        screen.ClickToClearQueryUseCase()
+//                    }
+//                },
+//                onImeSearchClick = {
+//                    scope.launch {
+//                        screen.ClickToSearchUseCase()
+//                    }
+//                })
+//        }
+//    }
 }
 
 @Composable
@@ -272,6 +423,11 @@ fun SearchScreenPreview() {
     LikeAvitoAppTheme {
         SearchScreenView(
             SearchScreen(
+                state = State(
+                    ads = Loadable<List<Ad>>(
+                        initial = MockDataProvider().getAds(1, 0, "")
+                    )
+                ),
                 prevScreen = null
             )
         )

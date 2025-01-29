@@ -13,45 +13,56 @@ import me.likeavitoapp.screens.addetails.AdDetailsScreen
 import kotlin.collections.emptyList
 
 class SearchScreen(
+    val state: State = State(),
     val sources: DataSources = dataSources(),
     override var prevScreen: Screen? = null,
     override var innerScreen: MutableStateFlow<Screen>? = null,
 ) : Screen {
 
-    val state: State = State()
 
-    class State {
-        val categories = Loadable(emptyList<Category>())
-        val ads = Loadable(emptyList<Ad>())
-        var adsPage = MutableStateFlow(0)
-        var searchTips = Loadable(emptyList<String>())
-
-        var searchFilter =
+    class State(
+        val categoriesEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true),
+        val categories: Loadable<List<Category>> = Loadable(emptyList<Category>()),
+        val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
+        var adsPage: MutableStateFlow<Int> = MutableStateFlow(0),
+        var searchTips: Loadable<List<String>> = Loadable(emptyList<String>()),
+        var searchFilter: SearchSettings =
             SearchSettings(
                 category = MutableStateFlow(Category(name = "", id = 0)),
                 query = MutableStateFlow(""),
                 region = MutableStateFlow(SearchSettings.Region(name = "Все регионы", id = 0)),
-                priceRange = MutableStateFlow(SearchSettings.PriceRange(from = 0, to = Int.MAX_VALUE))
+                priceRange = MutableStateFlow(
+                    SearchSettings.PriceRange(
+                        from = 0,
+                        to = Int.MAX_VALUE
+                    )
+                )
             )
-    }
+    )
+
+    private val getAdsUseCaseFlow = MutableStateFlow(Unit)
 
     // SearchBarUseCases:
 
-    suspend fun ChangeSearchQueryUseCase(newQuery: String) = with(state.searchFilter) {
-        query.value = newQuery
+    fun ChangeSearchQueryUseCase(newQuery: String) {
+        state.searchFilter.query.value = newQuery
+    }
 
-        if (query.subscriptionCount.value == 0) {
-            query.debounce(390).collect { lastQuery ->
-                    state.searchTips.loading.value = true
+    suspend fun ListenChangeSearchQueryUseCase() = with(state.searchFilter) {
+        query.debounce(390).collect { lastQuery ->
+            state.searchTips.loading.value = true
 
-                    val result = sources.backend.adsService.getSearchTips(
-                        categoryId = category.value.id,
-                        query = newQuery
-                    )
-                    state.searchTips.loading.value = false
-                    state.searchTips.data.value = result.getOrNull() ?: emptyList()
-                }
+            val result = sources.backend.adsService.getSearchTips(
+                categoryId = category.value.id,
+                query = query.value
+            )
+            state.searchTips.loading.value = false
+            state.searchTips.data.value = result.getOrNull() ?: emptyList()
         }
+    }
+
+    fun ClickToFavoriteIconUseCase() {
+
     }
 
     fun SelectSearchTipUseCase() {
@@ -75,12 +86,12 @@ class SearchScreen(
         searchFilter.query.value = ""
         adsPage.value = 0
 
-        GetAdsUseCase(searchFilter.query.value, adsPage.value)
+        GetAdsUseCase()
 
         ads.loading.value = false
     }
 
-    suspend fun GetCategoriesUseCase()= with(state) {
+    suspend fun GetCategoriesUseCase() = with(state) {
         categories.loading.value = true
 
         val result = sources.backend.adsService.getCategories()
@@ -101,24 +112,35 @@ class SearchScreen(
         )
     }
 
-    suspend fun ScrollToEndUseCase() {
-        GetAdsUseCase(state.searchFilter.query.value, state.adsPage.value+1)
+    fun ScrollToEndUseCase() {
         state.adsPage.value += 1
+        GetAdsUseCase()
     }
 
+    private fun GetAdsUseCase() {
+        getAdsUseCaseFlow.value = Unit
+    }
 
-    suspend fun GetAdsUseCase(query: String = "", page: Int) = with(state){
-        if (ads.loading.value) {
-            return
-        }
+    suspend fun ListenGetAdsUseCase() {
+        getAdsUseCaseFlow.collect {
+            with(state) {
+                if (ads.loading.value) {
+                    return@collect
+                }
 
-        val result = sources.backend.adsService.getAds(page = adsPage.value, query = query)
-        val newAds = result.getOrNull()
+                val result = sources.backend.adsService.getAds(
+                    page = adsPage.value,
+                    query = searchFilter.query.value,
+                    categoryId = searchFilter.category.value.id
+                )
+                val newAds = result.getOrNull()
 
-        if (result.isSuccess && newAds != null) {
-            ads.data.value = newAds.ads
-        } else {
-            ads.loadingFailed.value= true
+                if (result.isSuccess && newAds != null) {
+                    ads.data.value = newAds
+                } else {
+                    ads.loadingFailed.value = true
+                }
+            }
         }
     }
 
@@ -127,6 +149,11 @@ class SearchScreen(
     }
 
     suspend fun ClickToSearchUseCase() = with(state.searchFilter) {
-        GetAdsUseCase(query.value, 0)
+        GetAdsUseCase()
+    }
+
+    fun ClickToCategoryUseCase(category: Category) {
+        state.searchFilter.category.value = category
+        GetAdsUseCase()
     }
 }

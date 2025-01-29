@@ -53,7 +53,7 @@ fun AuthScreenProvider(screen: AuthScreen) {
     AuthScreenView(screen)
 
     LaunchedEffect(Unit) {
-        screen.SubscribeChangeEmailUseCase()
+        screen.ListenChangeEmailUseCase()
     }
     LaunchedEffect(Unit) {
         if (scenariosEnabled) {

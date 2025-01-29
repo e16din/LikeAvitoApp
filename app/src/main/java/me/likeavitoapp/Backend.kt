@@ -15,7 +15,7 @@ class Backend(val client: HttpClient = HttpClient()) {
 
     interface AdsServiceContract {
         suspend fun getCategories(): Result<List<Category>>
-        suspend fun getAds(categoryId: Int = 0, page: Int = 0, query: String = ""): Result<AdsList>
+        suspend fun getAds(categoryId: Int = 0, page: Int = 0, query: String = ""): Result<List<Ad>>
         suspend fun getAdDetails(adId: Long): Result<Ad>
         suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>>
     }
@@ -67,39 +67,14 @@ class Backend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class AdsService : AdsServiceContract {
         override suspend fun getCategories(): Result<List<Category>> {
-            return Result.success(listOf())
+            return Result.success(
+                mockDataProvider.getCategories()
+            )
         }
 
-        override suspend fun getAds(categoryId: Int, page: Int, query: String): Result<AdsList> {
+        override suspend fun getAds(categoryId: Int, page: Int, query: String): Result<List<Ad>> {
             return Result.success(
-                AdsList(
-                    page = page, query = query, ads = listOf(
-                        Ad(
-                            id = 1,
-                            title = "MacBook Pro 14",
-                            description = "Ноутбук, который расширяет ваши возможности\n" + "Apple MacBook Pro 14\" 2024 года – это ноутбук, созданный для тех, кто привык к скорости, мощности и комфорту. С процессором M4 он обеспечивает идеальный баланс между автономностью и производительностью, достаточной для очень требовательных задач. В нём есть всё, чтобы работать или отдыхать где угодно, подключать любые дисплеи и аксессуары, а высокий уровень безопасности, в сочетании с идеальной оптимизацией macOS и сервисами Apple, позволяет не загружать себя лишними заботами, фокусируясь на том, что действительно важно.",
-                            photoUrls = listOf("https://ir-3.ozone.ru/s3/multimedia-1-n/wc1000/6917949671.jpg"),
-                            contacts = Contacts(
-                                phone = "8XXXXXX1234",
-                                whatsapp = null,
-                                telegram = "@any_contact",
-                                email = "any@gmail.com"
-                            ),
-                            price = 100000.0,
-                            isPremium = true,
-                            category = Category("Ноутбуки", 1),
-                            address = Ad.Address(
-                                address = "г.Москва, ул.Ленина, д.45"
-                            ),
-                            owner = Ad.Owner(
-                                id = 100500,
-                                name = "Петр Петрович",
-                                contacts = Contacts(phone = "8950XXXXX07")
-                            ),
-                            isFavorite = false
-                        )
-                    )
-                )
+                mockDataProvider.getAds(categoryId, page, query)
             )
         }
 
