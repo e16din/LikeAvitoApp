@@ -104,7 +104,8 @@ data class Ad(
     val description: String,
     val photoUrls: List<String>,
     val contacts: Contacts,
-    val price: Double,
+    val price: Int,
+    val bargaining: Boolean,
     val isPremium: Boolean,
     val isFavorite: Boolean,
     val category: Category,
@@ -120,7 +121,8 @@ data class Ad(
 }
 
 data class SearchSettings(
-    var category: MutableStateFlow<Category>,
+    val categories: Loadable<List<Category>>,
+    var selectedCategory: MutableStateFlow<Category>,
     var query: MutableStateFlow<String>,
     var region: MutableStateFlow<Region>,
     var priceRange: MutableStateFlow<PriceRange>

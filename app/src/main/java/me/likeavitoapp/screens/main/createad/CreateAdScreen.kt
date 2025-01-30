@@ -44,6 +44,7 @@ class CreateAdScreen(
                     photoUrls = TODO(),
                     contacts = TODO(),
                     price = TODO(),
+                    bargaining = true,
                     isPremium = TODO(),
                     isFavorite = TODO(),
                     category = TODO(),

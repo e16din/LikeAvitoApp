@@ -1,7 +1,5 @@
 package me.likeavitoapp.screens.main.search
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,27 +16,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,27 +33,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import me.likeavitoapp.Ad
-import me.likeavitoapp.Loadable
-import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.screens.main.search.SearchScreen.State
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -76,10 +52,13 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SearchScreenProvider(screen: SearchScreen) {
 
     LaunchedEffect(Unit) {
-        screen.ListenGetAdsUseCase()
+        screen.listenLoadAdsCalls()
     }
     LaunchedEffect(Unit) {
-        screen.ListenChangeSearchQueryUseCase()
+        screen.listenLoadCategoriesCalls()
+    }
+    LaunchedEffect(Unit) {
+        screen.searchBar.listenChangeSearchQueryCalls()
     }
     SearchScreenView(screen)
 }
@@ -88,7 +67,7 @@ fun SearchScreenProvider(screen: SearchScreen) {
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
     LaunchedEffect(Unit) {
-        screen.ReloadDataUseCase()
+        screen.StartScreenUseCase()
     }
 
     val SEARCH_VIEW_HEIGHT_DP = 64.dp
@@ -103,14 +82,16 @@ fun SearchScreenView(screen: SearchScreen) {
     val ads by screen.state.ads.data.collectAsState()
     val query by screen.state.searchFilter.query.collectAsState()
     val searchTips by screen.state.searchTips.data.collectAsState()
-    val selectedCategory by screen.state.searchFilter.category.collectAsState()
-    val categories by screen.state.categories.data.collectAsState()
+    val selectedCategory by screen.state.searchFilter.selectedCategory.collectAsState()
+    val categories by screen.state.searchFilter.categories.data.collectAsState()
     var searchBarExpanded by remember { mutableStateOf(false) }
 
     fun hasSelectedCategory(): Boolean = selectedCategory.id != 0
 
 
-    Box(modifier = Modifier.background(Color.Black)) {
+    Box(modifier = Modifier
+        .background(Color.Black)
+        .nestedScroll(connection)) {
 
         Column(
         ) {
@@ -132,53 +113,43 @@ fun SearchScreenView(screen: SearchScreen) {
                     )
                 }
 
-                if (!hasSelectedCategory()) {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .background(Color.Black)
-                                .height(136.dp)
-                        ) {
-                            LazyHorizontalStaggeredGrid(
-                                modifier = Modifier.wrapContentHeight(),
-                                rows = StaggeredGridCells.Fixed(2),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalItemSpacing = 8.dp,
-                                contentPadding = PaddingValues(horizontal = 16.dp)
-                            ) {
-                                items(categories.size) { index ->
-                                    Card(
-                                        modifier = Modifier
-                                            .wrapContentHeight()
-                                            .clickable {
-                                                screen.ClickToCategoryUseCase(categories[index])
-                                            }
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.padding(16.dp),
-                                            text = categories[index].name
-                                        )
-                                    }
-                                }
+                items(count = ads.size) { index ->
+                    val ad = ads[index]
+                    if (ad.isPremium) {
+                        AdView(
+                            ad = ad,
+                            onItemClick = { ad ->
+                                screen.adsList.ClickToAdUseCase(ad)
+                            },
+                            onFavoriteClick = {
+                                screen.adsList.ClickToFavoriteUseCase()
+                            },
+                            onBuyClick = {
+                                screen.adsList.ClickToBuyUseCase()
+                            },
+                            onBargainingClick = {
+                                screen.adsList.ClickToBargainingUseCase()
                             }
-                        }
+                        )
+
+                    } else {
+                        MinAdView(
+                            ad = ad,
+                            onItemClick = { ad ->
+                                screen.adsList.ClickToAdUseCase(ad)
+                            },
+                            onFavoriteClick = {
+                                screen.adsList.ClickToFavoriteUseCase()
+                            }
+                        )
                     }
                 }
 
-                items(count = ads.size) { index ->
-                    val ad = ads[index]
-                    AdView(
-                        ad,
-                        onItemClick = { ad ->
-                            screen.ClickToAdUseCase(ad)
-                        },
-                        onFavoriteClick = {
-                            screen.ClickToFavoriteIconUseCase()
-                        })
-                }
-                item {
-                    LaunchedEffect(Unit) {
-                        screen.ScrollToEndUseCase()
+                if (!screen.state.ads.data.value.isEmpty()) {
+                    item {
+                        LaunchedEffect(Unit) {
+                            screen.adsList.ScrollToEndUseCase()
+                        }
                     }
                 }
             }
@@ -207,12 +178,12 @@ fun SearchScreenView(screen: SearchScreen) {
                             ImageVector.vectorResource(R.drawable.baseline_tune_24),
                             "searchbar_trailing_icon",
                             modifier = Modifier.clickable {
-                                screen.ClickToFilterButtonUseCase()
+                                screen.searchBar.ClickToFilterButtonUseCase()
                             })
                     },
                     query = query,
                     onQueryChange = { newQuery ->
-                        screen.ChangeSearchQueryUseCase(newQuery)
+                        screen.searchBar.ChangeSearchQueryUseCase(newQuery)
                     },
 
                     )
@@ -223,46 +194,51 @@ fun SearchScreenView(screen: SearchScreen) {
             }
         ) {
             // onExpanded
-
         }
+
         if (hasSelectedCategory()) {
-            Column(
+            Text(
+                text = selectedCategory.name,
                 modifier = Modifier
-                    .systemBarsPadding()
-            ) {
-                Text(
-                    text = selectedCategory.name,
+                    .background(Color.Yellow)
+                    .padding(vertical = 4.dp, horizontal = 16.dp)
+                    .fillMaxWidth()
+            )
+        } else {
+            if (!hasSelectedCategory()) {
+                Column(
                     modifier = Modifier
-                        .background(Color.Yellow)
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                        .fillMaxWidth()
-                )
+                        .background(Color.Black)
+                        .height(136.dp)
+                ) {
+                    LazyHorizontalStaggeredGrid(
+                        modifier = Modifier.wrapContentHeight(),
+                        rows = StaggeredGridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalItemSpacing = 8.dp,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        items(categories.size) { index ->
+                            Card(
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .clickable {
+                                        screen.searchBar.ClickToCategoryUseCase(categories[index])
+                                    }
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(16.dp),
+                                    text = categories[index].name
+                                )
+                            }
+                        }
+                    }
+                }
+
             }
         }
+
     }
-
-
-//    SearchView(
-//        modifier = Modifier.padding(horizontal = 16.dp),
-//        height = SEARCH_VIEW_HEIGHT_DP,
-//        query = query,
-//        tips = searchTips,
-//        clearEnabled = query.isNotEmpty(),
-//        onQueryChanged = { value ->
-//            scope.launch {
-//                screen.ChangeSearchQueryUseCase(value)
-//            }
-//        },
-//        onClearClick = {
-//            scope.launch {
-//                screen.ClickToClearQueryUseCase()
-//            }
-//        },
-//        onImeSearchClick = {
-//            scope.launch {
-//                screen.ClickToSearchUseCase()
-//            }
-//        })
 
 //    Box(
 //        Modifier
@@ -321,133 +297,6 @@ fun SearchScreenView(screen: SearchScreen) {
 //    }
 }
 
-@Composable
-inline fun AdView(
-    ad: Ad,
-    crossinline onItemClick: (ad: Ad) -> Unit,
-    crossinline onFavoriteClick: (ad: Ad) -> Unit,
-) {
-    val color = if (ad.isPremium) Color(0xff00c000) else Color(0xffffffff)
-    Box {
-        Card(
-            modifier =
-                Modifier.background(color = color),
-            onClick = {
-                onItemClick(ad)
-            }) {
-            Text(
-                text = ad.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            AsyncImage(
-                model = "https://example.com/image.jpg",
-                contentDescription = null,
-            )
-
-            Text(
-                text = ad.description,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Text(text = "${ad.price}₽")
-        }
-        IconButton(
-            onClick = { onFavoriteClick(ad) }
-        ) {
-            if (ad.isFavorite) {
-                Icon(Icons.Default.Favorite, "favorite_selected")
-            } else {
-                Icon(Icons.Default.FavoriteBorder, "favorite_unselected")
-            }
-        }
-    }
-}
-
-@Composable
-inline fun SearchView(
-    height: Dp = 80.dp,
-    query: String,
-    tips: List<String>,
-    modifier: Modifier = Modifier,
-    clearEnabled: Boolean,
-    crossinline onQueryChanged: (query: String) -> Unit,
-    crossinline onClearClick: () -> Unit,
-    crossinline onImeSearchClick: () -> Unit
-) {
-    val animatedColor by animateColorAsState(
-        if (tips.isNotEmpty()) Color.Green else Color.Blue, label = "color"
-    )
-
-    Column(
-        modifier = modifier
-            .clip(CircleShape)
-            .drawBehind {
-                drawRect(animatedColor)
-            }
-            .animateContentSize()) {
-        TextField(
-            modifier = Modifier
-                .height(height)
-                .fillMaxWidth(),
-            value = query,
-            onValueChange = { query -> onQueryChanged(query) },
-            colors = TextFieldDefaults.colors().copy(
-                focusedContainerColor = Color(0XFF101921),
-                focusedPlaceholderColor = Color(0XFF888D91),
-                focusedLeadingIconColor = Color(0XFF888D91),
-                focusedTrailingIconColor = Color(0XFF888D91),
-                focusedTextColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                cursorColor = Color(0XFF070E14)
-            ),
-            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "") },
-            trailingIcon = {
-                if (clearEnabled) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "",
-                        modifier = Modifier.clickable(onClick = {
-                            onClearClick()
-                        })
-                    )
-                }
-
-            },
-            placeholder = { Text(text = "Search") },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    onImeSearchClick()
-                }
-            ))
-
-        repeat(tips.size) { idx ->
-            val resultText = "Suggestion $idx"
-            ListItem(
-                headlineContent = { Text(resultText) },
-                supportingContent = { Text("Additional info") },
-                leadingContent = { Icon(Icons.Filled.Star, contentDescription = null) },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier
-                    .clickable {
-                        onQueryChanged(resultText)
-                    }
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp))
-        }
-
-    }
-}
-
 class CollapsingAppBarNestedScrollConnection(
     val appBarMaxHeight: Int
 ) : NestedScrollConnection {
@@ -470,14 +319,7 @@ class CollapsingAppBarNestedScrollConnection(
 fun SearchScreenPreview() {
     LikeAvitoAppTheme {
         SearchScreenView(
-            SearchScreen(
-                state = State(
-                    ads = Loadable<List<Ad>>(
-                        initial = MockDataProvider().getAds(1, 0, "")
-                    )
-                ),
-                prevScreen = null
-            )
+            SearchScreen(prevScreen = null)
         )
     }
 }

@@ -18,4 +18,5 @@
     <string name="create_new_tab">Создать</string>
     <string name="cart_tab">Корзина</string>
     <string name="search_hint">Искать</string>
+    <string name="bargaining_button">Торговаться</string>
 </resources>
