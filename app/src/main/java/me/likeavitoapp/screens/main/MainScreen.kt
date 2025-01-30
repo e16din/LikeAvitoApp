@@ -1,10 +1,10 @@
 package me.likeavitoapp.screens.main
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.Screen
-import me.likeavitoapp.User
-import me.likeavitoapp.dataSources
+import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.User
+import me.likeavitoapp.model.dataSources
 import me.likeavitoapp.screens.main.cart.CartScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.favorites.FavoritesScreen
@@ -14,9 +14,9 @@ import me.likeavitoapp.screens.main.search.SearchScreen
 
 class MainScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: Screen? = null,
-    override var innerScreen: MutableStateFlow<Screen>? = null,
-) : Screen {
+    override var prevScreen: IScreen? = null,
+    override var innerScreen: MutableStateFlow<IScreen>? = null,
+) : IScreen {
 
     val state = State()
     val nav = Navigation()
@@ -39,7 +39,7 @@ class MainScreen(
         }
 
         class Stack {
-            fun createAdScreen(prevScreen: Screen) = CreateAdScreen(
+            fun createAdScreen(prevScreen: IScreen) = CreateAdScreen(
                 prevScreen = prevScreen,
                 innerScreen = null
             )
@@ -57,7 +57,7 @@ class MainScreen(
         innerScreen = MutableStateFlow(searchScreen)
     }
 
-    private fun onClickTo(screen: Screen) {
+    private fun onClickTo(screen: IScreen) {
         innerScreen?.value = screen.apply {
             prevScreen = innerScreen?.value?.prevScreen
         }

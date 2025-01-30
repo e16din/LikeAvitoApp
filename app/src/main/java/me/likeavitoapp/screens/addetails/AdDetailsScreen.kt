@@ -1,9 +1,9 @@
 package me.likeavitoapp.screens.addetails
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.Ad
+import me.likeavitoapp.model.Ad
 
-import me.likeavitoapp.Screen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
 
@@ -11,9 +11,9 @@ import me.likeavitoapp.screens.main.MainScreen
 class AdDetailsScreen(
     ad: Ad,
     val state: State = State(ad),
-    override var prevScreen: Screen?,
-    override var innerScreen: MutableStateFlow<Screen>? = null
-) : Screen {
+    override var prevScreen: IScreen?,
+    override var innerScreen: MutableStateFlow<IScreen>? = null
+) : IScreen {
 
     class Input {}
     class State(val ad: Ad) {

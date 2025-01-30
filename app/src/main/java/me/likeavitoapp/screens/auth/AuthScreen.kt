@@ -2,19 +2,19 @@ package me.likeavitoapp.screens.auth
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.Loadable
-import me.likeavitoapp.Screen
-import me.likeavitoapp.dataSources
+import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.dataSources
 import me.likeavitoapp.screens.main.MainScreen
 import java.util.regex.Pattern
 
 
 class AuthScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: Screen? = null,
-    override var innerScreen: MutableStateFlow<Screen>? = null
-) : Screen {
+    override var prevScreen: IScreen? = null,
+    override var innerScreen: MutableStateFlow<IScreen>? = null
+) : IScreen {
 
     val state = State()
     val nav = Navigation()
@@ -80,7 +80,7 @@ class AuthScreen(
         if (loginData?.user != null) {
             sources.app.user = loginData.user
 
-            sources.platform.authDataStore.saveId(loginData.user.id)
+            sources.platform.appDataStore.saveId(loginData.user.id)
 
             sources.app.currentScreen.value = nav.roots.mainScreen()
 

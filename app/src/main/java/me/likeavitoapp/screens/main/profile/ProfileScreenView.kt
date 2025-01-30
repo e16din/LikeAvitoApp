@@ -19,9 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import me.likeavitoapp.Contacts
+import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
-import me.likeavitoapp.User
+import me.likeavitoapp.model.User
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 

@@ -4,19 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.Ad
-import me.likeavitoapp.Category
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.Loadable
-import me.likeavitoapp.Screen
+import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.Category
+import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.IScreen
 
 
 class CreateAdScreen(
     val input: Input = Input(),
     val state: State = State(),
-    override var prevScreen: Screen?,
-    override var innerScreen: MutableStateFlow<Screen>?,
-    ) : Screen {
+    override var prevScreen: IScreen?,
+    override var innerScreen: MutableStateFlow<IScreen>?,
+    ) : IScreen {
 
     class Input {
         var onTitleChanged: (title: String) -> Unit = {}

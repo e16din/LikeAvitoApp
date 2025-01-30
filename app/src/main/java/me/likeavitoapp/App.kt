@@ -17,89 +17,69 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import me.likeavitoapp.AppPlatform.Companion.platform
+import me.likeavitoapp.model.IAppPlatform
 import me.likeavitoapp.screens.auth.AuthScreen
 
 class AuthFiledException : Exception()
 
-fun dataSources() = DataSources(
-    app = app,
-    platform = platform,
-    backend = backend,
-)
 
-inline fun <reified T : Screen> dataSourcesWithScreen() = DataSourcesWithScreen(
-    app = app,
-    platform = platform,
-    backend = backend,
-    screen = app.currentScreen.value as T
-)
+@OptIn(DelicateCoroutinesApi::class)
+private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    println("Error!")
+    println(throwable.message)
+    if (throwable is AuthFiledException) {
+        if (appModel.currentScreen.value !is AuthScreen) {
+            GlobalScope.launch {
+                appModel.Logout()
+            }
+        }
 
-val app = AppModel()
-val backend = Backend()
+    } else {
+        throwable.printStackTrace()
+    }
+}
+val defaultContext = Dispatchers.Default + Job() + exceptionHandler
 
 @Composable
-fun actualScope() = rememberCoroutineScope { platform.defaultContext }
+fun actualScope() = rememberCoroutineScope { defaultContext }
 
-class AppPlatform : Application() {
-
-    companion object {
-        lateinit var platform: AppPlatform
-    }
+class App : IAppPlatform, Application() {
 
     init {
-        platform = this
+        appPlatform = this
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        println("Error!")
-        println(throwable.message)
-        if (throwable is AuthFiledException) {
-            if (app.currentScreen.value !is AuthScreen) {
-                GlobalScope.launch {
-                    app.Logout()
-                }
-            }
-
-        } else {
-            throwable.printStackTrace()
-        }
-    }
-    val defaultContext = Dispatchers.Default + Job() + exceptionHandler
-
-
-    val authDataStore = AuthDataStore()
+    override val appDataStore = AuthDataStore()
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-    inner class AuthDataStore() {
+    inner class AuthDataStore() : IAppPlatform.IAppDataStore {
         private val USER_ID_KEY = longPreferencesKey("user_id")
         private val TOKEN_KEY = stringPreferencesKey("token")
 
-        suspend fun loadId(): Long? {
+        override suspend fun loadId(): Long? {
             val prefs = dataStore.data.first()
             return prefs[USER_ID_KEY]
         }
 
-        suspend fun saveId(userId: Long) {
+        override suspend fun saveId(userId: Long) {
             dataStore.edit { settings ->
                 settings[USER_ID_KEY] = userId
             }
         }
 
-        suspend fun loadToken(): String? {
+        override suspend fun loadToken(): String? {
             val prefs = dataStore.data.first()
             return prefs[TOKEN_KEY]
         }
 
-        suspend fun saveToken(token: String) {
+        override suspend fun saveToken(token: String) {
             dataStore.edit { settings ->
                 settings[TOKEN_KEY] = token
             }
         }
 
-        suspend fun clear() {
+        override suspend fun clear() {
             dataStore.edit { settings ->
                 settings.clear()
             }

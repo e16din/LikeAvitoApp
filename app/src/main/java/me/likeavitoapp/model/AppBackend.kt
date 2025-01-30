@@ -1,31 +1,13 @@
-package me.likeavitoapp
+package me.likeavitoapp.model
 
 
 import io.ktor.client.*
 import kotlinx.coroutines.delay
+import me.likeavitoapp.AuthFiledException
+import me.likeavitoapp.MockDataProvider
 
 
-class Backend(val client: HttpClient = HttpClient()) {
-
-    interface UserServiceContract {
-        suspend fun login(username: String, password: String): Result<LoginResult>
-        suspend fun logout(userId: Long): Result<Boolean>
-        suspend fun getUser(userId: Long): Result<User>
-    }
-
-    interface AdsServiceContract {
-        suspend fun getCategories(): Result<List<Category>>
-        suspend fun getAds(categoryId: Int = 0, page: Int = 0, query: String = ""): Result<List<Ad>>
-        suspend fun getAdDetails(adId: Long): Result<Ad>
-        suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>>
-    }
-
-    interface CartServiceContract {
-        suspend fun reserve(adId: Long): Result<Boolean>
-        suspend fun order(adId: Long, buyType: Order.BuyType): Result<Boolean>
-
-        suspend fun getOrders(userId: Long): Result<List<Order>>
-    }
+class AppBackend(val client: HttpClient = HttpClient()) {
 
     var token: String? = null
 
@@ -38,9 +20,9 @@ class Backend(val client: HttpClient = HttpClient()) {
     data class LoginResult(val user: User, val token: String)
 
     // NOTE: this is mock for an example
-    inner class UserService : UserServiceContract {
+    inner class UserService {
 
-        override suspend fun login(username: String, password: String): Result<LoginResult> {
+         suspend fun login(username: String, password: String): Result<LoginResult> {
             delay(1500)
             if(username == "ss@ss.ss" && password == "123456") {
                 return Result.success(
@@ -54,35 +36,35 @@ class Backend(val client: HttpClient = HttpClient()) {
             }
         }
 
-        override suspend fun logout(userId: Long): Result<Boolean> {
+         suspend fun logout(userId: Long): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
-        override suspend fun getUser(userId: Long): Result<User> {
+         suspend fun getUser(userId: Long): Result<User> {
             return Result.success(mockDataProvider.getUser())
         }
 
     }
 
     // NOTE: this is mock for an example
-    inner class AdsService : AdsServiceContract {
-        override suspend fun getCategories(): Result<List<Category>> {
+    inner class AdsService {
+         suspend fun getCategories(): Result<List<Category>> {
             return Result.success(
                 mockDataProvider.getCategories()
             )
         }
 
-        override suspend fun getAds(categoryId: Int, page: Int, query: String): Result<List<Ad>> {
+         suspend fun getAds(categoryId: Int, page: Int, query: String): Result<List<Ad>> {
             return Result.success(
                 mockDataProvider.getAds(categoryId, page, query)
             )
         }
 
-        override suspend fun getAdDetails(adId: Long): Result<Ad> {
+         suspend fun getAdDetails(adId: Long): Result<Ad> {
             TODO("Not yet implemented")
         }
 
-        override suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
+         suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
             return Result.success(
                 listOf(
                     "Mac Book",
@@ -96,19 +78,19 @@ class Backend(val client: HttpClient = HttpClient()) {
     }
 
     // NOTE: this is mock for an example
-    inner class CartService : CartServiceContract {
-        override suspend fun reserve(adId: Long): Result<Boolean> {
+    inner class CartService {
+         suspend fun reserve(adId: Long): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
-        override suspend fun order(
+         suspend fun order(
             adId: Long,
             buyType: Order.BuyType
         ): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
-        override suspend fun getOrders(userId: Long): Result<List<Order>> {
+         suspend fun getOrders(userId: Long): Result<List<Order>> {
             TODO("Not yet implemented")
         }
 

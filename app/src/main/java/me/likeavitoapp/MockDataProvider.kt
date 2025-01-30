@@ -1,10 +1,19 @@
 package me.likeavitoapp
 
+import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.AppBackend
+import me.likeavitoapp.model.AppModel
+import me.likeavitoapp.model.Category
+import me.likeavitoapp.model.Contacts
+import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.SearchSettings
+import me.likeavitoapp.model.User
+
 class MockDataProvider {
     fun dataSources(): DataSources = DataSources(
         app = AppModel().apply { user = getUser() },
-        platform = AppPlatform(),
-        backend = Backend()
+        platform = App(),
+        backend = AppBackend()
     )
 
     fun getUser(): User {
@@ -21,7 +30,7 @@ class MockDataProvider {
 
     fun getAds(categoryId: Int, page: Int, query: String): List<Ad> {
         val result = mutableListOf<Ad>()
-        repeat(20){
+        repeat(20) {
             result.add(
                 getAd(it.toLong())
             )
@@ -66,7 +75,7 @@ class MockDataProvider {
         )
     }
 
-    fun getAd(id:Long): Ad {
+    fun getAd(id: Long): Ad {
         return Ad(
             id = id.toLong(),
             title = "${id.toLong()}: MacBook Pro 14",
@@ -91,6 +100,16 @@ class MockDataProvider {
                 contacts = Contacts(phone = "8950XXXXX07")
             ),
             isFavorite = false
+        )
+    }
+
+    fun getRegions(): List<SearchSettings.Region> {
+        return listOf(
+            SearchSettings.Region("Москва", 1),
+            SearchSettings.Region("Санкт-Петербург", 2),
+            SearchSettings.Region("Ростов-на-Дону", 3),
+            SearchSettings.Region("Екатеринбург", 4),
+            SearchSettings.Region("Омск", 5),
         )
     }
 }

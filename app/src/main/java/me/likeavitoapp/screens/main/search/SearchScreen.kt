@@ -2,22 +2,22 @@ package me.likeavitoapp.screens.main.search
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
-import me.likeavitoapp.Ad
-import me.likeavitoapp.Category
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.Loadable
-import me.likeavitoapp.Screen
-import me.likeavitoapp.SearchSettings
-import me.likeavitoapp.dataSources
+import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.Category
+import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.SearchSettings
+import me.likeavitoapp.model.dataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.addetails.AdDetailsScreen
 
 
 class SearchScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: Screen? = null,
-    override var innerScreen: MutableStateFlow<Screen>? = null,
-) : Screen {
+    override var prevScreen: IScreen? = null,
+    override var innerScreen: MutableStateFlow<IScreen>? = null,
+) : IScreen {
 
     val state = State()
 
@@ -37,8 +37,8 @@ class SearchScreen(
 
                 val result = sources.backend.adsService.getAds(
                     page = adsPage.value,
-                    query = searchFilter.query.value,
-                    categoryId = searchFilter.selectedCategory.value.id
+                    query = searchSettings.query.value,
+                    categoryId = searchSettings.selectedCategory.value!!.id
                 )
                 val newAds = result.getOrNull()
 
@@ -57,7 +57,7 @@ class SearchScreen(
     }
     suspend fun listenLoadCategoriesCalls() {
         loadCategoriesCalls.collect {
-            with(state.searchFilter) {
+            with(state.searchSettings) {
                 categories.loading.value = true
 
                 val result = sources.backend.adsService.getCategories()
@@ -76,11 +76,12 @@ class SearchScreen(
     class State(
         val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
         var adsPage: MutableStateFlow<Int> = MutableStateFlow(0),
+        var searchSettingsPanelEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false),
         var searchTips: Loadable<List<String>> = Loadable(emptyList<String>()),
-        var searchFilter: SearchSettings =
+        var searchSettings: SearchSettings =
             SearchSettings(
                 categories = Loadable(emptyList<Category>()),
-                selectedCategory = MutableStateFlow(Category(name = "", id = 0)),
+                selectedCategory = MutableStateFlow(null),
                 query = MutableStateFlow(""),
                 region = MutableStateFlow(SearchSettings.Region(name = "Все регионы", id = 0)),
                 priceRange = MutableStateFlow(
@@ -106,30 +107,40 @@ class SearchScreen(
         ads.loading.value = false
     }
 
+    fun DismissSearchSettingsPanelUseCase() {
+        recordScenarioStep()
+
+        state.searchSettingsPanelEnabled.value = false
+    }
+
     inner class SearchBarUseCases(val sources: DataSources) {
 
         fun ClickToCategoryUseCase(category: Category) {
             recordScenarioStep()
-            state.searchFilter.selectedCategory.value = category
+
+            state.searchSettings.selectedCategory.value = category
             loadAds()
         }
 
         fun ClickToFilterButtonUseCase() {
             recordScenarioStep()
+
+            state.searchSettingsPanelEnabled.value = !state.searchSettingsPanelEnabled.value
         }
 
         fun ChangeSearchQueryUseCase(newQuery: String) {
             recordScenarioStep(newQuery)
-            state.searchFilter.query.value = newQuery
+
+            state.searchSettings.query.value = newQuery
         }
 
         suspend fun listenChangeSearchQueryCalls() = with(state) {
-            searchFilter.query.debounce(390).collect { lastQuery ->
+            searchSettings.query.debounce(390).collect { lastQuery ->
                 searchTips.loading.value = true
 
                 val result = sources.backend.adsService.getSearchTips(
-                    categoryId = searchFilter.selectedCategory.value.id,
-                    query = searchFilter.query.value
+                    categoryId = searchSettings.selectedCategory.value!!.id,
+                    query = searchSettings.query.value
                 )
                 searchTips.loading.value = false
                 searchTips.data.value = result.getOrNull() ?: emptyList()
@@ -142,11 +153,13 @@ class SearchScreen(
 
         suspend fun ClickToClearQueryUseCase() {
             recordScenarioStep()
+
             ChangeSearchQueryUseCase("")
         }
 
-        suspend fun ClickToSearchUseCase() = with(state.searchFilter) {
+        suspend fun ClickToSearchUseCase() = with(state.searchSettings) {
             recordScenarioStep()
+
             loadAds()
         }
     }
@@ -155,6 +168,7 @@ class SearchScreen(
 
         fun ClickToAdUseCase(ad: Ad) {
             recordScenarioStep()
+
             sources.app.currentScreen.value = AdDetailsScreen(
                 ad = ad,
                 prevScreen = sources.app.currentScreen.value
@@ -163,6 +177,7 @@ class SearchScreen(
 
         fun ScrollToEndUseCase() {
             recordScenarioStep()
+
             state.adsPage.value += 1
             loadAds()
         }

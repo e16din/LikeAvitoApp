@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LikeAvitoAppTheme {
-                Main()
+                Root()
             }
         }
     }
@@ -29,8 +29,8 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun Main() {
-    val screen = app.currentScreen.collectAsState()
+fun Root() {
+    val screen = appModel.currentScreen.collectAsState()
 
     when (screen.value){
         is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)

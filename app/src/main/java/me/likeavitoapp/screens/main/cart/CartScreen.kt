@@ -3,19 +3,18 @@ package me.likeavitoapp.screens.main.cart
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.DataSources
-import me.likeavitoapp.Order
-import me.likeavitoapp.Screen
-import me.likeavitoapp.dataSources
+import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.dataSources
 
 
 class CartScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: Screen? = null,
-    override var innerScreen: MutableStateFlow<Screen>? = null,
-) : Screen {
+    override var prevScreen: IScreen? = null,
+    override var innerScreen: MutableStateFlow<IScreen>? = null,
+) : IScreen {
 
     val state = State()
 

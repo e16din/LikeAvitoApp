@@ -2,7 +2,7 @@ package me.likeavitoapp.screens.auth
 
 import kotlinx.coroutines.delay
 import me.likeavitoapp.checkState
-import me.likeavitoapp.dataSourcesWithScreen
+import me.likeavitoapp.model.dataSourcesWithScreen
 import kotlin.math.roundToInt
 
 suspend fun RunAllAuthScenarios() {

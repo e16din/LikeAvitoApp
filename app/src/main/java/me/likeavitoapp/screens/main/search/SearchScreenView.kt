@@ -80,15 +80,16 @@ fun SearchScreenView(screen: SearchScreen) {
     }
 
     val ads by screen.state.ads.data.collectAsState()
-    val query by screen.state.searchFilter.query.collectAsState()
+    val query by screen.state.searchSettings.query.collectAsState()
     val searchTips by screen.state.searchTips.data.collectAsState()
-    val selectedCategory by screen.state.searchFilter.selectedCategory.collectAsState()
-    val categories by screen.state.searchFilter.categories.data.collectAsState()
+    val selectedCategory by screen.state.searchSettings.selectedCategory.collectAsState()
+    val categories by screen.state.searchSettings.categories.data.collectAsState()
     var searchBarExpanded by remember { mutableStateOf(false) }
+    val searchFilterPanelEnabled by screen.state.searchSettingsPanelEnabled.collectAsState()
 
-    fun hasSelectedCategory(): Boolean = selectedCategory.id != 0
+    fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 
-
+Box {
     Box(modifier = Modifier
         .background(Color.Black)
         .nestedScroll(connection)) {
@@ -198,7 +199,7 @@ fun SearchScreenView(screen: SearchScreen) {
 
         if (hasSelectedCategory()) {
             Text(
-                text = selectedCategory.name,
+                text = selectedCategory?.name ?: "",
                 modifier = Modifier
                     .background(Color.Yellow)
                     .padding(vertical = 4.dp, horizontal = 16.dp)
@@ -237,6 +238,16 @@ fun SearchScreenView(screen: SearchScreen) {
 
             }
         }
+
+        if(searchFilterPanelEnabled) {
+            SearchSettingsPanelView(
+                settings = screen.state.searchSettings,
+                onDismiss = {
+                    screen.DismissSearchSettingsPanelUseCase()
+                }
+            )
+        }
+    }
 
     }
 

@@ -1,50 +1,19 @@
-package me.likeavitoapp
+package me.likeavitoapp.model
 
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
+import me.likeavitoapp.appBackend
+import me.likeavitoapp.appPlatform
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
-private var lastCallMs = System.currentTimeMillis()
-fun recordScenarioStep(value: Any? = Unit) {
-    if (develop) {
-        var end = "()"
-        if (value != Unit) {
-            end = "(${value})"
-        }
-        val methodName = Thread.currentThread().stackTrace.first {
-            it.methodName.first().isUpperCase()
-        }.methodName
-
-        val timeMs = System.currentTimeMillis() - lastCallMs
-        lastCallMs = System.currentTimeMillis()
-        println("record_scenario", "delay(${Math.round(timeMs/100f)*100})")
-        println("record_scenario", "$methodName$end")
-    }
-}
-
-
-
-fun println(key: String = "debug", text: String) {
-    if (develop) {
-        Log.d(key, text)
-    }
-}
-
-fun checkState(condition: Boolean) {
-    assert(condition)
-}
-
-val develop = true
-val scenariosEnabled = false
 
 class AppModel(
-    val backend: Backend = Backend(),
-    val platform: AppPlatform = AppPlatform.platform
+    val backend: AppBackend = appBackend,
+    val platform: IAppPlatform = appPlatform
 ) {
     var user: User? = null
 
-    var currentScreen = MutableStateFlow<Screen>(
+    var currentScreen = MutableStateFlow<IScreen>(
         SplashScreen(
             sources = DataSources(
                 app = this,
@@ -64,7 +33,7 @@ class AppModel(
 
     // UseCases:
 
-    fun PressBack(screen: Screen) {
+    fun PressBack(screen: IScreen) {
         screen.prevScreen?.let {
             currentScreen.value = it
         }
@@ -72,13 +41,13 @@ class AppModel(
 
     suspend fun Logout() {
         currentScreen.value = nav.roots.authScreen()
-        platform.authDataStore.clear()
+        platform.appDataStore.clear()
     }
 }
 
-interface Screen {
-    var prevScreen: Screen?
-    var innerScreen: MutableStateFlow<Screen>?
+interface IScreen {
+    var prevScreen: IScreen?
+    var innerScreen: MutableStateFlow<IScreen>?
 }
 
 data class User(
@@ -122,13 +91,13 @@ data class Ad(
 
 data class SearchSettings(
     val categories: Loadable<List<Category>>,
-    var selectedCategory: MutableStateFlow<Category>,
+    var selectedCategory: MutableStateFlow<Category?>,
     var query: MutableStateFlow<String>,
     var region: MutableStateFlow<Region>,
     var priceRange: MutableStateFlow<PriceRange>
 ) {
     data class Region(val name: String, val id: Int)
-    data class PriceRange(val from: Int, val to: Int)
+    data class PriceRange(val from: Int = 0, val to: Int = Int.MAX_VALUE)
 }
 
 data class Order(val ad: Ad, val buyType: BuyType, val state: State) {

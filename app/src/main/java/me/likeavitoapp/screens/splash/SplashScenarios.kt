@@ -1,12 +1,12 @@
 package me.likeavitoapp.screens.splash
 
-import me.likeavitoapp.dataSourcesWithScreen
+import me.likeavitoapp.model.dataSourcesWithScreen
 
 
 suspend fun RunAppFromScratchScenario() {
     val sources = dataSourcesWithScreen<SplashScreen>()
 
-    sources.platform.authDataStore.clear()
+    sources.platform.appDataStore.clear()
     sources.screen.StartScreenUseCase(System.currentTimeMillis())
 }
 
