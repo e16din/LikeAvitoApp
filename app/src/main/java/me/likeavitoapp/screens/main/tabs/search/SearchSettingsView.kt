@@ -3,8 +3,11 @@ package me.likeavitoapp.screens.main.tabs.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,6 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -33,13 +39,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
+import me.likeavitoapp.log
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
+inline fun SearchSettingsPanelView(
+    panel: SearchScreen.SearchSettingsPanel,
+    crossinline onFocus: () -> Unit = {}
+) {
     val category by panel.state.selectedCategory.collectAsState()
     val region by panel.state.selectedRegion.collectAsState()
     val priceRange by panel.state.priceRange.collectAsState()
@@ -52,12 +63,14 @@ fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
     }
 
     val localFocusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
-    Column {
+    Column(modifier = Modifier) {
         Text(
             stringResource(R.string.search_settings_title),
-            fontWeight = FontWeight.Medium,
-            fontSize = 24.sp,
+            style = AppTypography.headlineLarge,
+//            fontWeight = FontWeight.Medium,
+//            fontSize = 24.sp,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
         )
         PreferenceItem(
@@ -82,6 +95,15 @@ fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
 
         PreferenceCustomItem(stringResource(R.string.price_title)) { modifier ->
             OutlinedTextField(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            log("isFocused: ${it.isFocused}")
+                            onFocus()
+                        }
+                    },
                 value = textFrom,
                 onValueChange = { value ->
                     panel.ChangePriceFromUseCase(value.toIntOrNull() ?: 0)
@@ -89,7 +111,6 @@ fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
                 label = {
                     Text(stringResource(R.string.from))
                 },
-                modifier = modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
@@ -103,6 +124,14 @@ fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
             )
 
             OutlinedTextField(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            onFocus()
+                        }
+                    },
                 value = textTo,
                 onValueChange = { value ->
                     panel.ChangePriceToUseCase(value.toIntOrNull() ?: 0)
@@ -115,7 +144,6 @@ fun SearchSettingsPanelView(panel: SearchScreen.SearchSettingsPanel) {
                         Text(stringResource(R.string.hint_max))
                     }
                 },
-                modifier = modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal)
             )
@@ -168,7 +196,8 @@ fun SearchSettingsViewPreview() {
         SearchSettingsPanelView(
             panel = SearchScreen(
                 parentNavigator = ScreensNavigator()
-            ).searchSettingsPanel
+            ).searchSettingsPanel,
+            onFocus = {}
         )
     }
 }

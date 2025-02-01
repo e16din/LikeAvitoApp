@@ -1,6 +1,7 @@
 package me.likeavitoapp
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.model.AppBackend
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.IAppPlatform
@@ -11,16 +12,18 @@ val scenariosEnabled = false
 lateinit var appModel: AppModel
 lateinit var appBackend: AppBackend
 lateinit var appPlatform: IAppPlatform
+lateinit var actualScope: CoroutineScope
 
-fun initMain(platform: IAppPlatform) {
+fun initMain(platform: IAppPlatform, scope: CoroutineScope) {
     appPlatform = platform
+    actualScope = scope
     appBackend = AppBackend()
     appModel = AppModel()
 }
 
-fun log(text: String, key: String = "debug") {
+fun log(text: String, tag: String = "debug") {
     if (develop) {
-        Log.d(key, text)
+        Log.d(tag, text)
     }
 }
 
@@ -41,7 +44,8 @@ fun recordScenarioStep(value: Any? = Unit) {
 
         val timeMs = System.currentTimeMillis() - lastCallMs
         lastCallMs = System.currentTimeMillis()
-        log("record_scenario", "delay(${Math.round(timeMs/100f)*100})")
-        log("record_scenario", "$methodName$end")
+        val tag = "record_scenario"
+        log("delay(${Math.round(timeMs/100f)*100})", tag)
+        log("$methodName$end", tag)
     }
 }

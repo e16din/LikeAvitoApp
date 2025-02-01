@@ -1,5 +1,7 @@
 package me.likeavitoapp.model
 
+import kotlinx.coroutines.CoroutineScope
+
 interface IAppPlatform {
     val appDataStore: IAppDataStore
 

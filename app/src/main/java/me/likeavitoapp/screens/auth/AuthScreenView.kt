@@ -41,9 +41,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import me.likeavitoapp.R
-import me.likeavitoapp.actualScope
 import me.likeavitoapp.scenariosEnabled
 
 
@@ -76,7 +74,7 @@ fun <T> StateFlow<T>.collectAsStateSavable(): State<T> {
 @ExperimentalLayoutApi
 @Composable
 fun AuthScreenView(screen: AuthScreen) {
-    val scope = actualScope()
+
     val localFocusManager = LocalFocusManager.current
 
     val email = screen.state.email.collectAsStateSavable()
@@ -153,9 +151,7 @@ fun AuthScreenView(screen: AuthScreen) {
 
             Button(
                 onClick = {
-                    scope.launch {
-                        screen.LoginUseCase()
-                    }
+                    screen.LoginUseCase()
                 },
                 modifier = Modifier.width(200.dp),
                 enabled = loginButtonEnabled.value

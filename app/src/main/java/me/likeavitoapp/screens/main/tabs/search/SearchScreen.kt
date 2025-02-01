@@ -1,7 +1,9 @@
 package me.likeavitoapp.screens.main.tabs.search
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
+import me.likeavitoapp.actualScope
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.DataSources
@@ -12,12 +14,14 @@ import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.dataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.inverse
+import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 
 
 class SearchScreen(
     val parentNavigator: ScreensNavigator,
+    val scope: CoroutineScope = actualScope,
     val sources: DataSources = dataSources(),
 ) : IScreen {
 
@@ -27,41 +31,35 @@ class SearchScreen(
     )
 
     val state = State()
-    lateinit var navigator : ScreensNavigator
+    lateinit var navigator: ScreensNavigator
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
 
 
-    private val loadAdsCalls = MutableStateFlow(Unit)
-    fun loadAds() {
-        loadAdsCalls.value = Unit
-    }
+    suspend fun loadAds() {
+        with(state) {
+            ads.loading.value = true
 
-    suspend fun listenLoadAdsCalls() {
-        loadAdsCalls.collect {
-            with(state) {
-                ads.loading.value = true
+            val result = sources.backend.adsService.getAds(
+                page = adsPage.value,
+                query = searchBar.state.query.value,
+                categoryId = searchSettingsPanel.state.selectedCategory.value?.id ?: 0,
+                range = searchSettingsPanel.state.priceRange.value,
+                regionId = searchSettingsPanel.state.selectedRegion.value?.id ?: 0
+            )
+            val newAds = result.getOrNull()
 
-                val result = sources.backend.adsService.getAds(
-                    page = adsPage.value,
-                    query = searchBar.state.query.value,
-                    categoryId = searchSettingsPanel.state.selectedCategory.value?.id ?: 0,
-                    range = searchSettingsPanel.state.priceRange.value,
-                    regionId = searchSettingsPanel.state.selectedRegion.value?.id ?: 0
-                )
-                val newAds = result.getOrNull()
+            ads.loading.value = false
 
-                ads.loading.value = false
-
-                if (result.isSuccess && newAds != null) {
-                    ads.data.value = newAds
-                } else {
-                    ads.loadingFailed.value = true
-                }
+            if (result.isSuccess && newAds != null) {
+                ads.data.value = newAds
+            } else {
+                ads.loadingFailed.value = true
             }
         }
     }
+
 
     private val loadCategoriesCalls = MutableStateFlow(Unit)
     fun loadCategories() = with(state) {
@@ -86,7 +84,7 @@ class SearchScreen(
         }
     }
 
-    fun StartScreenUseCase() = with(state) {
+    suspend fun StartScreenUseCase() = with(state) {
         recordScenarioStep()
 
         loadCategories()
@@ -96,8 +94,10 @@ class SearchScreen(
     fun CloseSearchSettingsPanelUseCase() {
         recordScenarioStep()
 
-        searchSettingsPanel.state.enabled.value = false
-        loadAds()
+        scope.launchWithHandler {
+            searchSettingsPanel.state.enabled.value = false
+            loadAds()
+        }
     }
 
     inner class SearchBar {
@@ -112,8 +112,10 @@ class SearchScreen(
         fun ClickToCategoryUseCase(category: Category) {
             recordScenarioStep()
 
-            searchSettingsPanel.state.selectedCategory.value = category
-            loadAds()
+            scope.launchWithHandler {
+                searchSettingsPanel.state.selectedCategory.value = category
+                loadAds()
+            }
         }
 
 
@@ -140,7 +142,7 @@ class SearchScreen(
                 searchTips.loading.value = true
 
                 val result = sources.backend.adsService.getSearchTips(
-                    categoryId = searchSettingsPanel.state.selectedCategory.value!!.id,
+                    categoryId = searchSettingsPanel.state.selectedCategory.value?.id ?: 0,
                     query = searchBar.state.query.value
                 )
                 searchTips.loading.value = false
@@ -204,14 +206,18 @@ class SearchScreen(
         }
 
     }
-    
+
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
         parentNavigator.startScreen(AdDetailsScreen(ad, parentNavigator))
     }
 
-    fun ScrollToEndUseCase() {
+    suspend fun ScrollToEndUseCase() {
+        if (state.ads.data.value.isEmpty()) {
+            return
+        }
+
         recordScenarioStep()
 
         state.adsPage.value += 1
@@ -221,7 +227,10 @@ class SearchScreen(
     fun ClickToFavoriteUseCase(ad: Ad) {
         recordScenarioStep()
 
-        ad.isFavorite.inverse()
+        scope.launchWithHandler {
+            ad.isFavorite.inverse()
+            sources.backend.adsService.updateFavoriteState(ad)
+        }
     }
 
     fun ClickToBuyUseCase() {
@@ -232,4 +241,5 @@ class SearchScreen(
     fun ClickToBargainingUseCase() {
 
     }
+
 }

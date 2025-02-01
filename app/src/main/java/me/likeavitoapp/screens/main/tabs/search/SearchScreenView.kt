@@ -1,20 +1,24 @@
 package me.likeavitoapp.screens.main.tabs.search
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
@@ -31,6 +35,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,9 +68,9 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SearchScreenProvider(screen: SearchScreen) {
     val nextScreen by screen.navigator.nextScreen.collectAsState()
 
-    LaunchedEffect(Unit) {
-        screen.listenLoadAdsCalls()
-    }
+//    LaunchedEffect(Unit) {
+//        screen.listenLoadAdsCalls()
+//    }
     LaunchedEffect(Unit) {
         screen.listenLoadCategoriesCalls()
     }
@@ -84,9 +89,22 @@ fun SearchScreenProvider(screen: SearchScreen) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
+    val listState = rememberLazyListState()
+    val isAtTheEndOfList by remember(listState) {
+        derivedStateOf {
+            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1
+        }
+    }
+
+    if (isAtTheEndOfList) {
+        LaunchedEffect(Unit) {
+            screen.ScrollToEndUseCase()
+        }
+    }
+
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
     }
@@ -108,7 +126,7 @@ fun SearchScreenView(screen: SearchScreen) {
     var searchBarExpanded by remember { mutableStateOf(false) }
     val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState()
     val searchSettingsSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
+        skipPartiallyExpanded = true,
     )
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
@@ -127,6 +145,7 @@ fun SearchScreenView(screen: SearchScreen) {
             Column(
             ) {
                 LazyColumn(
+                    state = listState,
                     contentPadding = PaddingValues(
                         start = 16.dp, top = 72.dp, end = 16.dp, bottom = 16.dp
                     ),
@@ -134,18 +153,32 @@ fun SearchScreenView(screen: SearchScreen) {
 
                     ) {
 
-                    item {
-                        val spacerSize = (36 + if (hasSelectedCategory()) 32 else 0).dp
-                        Spacer(
-                            modifier = Modifier
-                                .size(spacerSize)
-                        )
+                    stickyHeader {
+                        AnimatedVisibility(visible = hasSelectedCategory()) {
+                            Text(
+                                text = selectedCategory?.name ?: "",
+                                modifier = Modifier
+                                    .background(Color.Yellow)
+                                    .padding(vertical = 4.dp, horizontal = 16.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
                     }
 
-                    items(count = ads.size) { index ->
-                        val ad = ads[index]
+//                    item {
+//                        val spacerSize = (36 + if (hasSelectedCategory()) 32 else 0).dp
+//                        Spacer(
+//                            modifier = Modifier
+//                                .size(spacerSize)
+//                        )
+//                    }
+
+                    items(items = ads, key = { ad ->
+                        ad.id
+                    }) { ad ->
                         if (ad.isPremium) {
                             AdView(
+                                modifier = Modifier.animateItem(),
                                 ad = ad,
                                 onItemClick = { ad ->
                                     screen.ClickToAdUseCase(ad)
@@ -163,6 +196,7 @@ fun SearchScreenView(screen: SearchScreen) {
 
                         } else {
                             MinAdView(
+                                modifier = Modifier.animateItem(),
                                 ad = ad,
                                 onItemClick = { ad ->
                                     screen.ClickToAdUseCase(ad)
@@ -171,14 +205,6 @@ fun SearchScreenView(screen: SearchScreen) {
                                     screen.ClickToFavoriteUseCase(ad)
                                 }
                             )
-                        }
-                    }
-
-                    if (!screen.state.ads.data.value.isEmpty()) {
-                        item {
-                            LaunchedEffect(Unit) {
-                                screen.ScrollToEndUseCase()
-                            }
                         }
                     }
                 }
@@ -224,62 +250,55 @@ fun SearchScreenView(screen: SearchScreen) {
                 // onExpanded
             }
 
-            if (hasSelectedCategory()) {
-                Text(
-                    text = selectedCategory?.name ?: "",
+            AnimatedVisibility(visible = !hasSelectedCategory()) {
+                Column(
                     modifier = Modifier
-                        .background(Color.Yellow)
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                        .fillMaxWidth()
-                )
-            } else {
-                if (!hasSelectedCategory()) {
-                    Column(
-                        modifier = Modifier
-                            .background(Color.Black)
-                            .height(136.dp)
+                        .background(Color.Black)
+                        .height(136.dp)
+                ) {
+                    LazyHorizontalStaggeredGrid(
+                        modifier = Modifier.wrapContentHeight(),
+                        rows = StaggeredGridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalItemSpacing = 8.dp,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
-                        LazyHorizontalStaggeredGrid(
-                            modifier = Modifier.wrapContentHeight(),
-                            rows = StaggeredGridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalItemSpacing = 8.dp,
-                            contentPadding = PaddingValues(horizontal = 16.dp)
-                        ) {
-                            items(categories.size) { index ->
-                                Card(
-                                    modifier = Modifier
-                                        .wrapContentHeight()
-                                        .clickable {
-                                            screen.searchBar.ClickToCategoryUseCase(categories[index])
-                                        }
-                                ) {
-                                    Text(
-                                        modifier = Modifier.padding(16.dp),
-                                        text = categories[index].name
-                                    )
-                                }
+                        items(categories.size) { index ->
+                            Card(
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .clickable {
+                                        screen.searchBar.ClickToCategoryUseCase(categories[index])
+                                    }
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(16.dp),
+                                    text = categories[index].name
+                                )
                             }
                         }
                     }
-
                 }
-            }
 
-            if (searchFilterPanelEnabled) {
-                ModalBottomSheet(
-                    modifier = Modifier.fillMaxHeight(),
-                    sheetState = searchSettingsSheetState,
-                    onDismissRequest = {
-                        screen.CloseSearchSettingsPanelUseCase()
-                    }
-                ) {
-                    SearchSettingsPanelView(panel = screen.searchSettingsPanel)
-                }
             }
         }
 
+        if (searchFilterPanelEnabled) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxHeight(),
+                contentWindowInsets = { WindowInsets.ime },
+                sheetState = searchSettingsSheetState,
+                onDismissRequest = {
+                    screen.CloseSearchSettingsPanelUseCase()
+                }
+            ) {
+                SearchSettingsPanelView(
+                    panel = screen.searchSettingsPanel
+                )
+            }
+        }
     }
+
 
 //    Box(
 //        Modifier

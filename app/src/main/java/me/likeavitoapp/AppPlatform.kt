@@ -2,8 +2,6 @@ package me.likeavitoapp
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,7 +10,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -38,16 +35,9 @@ private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 }
-val defaultContext = Dispatchers.Default + Job() + exceptionHandler
-
-@Composable
-fun actualScope() = rememberCoroutineScope { defaultContext }
+val defaultContext = Job() + exceptionHandler
 
 class AppPlatform : IAppPlatform, Application() {
-
-    init {
-        initMain(this)
-    }
 
     override val appDataStore = AuthDataStore()
 

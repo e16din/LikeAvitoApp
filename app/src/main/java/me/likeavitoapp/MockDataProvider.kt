@@ -12,6 +12,8 @@ import me.likeavitoapp.model.User
 
 
 class MockDataProvider {
+    val favorites = mutableListOf<Ad>()
+
     fun dataSources(): DataSources = DataSources(
         app = AppModel().apply { user = getUser() },
         platform = AppPlatform(),

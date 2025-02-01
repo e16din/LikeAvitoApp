@@ -1,7 +1,9 @@
 package me.likeavitoapp.model
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.appBackend
+import me.likeavitoapp.appModel
 import me.likeavitoapp.appPlatform
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.auth.AuthScreen
@@ -25,22 +27,8 @@ class AppModel(
         javaClass.simpleName
     )
 
-    val nav = Navigation()
-
-    class Navigation(val roots: Roots = Roots()) {
-        class Roots {
-            fun authScreen() = AuthScreen()
-        }
-    }
-
-    // UseCases:
-
-    fun PressBack() {
-        navigator.backToPrevious()
-    }
-
     suspend fun Logout() {
-        navigator.startScreen(nav.roots.authScreen())
+        navigator.startScreen(AuthScreen())
         platform.appDataStore.clear()
     }
 }

@@ -5,6 +5,7 @@ import io.ktor.client.*
 import kotlinx.coroutines.delay
 import me.likeavitoapp.AuthFiledException
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.develop
 
 
 class AppBackend(val client: HttpClient = HttpClient()) {
@@ -74,6 +75,20 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                     "Mac Book Pro 16 2025",
                 )
             )
+        }
+
+        suspend fun updateFavoriteState(ad:Ad): Result<Boolean> {
+            if (develop) {
+                mockDataProvider.favorites.apply {
+                    if (ad.isFavorite.value) {
+                        add(ad)
+                    } else {
+                        remove(ad)
+                    }
+                }
+            }
+
+            return Result.success(true)
         }
     }
 

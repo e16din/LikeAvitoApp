@@ -42,8 +42,9 @@ fun MinAdViewPreview() {
     LikeAvitoAppTheme {
         MinAdView(
             ad = MockDataProvider().getAd(1),
-            onItemClick = {}
-        ) { }
+            onItemClick = {},
+            onFavoriteClick = {}
+        )
     }
 }
 
@@ -52,9 +53,11 @@ inline fun MinAdView(
     ad: Ad,
     crossinline onItemClick: (ad: Ad) -> Unit,
     crossinline onFavoriteClick: (ad: Ad) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val favoriteSelected by ad.isFavorite.collectAsState()
     Card(
+        modifier = modifier,
         onClick = {
             onItemClick(ad)
         }) {

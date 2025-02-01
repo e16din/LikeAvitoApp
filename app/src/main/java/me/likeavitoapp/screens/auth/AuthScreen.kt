@@ -1,7 +1,10 @@
 package me.likeavitoapp.screens.auth
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
+import me.likeavitoapp.actualScope
+import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.IScreen
@@ -11,6 +14,7 @@ import java.util.regex.Pattern
 
 
 class AuthScreen(
+    val scope: CoroutineScope = actualScope,
     val sources: DataSources = dataSources(),
 ) : IScreen {
 
@@ -69,22 +73,24 @@ class AuthScreen(
             state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
     }
 
-    suspend fun LoginUseCase() {
+    fun LoginUseCase() {
         state.loginButtonEnabled.value = false
         state.login.loading.value = true
 
-        val result = sources.backend.userService.login(state.email.value, state.password.value)
-        val loginData = result.getOrNull()
-        if (loginData?.user != null) {
-            sources.app.user = loginData.user
+        actualScope.launchWithHandler {
+            val result = sources.backend.userService.login(state.email.value, state.password.value)
+            val loginData = result.getOrNull()
+            if (loginData?.user != null) {
+                sources.app.user = loginData.user
 
-            sources.platform.appDataStore.saveId(loginData.user.id)
+                sources.platform.appDataStore.saveId(loginData.user.id)
 
-            sources.app.navigator.startScreen(nav.roots.mainScreen())
+                sources.app.navigator.startScreen(nav.roots.mainScreen())
 
-        } else {
-            state.login.loading.value = false
-            state.login.loadingFailed.value = true
+            } else {
+                state.login.loading.value = false
+                state.login.loadingFailed.value = true
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,8 +49,9 @@ fun AdViewPreview() {
             ad = MockDataProvider().getAd(1),
             onItemClick = {},
             onFavoriteClick = {},
-            onBuyClick = {}
-        ) { }
+            onBuyClick = {},
+            onBargainingClick = { }
+        )
     }
 }
 
@@ -60,28 +62,33 @@ inline fun AdView(
     crossinline onFavoriteClick: (ad: Ad) -> Unit,
     crossinline onBuyClick: (ad: Ad) -> Unit,
     crossinline onBargainingClick: (ad: Ad) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val favoriteSelected by ad.isFavorite.collectAsState()
     Card(
+        modifier = modifier,
         onClick = {
             onItemClick(ad)
         }) {
 
         Column {
             Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 text = ad.title,
                 fontSize = 21.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.Companion
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Companion.Ellipsis
             )
-            Box {
+            Box(modifier = Modifier
+                .fillMaxWidth()) {
                 AsyncImage(
                     model = ad.photoUrls.first(),
+                    alignment = Alignment.Center,
                     contentDescription = null,
+                    contentScale = ContentScale.Fit,
                     error = painterResource(R.drawable.placeholder)
                 )
 

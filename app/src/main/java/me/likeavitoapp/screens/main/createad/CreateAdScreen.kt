@@ -32,24 +32,7 @@ class CreateAdScreen(
     }
 
     class State {
-        var ad by mutableStateOf(
-            Loadable(
-                Ad(
-                    id = TODO(),
-                    title = TODO(),
-                    description = TODO(),
-                    photoUrls = TODO(),
-                    contacts = TODO(),
-                    price = TODO(),
-                    isBargainingEnabled = true,
-                    isPremium = TODO(),
-                    isFavorite = TODO(),
-                    category = TODO(),
-                    address = TODO(),
-                    owner = TODO()
-                )
-            )
-        )
+        var adCreated by mutableStateOf(Loadable(false))
         var exitDialog by mutableStateOf(false)
     }
 
