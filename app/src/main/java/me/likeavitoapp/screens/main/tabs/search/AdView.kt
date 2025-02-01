@@ -95,16 +95,15 @@ inline fun AdView(
                         onFavoriteClick(ad)
                     }
                 ) {
-                    val size = 32.dp
-                    if (favoriteSelected) {
-                        Icon(Icons.Default.Favorite, "favorite_selected", Modifier.size(size))
-                    } else {
-                        Icon(
+                    Icon(
+                        imageVector = if (favoriteSelected)
+                            Icons.Default.Favorite
+                        else
                             Icons.Default.FavoriteBorder,
-                            "favorite_unselected",
-                            Modifier.size(size)
-                        )
-                    }
+                        contentDescription = "favorite",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Red
+                    )
                 }
             }
 

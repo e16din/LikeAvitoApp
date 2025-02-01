@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.main.tabs.profile
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
 
 
@@ -15,7 +16,7 @@ class ProfileScreen(
         var onBackClick: () -> Unit = {}
     }
 
-    class State(val user: User) {
+    class State(val user: User)
 
-    }
+    lateinit var navigator : ScreensNavigator
 }

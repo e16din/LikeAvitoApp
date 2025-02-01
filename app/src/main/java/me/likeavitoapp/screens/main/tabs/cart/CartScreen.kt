@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.dataSources
 
 
@@ -22,7 +23,6 @@ class CartScreen(
         Archived
     }
 
-    class Navigation
     class State {
         var navHistory = mutableListOf<Tabs>()
         var selectedTab by mutableStateOf(Tabs.New)
@@ -39,4 +39,5 @@ class CartScreen(
         state.navHistory.add(tab)
     }
 
+    lateinit var navigator : ScreensNavigator
 }

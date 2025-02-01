@@ -3,6 +3,7 @@ package me.likeavitoapp.model
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.appBackend
 import me.likeavitoapp.appPlatform
+import me.likeavitoapp.log
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
@@ -20,7 +21,8 @@ class AppModel(
                 platform = platform,
                 backend = backend
             )
-        )
+        ),
+        javaClass.simpleName
     )
 
     val nav = Navigation()
@@ -44,18 +46,22 @@ class AppModel(
 }
 
 class StubScreen() : IScreen
-class ScreensNavigator(initialScreen: IScreen = StubScreen()) {
+class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag:String = "") {
     val screens = mutableListOf(initialScreen)
     val nextScreen = MutableStateFlow(initialScreen)
 
     fun startScreen(screen: IScreen) {
-        screens.add(screen)
-        nextScreen.value = screen
+        if(screens.last().javaClass.simpleName != screen.javaClass.simpleName) {
+            log("$tag.startScreen: ${screen.javaClass.simpleName}")
+            screens.add(screen)
+            nextScreen.value = screen
+        }
     }
 
     fun backToPrevious() {
         screens.removeAt(screens.lastIndex)
         nextScreen.value = screens.last()
+        log("$tag.backToPrevious: ${nextScreen.value.javaClass.simpleName}")
     }
 }
 

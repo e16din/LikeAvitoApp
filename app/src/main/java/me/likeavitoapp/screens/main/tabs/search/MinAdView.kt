@@ -87,23 +87,23 @@ inline fun MinAdView(
                         onFavoriteClick(ad)
                     }
                 ) {
-                    val size = 32.dp
-                    if (favoriteSelected) {
-                        Icon(Icons.Default.Favorite, "favorite_selected", Modifier.size(size))
-                    } else {
-                        Icon(
+                    Icon(
+                        imageVector = if (favoriteSelected)
+                            Icons.Default.Favorite
+                        else
                             Icons.Default.FavoriteBorder,
-                            "favorite_unselected",
-                            Modifier.size(size)
-                        )
-                    }
+                        contentDescription = "favorite",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Red
+                    )
                 }
-                Box(modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray)
-                    .align(Alignment.BottomEnd)
-                    ) {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray)
+                        .align(Alignment.BottomEnd)
+                ) {
                     Text(
                         text = "${ad.price.toInt()}₽",
                         fontSize = 16.sp,

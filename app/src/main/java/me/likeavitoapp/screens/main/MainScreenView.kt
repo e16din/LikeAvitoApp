@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
@@ -51,11 +53,17 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
+    val mainTabScreen = remember { screen.mainTabScreen }
     val nextScreen = screen.navigator.nextScreen.collectAsState()
-    MainScreenView(
-        screen = screen,
-        tabScreen = nextScreen.value
-    )
+    val tabScreen = screen.tabsNavigator.nextScreen.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        MainScreenView(screen, mainTabScreen, tabScreen.value)
+
+        when (nextScreen.value) {
+            is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
+        }
+    }
 
     BackHandler {
         screen.PressBack()
@@ -63,15 +71,15 @@ fun MainScreenProvider(screen: MainScreen) {
 }
 
 @Composable
-fun MainScreenView(screen: MainScreen, tabScreen: IScreen) {
+fun MainScreenView(screen: MainScreen, mainTabScreen: IScreen, tabScreen: IScreen) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Content:
         Box(modifier = Modifier.weight(1f)) {
-            when (tabScreen) {
-                is SearchScreen -> SearchScreenProvider(tabScreen)
-                is FavoritesScreen -> FavoritesScreenProvider(tabScreen)
-                is ProfileScreen -> ProfileScreenProvider(tabScreen)
-                is CartScreen -> CartScreenProvider(tabScreen)
+            when (mainTabScreen) {
+                is SearchScreen -> SearchScreenProvider(mainTabScreen)
+                is FavoritesScreen -> FavoritesScreenProvider(mainTabScreen)
+                is ProfileScreen -> ProfileScreenProvider(mainTabScreen)
+                is CartScreen -> CartScreenProvider(mainTabScreen)
             }
         }
 
@@ -200,11 +208,13 @@ fun MainScreenView(screen: MainScreen, tabScreen: IScreen) {
 @Composable
 fun MainScreenPreview() {
     LikeAvitoAppTheme {
+        val searchScreen = SearchScreen(ScreensNavigator())
         MainScreenView(
             screen = MainScreen(
                 sources = MockDataProvider().dataSources()
             ),
-            tabScreen = SearchScreen()
+            mainTabScreen = searchScreen,
+            tabScreen = searchScreen
         )
     }
 }

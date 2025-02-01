@@ -1,14 +1,18 @@
 package me.likeavitoapp.screens.main.tabs.favorites
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.dataSources
 
 
 class FavoritesScreen(
-    val input: Input = Input(),
-    val state: State = State(),
+    val parentNavigator: ScreensNavigator,
+    val sources: DataSources = dataSources()
 ) : IScreen {
 
-    class Input {}
     class State {}
+
+    val state: State = State()
+    lateinit var navigator : ScreensNavigator
 }

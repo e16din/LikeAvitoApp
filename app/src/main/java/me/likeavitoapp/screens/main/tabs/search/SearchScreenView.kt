@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -48,13 +49,19 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
-import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
-import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
 fun SearchScreenProvider(screen: SearchScreen) {
+    val nextScreen by screen.navigator.nextScreen.collectAsState()
 
     LaunchedEffect(Unit) {
         screen.listenLoadAdsCalls()
@@ -65,12 +72,16 @@ fun SearchScreenProvider(screen: SearchScreen) {
     LaunchedEffect(Unit) {
         screen.searchBar.listenChangeSearchQueryCalls()
     }
-    SearchScreenView(screen)
+    Box {
+        SearchScreenView(screen)
 
-    val nextScreen = screen.navigator.nextScreen.collectAsState()
-    when(nextScreen.value){
-        is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
+        when (nextScreen) {
+            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
+            is ProfileScreen -> ProfileScreenProvider(nextScreen as ProfileScreen)
+            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
+        }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,10 +113,14 @@ fun SearchScreenView(screen: SearchScreen) {
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 
-    Box {
+    Box(
+        Modifier
+            .background(colorScheme.background)
+            .systemBarsPadding()
+    ) {
         Box(
             modifier = Modifier
-                .background(Color.Black)
+
                 .nestedScroll(connection)
         ) {
 
@@ -124,8 +139,6 @@ fun SearchScreenView(screen: SearchScreen) {
                         Spacer(
                             modifier = Modifier
                                 .size(spacerSize)
-                                .systemBarsPadding()
-                                .background(Color.Black)
                         )
                     }
 
@@ -137,8 +150,8 @@ fun SearchScreenView(screen: SearchScreen) {
                                 onItemClick = { ad ->
                                     screen.ClickToAdUseCase(ad)
                                 },
-                                onFavoriteClick = {
-                                    screen.ClickToFavoriteUseCase()
+                                onFavoriteClick = { ad ->
+                                    screen.ClickToFavoriteUseCase(ad)
                                 },
                                 onBuyClick = {
                                     screen.ClickToBuyUseCase()
@@ -154,8 +167,8 @@ fun SearchScreenView(screen: SearchScreen) {
                                 onItemClick = { ad ->
                                     screen.ClickToAdUseCase(ad)
                                 },
-                                onFavoriteClick = {
-                                    screen.ClickToFavoriteUseCase()
+                                onFavoriteClick = { ad ->
+                                    screen.ClickToFavoriteUseCase(ad)
                                 }
                             )
                         }
@@ -174,7 +187,6 @@ fun SearchScreenView(screen: SearchScreen) {
 
         Column(
             modifier = Modifier
-                .systemBarsPadding()
         ) {
             SearchBar(
                 inputField = {
@@ -348,7 +360,9 @@ class CollapsingAppBarNestedScrollConnection(
 fun SearchScreenPreview() {
     LikeAvitoAppTheme {
         SearchScreenView(
-            SearchScreen()
+            SearchScreen(
+                parentNavigator = ScreensNavigator()
+            )
         )
     }
 }

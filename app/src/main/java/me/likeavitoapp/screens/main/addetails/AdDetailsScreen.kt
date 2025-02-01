@@ -21,7 +21,7 @@ class AdDetailsScreen(
 ) : IScreen {
 
     val state: State = State(ad)
-    val nav = Navigation(this)
+
 
     private val buyCalls = MutableStateFlow(Unit)
 
@@ -34,7 +34,9 @@ class AdDetailsScreen(
             val isReserved = result.getOrNull()
             if (isReserved == true) {
                 state.reserve.data.value = isReserved
-                sources.app.navigator.startScreen(nav.stack.orderScreen())
+                sources.app.navigator.startScreen(
+                    CreateOrderScreen(ad = state.ad)
+                )
             } else {
                 state.reserve.loadingFailed.value = true
             }
@@ -46,13 +48,6 @@ class AdDetailsScreen(
         val messages: MutableStateFlow<List<IMessage>> = MutableStateFlow(emptyList()),
         val reserve: Loadable<Boolean> = Loadable(false)
     )
-
-    class Navigation(val screen: AdDetailsScreen, val stack: Stack = Stack(screen)) {
-        class Stack(val screen: AdDetailsScreen) {
-            fun orderScreen() = CreateOrderScreen(ad = screen.state.ad)
-            fun chatScreen() = ChatScreen(ad = screen.state.ad)
-        }
-    }
 
     fun ClickToFavoriteUseCase() {
         recordScenarioStep()
@@ -69,7 +64,9 @@ class AdDetailsScreen(
     fun ClickToBargaining() {
         recordScenarioStep()
 
-        sources.app.navigator.startScreen(nav.stack.chatScreen())
+        sources.app.navigator.startScreen(
+            ChatScreen(ad = state.ad)
+        )
     }
 
     fun PressBack() {

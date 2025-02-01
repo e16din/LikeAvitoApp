@@ -18,7 +18,7 @@ fun initMain(platform: IAppPlatform) {
     appModel = AppModel()
 }
 
-fun println(key: String = "debug", text: String) {
+fun log(text: String, key: String = "debug") {
     if (develop) {
         Log.d(key, text)
     }
@@ -41,7 +41,7 @@ fun recordScenarioStep(value: Any? = Unit) {
 
         val timeMs = System.currentTimeMillis() - lastCallMs
         lastCallMs = System.currentTimeMillis()
-        println("record_scenario", "delay(${Math.round(timeMs/100f)*100})")
-        println("record_scenario", "$methodName$end")
+        log("record_scenario", "delay(${Math.round(timeMs/100f)*100})")
+        log("record_scenario", "$methodName$end")
     }
 }

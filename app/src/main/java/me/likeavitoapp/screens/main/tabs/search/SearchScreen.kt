@@ -17,10 +17,9 @@ import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 
 
 class SearchScreen(
+    val parentNavigator: ScreensNavigator,
     val sources: DataSources = dataSources(),
 ) : IScreen {
-
-    val navigator = ScreensNavigator()
 
     class State(
         val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
@@ -28,6 +27,7 @@ class SearchScreen(
     )
 
     val state = State()
+    lateinit var navigator : ScreensNavigator
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
@@ -208,7 +208,7 @@ class SearchScreen(
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
-        navigator.startScreen(AdDetailsScreen(ad, navigator))
+        parentNavigator.startScreen(AdDetailsScreen(ad, parentNavigator))
     }
 
     fun ScrollToEndUseCase() {
@@ -218,8 +218,10 @@ class SearchScreen(
         loadAds()
     }
 
-    fun ClickToFavoriteUseCase() {
+    fun ClickToFavoriteUseCase(ad: Ad) {
         recordScenarioStep()
+
+        ad.isFavorite.inverse()
     }
 
     fun ClickToBuyUseCase() {

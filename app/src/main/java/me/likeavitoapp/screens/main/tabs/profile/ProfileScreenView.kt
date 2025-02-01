@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.main.tabs.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,10 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -22,17 +28,37 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
 import me.likeavitoapp.model.User
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenView
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun ProfileScreenProvider(tabScreen: ProfileScreen) {
+fun ProfileScreenProvider(screen: ProfileScreen) {
+    val nextScreen by screen.navigator.nextScreen.collectAsState()
 
+    Box {
+        ProfileScreenView(screen)
+
+        when (nextScreen) {
+            is SearchScreen -> SearchScreenProvider(nextScreen as SearchScreen)
+            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
+            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
+        }
+    }
 }
 
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier
+        .background(colorScheme.background)
+        .fillMaxSize()
+        .systemBarsPadding()) {
         Row {
             // Edit Button
         }

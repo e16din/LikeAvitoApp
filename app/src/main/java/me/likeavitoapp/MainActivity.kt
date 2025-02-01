@@ -34,10 +34,10 @@ class MainActivity : ComponentActivity() {
 fun Root() {
     val screen = appModel.navigator.nextScreen.collectAsState()
 
+    log("Root: "+ screen.value.javaClass.simpleName)
     when (screen.value){
         is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
         is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)
         is MainScreen -> MainScreenProvider(screen.value as MainScreen)
-        is AdDetailsScreen -> AdDetailsScreenProvider(screen.value as AdDetailsScreen)
     }
 }

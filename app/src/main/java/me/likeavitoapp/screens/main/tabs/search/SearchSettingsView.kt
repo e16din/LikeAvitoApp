@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -165,7 +166,9 @@ inline fun PreferenceCustomItem(
 fun SearchSettingsViewPreview() {
     LikeAvitoAppTheme {
         SearchSettingsPanelView(
-            panel = SearchScreen().searchSettingsPanel
+            panel = SearchScreen(
+                parentNavigator = ScreensNavigator()
+            ).searchSettingsPanel
         )
     }
 }
