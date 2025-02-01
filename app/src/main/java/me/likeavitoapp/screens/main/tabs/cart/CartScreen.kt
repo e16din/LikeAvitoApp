@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.cart
+package me.likeavitoapp.screens.main.tabs.cart
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,8 +12,6 @@ import me.likeavitoapp.model.dataSources
 
 class CartScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: IScreen? = null,
-    override var innerScreen: MutableStateFlow<IScreen>? = null,
 ) : IScreen {
 
     val state = State()

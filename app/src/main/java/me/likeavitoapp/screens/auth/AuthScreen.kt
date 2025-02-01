@@ -12,8 +12,6 @@ import java.util.regex.Pattern
 
 class AuthScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: IScreen? = null,
-    override var innerScreen: MutableStateFlow<IScreen>? = null
 ) : IScreen {
 
     val state = State()
@@ -82,7 +80,7 @@ class AuthScreen(
 
             sources.platform.appDataStore.saveId(loginData.user.id)
 
-            sources.app.currentScreen.value = nav.roots.mainScreen()
+            sources.app.navigator.startScreen(nav.roots.mainScreen())
 
         } else {
             state.login.loading.value = false

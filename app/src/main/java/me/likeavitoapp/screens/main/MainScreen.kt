@@ -1,26 +1,26 @@
 package me.likeavitoapp.screens.main
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
 import me.likeavitoapp.model.dataSources
-import me.likeavitoapp.screens.main.cart.CartScreen
+import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
-import me.likeavitoapp.screens.main.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.profile.ProfileScreen
-import me.likeavitoapp.screens.main.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
 class MainScreen(
     val sources: DataSources = dataSources(),
-    override var prevScreen: IScreen? = null,
-    override var innerScreen: MutableStateFlow<IScreen>? = null,
 ) : IScreen {
 
     val state = State()
     val nav = Navigation()
 
+    val navigator = ScreensNavigator(nav.pages.searchScreen())
 
     class State {}
 
@@ -39,10 +39,7 @@ class MainScreen(
         }
 
         class Stack {
-            fun createAdScreen(prevScreen: IScreen) = CreateAdScreen(
-                prevScreen = prevScreen,
-                innerScreen = null
-            )
+            fun createAdScreen() = CreateAdScreen()
         }
     }
 
@@ -53,33 +50,41 @@ class MainScreen(
     val profileScreen = nav.pages.profileScreen(sources.app.user!!)
     val cartScreen = nav.pages.cartScreen()
 
-    fun StartScreenUseCase() {
-        innerScreen = MutableStateFlow(searchScreen)
-    }
-
-    private fun onClickTo(screen: IScreen) {
-        innerScreen?.value = screen.apply {
-            prevScreen = innerScreen?.value?.prevScreen
-        }
-    }
 
     fun ClickToSearchUseCase() {
-        onClickTo(searchScreen)
+        navigator.startScreen(searchScreen)
     }
 
     fun ClickToFavoritesUseCase() {
-        onClickTo(favoritesScreen)
+        navigator.startScreen(favoritesScreen)
     }
 
     fun ClickToCreateAdUseCase() {
-        innerScreen?.value = nav.stack.createAdScreen(this)
+        sources.app.navigator.startScreen(nav.stack.createAdScreen())
     }
 
     fun ClickToCartUseCase() {
-        onClickTo(cartScreen)
+        navigator.startScreen(cartScreen)
     }
 
     fun ClickToProfileUseCase() {
-        onClickTo(profileScreen)
+        navigator.startScreen(profileScreen)
+    }
+
+    fun PressBack() {
+        recordScenarioStep()
+
+        with(navigator) {
+            if (screens.size > 1) {
+                val last = screens.last()
+                if (last is SearchScreen) {
+                    screens.clear()
+                    screens.add(last)
+
+                } else {
+                    backToPrevious()
+                }
+            }
+        }
     }
 }

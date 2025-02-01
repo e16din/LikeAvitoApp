@@ -7,6 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+
+fun MutableStateFlow<Boolean>.inverse() {
+    this.value = !this.value
+}
 
 @Composable
 fun Launcher(

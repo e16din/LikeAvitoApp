@@ -19,4 +19,13 @@
     <string name="cart_tab">Корзина</string>
     <string name="search_hint">Искать</string>
     <string name="bargaining_button">Торговаться</string>
+    <string name="all_categories">Все категории</string>
+    <string name="all_regions">Все регионы</string>
+    <string name="category_title">Категория</string>
+    <string name="region_title">Регион</string>
+    <string name="price_title">Цена</string>
+    <string name="from">От</string>
+    <string name="to">До</string>
+    <string name="hint_max">Максимум</string>
+    <string name="search_settings_title">Настройки поиска</string>
 </resources>

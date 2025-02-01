@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.cart
+package me.likeavitoapp.screens.main.tabs.cart
 
 import androidx.compose.runtime.Composable
 

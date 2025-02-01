@@ -54,7 +54,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             )
         }
 
-         suspend fun getAds(categoryId: Int, page: Int, query: String): Result<List<Ad>> {
+         suspend fun getAds(range: PriceRange, regionId:Int, categoryId: Int,  query: String, page: Int,): Result<List<Ad>> {
             return Result.success(
                 mockDataProvider.getAds(categoryId, page, query)
             )
@@ -80,7 +80,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class CartService {
          suspend fun reserve(adId: Long): Result<Boolean> {
-            TODO("Not yet implemented")
+            return mockDataProvider.getSuccessOrFail(adId != 2L)
         }
 
          suspend fun order(

@@ -1,5 +1,7 @@
 package me.likeavitoapp.model
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.appBackend
 import me.likeavitoapp.appModel
@@ -25,6 +27,15 @@ class Loadable<T>(initial: T) {
     var loadingFailed = MutableStateFlow(false)
 }
 
+@Composable
+fun rememberDataSources() = remember {
+    DataSources(
+        app = appModel,
+        platform = appPlatform,
+        backend = appBackend,
+    )
+}
+
 fun dataSources() = DataSources(
     app = appModel,
     platform = appPlatform,
@@ -35,5 +46,5 @@ inline fun <reified T : IScreen> dataSourcesWithScreen() = DataSourcesWithScreen
     app = appModel,
     platform = appPlatform,
     backend = appBackend,
-    screen = appModel.currentScreen.value as T
+    screen = appModel.navigator.nextScreen.value as T
 )

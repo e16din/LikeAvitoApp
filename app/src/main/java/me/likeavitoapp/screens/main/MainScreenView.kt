@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,37 +34,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.likeavitoapp.Launcher
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.dataSources
-import me.likeavitoapp.screens.main.cart.CartScreen
-import me.likeavitoapp.screens.main.cart.CartScreenProvider
-import me.likeavitoapp.screens.main.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.profile.ProfileScreen
-import me.likeavitoapp.screens.main.profile.ProfileScreenProvider
-import me.likeavitoapp.screens.main.search.SearchScreen
-import me.likeavitoapp.screens.main.search.SearchScreenProvider
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
-    val sources = remember { dataSources() }
-
-    Launcher(launchOnce = {
-        screen.StartScreenUseCase()
-    }) {
-        val tabScreen = screen.innerScreen?.collectAsState()
-        MainScreenView(
-            screen = screen,
-            tabScreen = tabScreen!!.value
-        )
-    }
+    val nextScreen = screen.navigator.nextScreen.collectAsState()
+    MainScreenView(
+        screen = screen,
+        tabScreen = nextScreen.value
+    )
 
     BackHandler {
-        sources.app.PressBack(screen)
+        screen.PressBack()
     }
 }
 
@@ -132,9 +125,11 @@ fun MainScreenView(screen: MainScreen, tabScreen: IScreen) {
                 }
 
                 // CreateAd Stub
-                Spacer(modifier = Modifier
-                    .weight(1f)
-                    .height(72.dp))
+                Spacer(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(72.dp)
+                )
 
                 // Cart
                 Column(
@@ -209,7 +204,7 @@ fun MainScreenPreview() {
             screen = MainScreen(
                 sources = MockDataProvider().dataSources()
             ),
-            tabScreen = SearchScreen(prevScreen = null, innerScreen = null)
+            tabScreen = SearchScreen()
         )
     }
 }

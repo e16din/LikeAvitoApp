@@ -13,7 +13,7 @@ class AppModel(
 ) {
     var user: User? = null
 
-    var currentScreen = MutableStateFlow<IScreen>(
+    val navigator = ScreensNavigator(
         SplashScreen(
             sources = DataSources(
                 app = this,
@@ -33,22 +33,33 @@ class AppModel(
 
     // UseCases:
 
-    fun PressBack(screen: IScreen) {
-        screen.prevScreen?.let {
-            currentScreen.value = it
-        }
+    fun PressBack() {
+        navigator.backToPrevious()
     }
 
     suspend fun Logout() {
-        currentScreen.value = nav.roots.authScreen()
+        navigator.startScreen(nav.roots.authScreen())
         platform.appDataStore.clear()
     }
 }
 
-interface IScreen {
-    var prevScreen: IScreen?
-    var innerScreen: MutableStateFlow<IScreen>?
+class StubScreen() : IScreen
+class ScreensNavigator(initialScreen: IScreen = StubScreen()) {
+    val screens = mutableListOf(initialScreen)
+    val nextScreen = MutableStateFlow(initialScreen)
+
+    fun startScreen(screen: IScreen) {
+        screens.add(screen)
+        nextScreen.value = screen
+    }
+
+    fun backToPrevious() {
+        screens.removeAt(screens.lastIndex)
+        nextScreen.value = screens.last()
+    }
 }
+
+interface IScreen
 
 data class User(
     val id: Long,
@@ -74,9 +85,9 @@ data class Ad(
     val photoUrls: List<String>,
     val contacts: Contacts,
     val price: Int,
-    val bargaining: Boolean,
+    val isBargainingEnabled: Boolean,
     val isPremium: Boolean,
-    val isFavorite: Boolean,
+    val isFavorite: MutableStateFlow<Boolean>,
     val category: Category,
     val address: Address,
     val owner: Owner
@@ -89,16 +100,10 @@ data class Ad(
     )
 }
 
-data class SearchSettings(
-    val categories: Loadable<List<Category>>,
-    var selectedCategory: MutableStateFlow<Category?>,
-    var query: MutableStateFlow<String>,
-    var region: MutableStateFlow<Region>,
-    var priceRange: MutableStateFlow<PriceRange>
-) {
-    data class Region(val name: String, val id: Int)
-    data class PriceRange(val from: Int = 0, val to: Int = Int.MAX_VALUE)
-}
+
+data class Region(val name: String, val id: Int)
+data class PriceRange(var from: Int = 0, var to: Int = -1)
+
 
 data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
     enum class State {
@@ -118,3 +123,22 @@ data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
         Boxberry,
     }
 }
+
+interface IMessage {
+    val dateMs: Long
+    val isNew: Boolean
+}
+
+data class TextMessage(
+    val text: String,
+    override val dateMs: Long,
+    override val isNew: Boolean = true
+) : IMessage
+
+data class OfferMessage(
+    val newPrice: Int,
+    val isConsentReceived: Boolean,
+    override val dateMs: Long,
+    override val isNew: Boolean = true
+) : IMessage
+

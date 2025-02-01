@@ -1,18 +1,20 @@
 package me.likeavitoapp
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.AppBackend
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.SearchSettings
+import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.User
+
 
 class MockDataProvider {
     fun dataSources(): DataSources = DataSources(
         app = AppModel().apply { user = getUser() },
-        platform = App(),
+        platform = AppPlatform(),
         backend = AppBackend()
     )
 
@@ -88,7 +90,7 @@ class MockDataProvider {
                 email = "any@gmail.com"
             ),
             price = 100000,
-            bargaining = true,
+            isBargainingEnabled = true,
             isPremium = true,
             category = Category("Ноутбуки", 1),
             address = Ad.Address(
@@ -99,17 +101,24 @@ class MockDataProvider {
                 name = "Петр Петрович",
                 contacts = Contacts(phone = "8950XXXXX07")
             ),
-            isFavorite = false
+            isFavorite = MutableStateFlow(false)
         )
     }
 
-    fun getRegions(): List<SearchSettings.Region> {
+    fun getRegions(): List<Region> {
         return listOf(
-            SearchSettings.Region("Москва", 1),
-            SearchSettings.Region("Санкт-Петербург", 2),
-            SearchSettings.Region("Ростов-на-Дону", 3),
-            SearchSettings.Region("Екатеринбург", 4),
-            SearchSettings.Region("Омск", 5),
+            Region("Москва", 1),
+            Region("Санкт-Петербург", 2),
+            Region("Ростов-на-Дону", 3),
+            Region("Екатеринбург", 4),
+            Region("Омск", 5),
         )
+    }
+
+    fun getSuccessOrFail(success: Boolean): Result<Boolean> {
+        return if (success)
+            Result.success(true)
+        else
+            Result.failure(Exception("Request failed"))
     }
 }

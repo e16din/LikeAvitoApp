@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.favorites
+package me.likeavitoapp.screens.main.tabs.favorites
 
 import androidx.compose.runtime.Composable
 

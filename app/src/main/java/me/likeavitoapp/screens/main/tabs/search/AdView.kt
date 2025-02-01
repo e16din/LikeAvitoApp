@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.search
+package me.likeavitoapp.screens.main.tabs.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +61,7 @@ inline fun AdView(
     crossinline onBuyClick: (ad: Ad) -> Unit,
     crossinline onBargainingClick: (ad: Ad) -> Unit,
 ) {
-    var favoriteSelected by remember(ad) { mutableStateOf(ad.isFavorite) }
+    val favoriteSelected by ad.isFavorite.collectAsState()
     Card(
         onClick = {
             onItemClick(ad)
@@ -91,7 +92,6 @@ inline fun AdView(
                         .clip(CircleShape)
                         .background(Color.Transparent),
                     onClick = {
-                        favoriteSelected = !favoriteSelected
                         onFavoriteClick(ad)
                     }
                 ) {
@@ -132,7 +132,7 @@ inline fun AdView(
 
                 Spacer(Modifier.weight(1f))
 
-                if (ad.bargaining) {
+                if (ad.isBargainingEnabled) {
                     Button(
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 8.dp),

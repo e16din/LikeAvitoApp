@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.profile
+package me.likeavitoapp.screens.main.tabs.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,8 +102,7 @@ fun ProfileScreenPreview() {
                 contacts = Contacts(telegram = "@alex_ku_san"),
                 ownAds = emptyList(),
                 photoUrl = ""
-            ),
-            prevScreen = null
+            )
         ))
     }
 }

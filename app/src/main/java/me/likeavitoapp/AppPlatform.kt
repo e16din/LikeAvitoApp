@@ -28,7 +28,7 @@ private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
     println("Error!")
     println(throwable.message)
     if (throwable is AuthFiledException) {
-        if (appModel.currentScreen.value !is AuthScreen) {
+        if (appModel.navigator.nextScreen.value !is AuthScreen) {
             GlobalScope.launch {
                 appModel.Logout()
             }
@@ -43,10 +43,10 @@ val defaultContext = Dispatchers.Default + Job() + exceptionHandler
 @Composable
 fun actualScope() = rememberCoroutineScope { defaultContext }
 
-class App : IAppPlatform, Application() {
+class AppPlatform : IAppPlatform, Application() {
 
     init {
-        appPlatform = this
+        initMain(this)
     }
 
     override val appDataStore = AuthDataStore()

@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.profile
+package me.likeavitoapp.screens.main.tabs.profile
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.IScreen
@@ -9,8 +9,6 @@ class ProfileScreen(
     user: User,
     val input: Input = Input(),
     val state: State = State(user),
-    override var prevScreen: IScreen? = null,
-    override var innerScreen: MutableStateFlow<IScreen>? = null,
 ) : IScreen {
     class Input {
         var onEditProfileClick: () -> Unit = {}

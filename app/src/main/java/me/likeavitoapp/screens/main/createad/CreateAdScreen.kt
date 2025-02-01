@@ -13,8 +13,6 @@ import me.likeavitoapp.model.IScreen
 class CreateAdScreen(
     val input: Input = Input(),
     val state: State = State(),
-    override var prevScreen: IScreen?,
-    override var innerScreen: MutableStateFlow<IScreen>?,
     ) : IScreen {
 
     class Input {
@@ -43,7 +41,7 @@ class CreateAdScreen(
                     photoUrls = TODO(),
                     contacts = TODO(),
                     price = TODO(),
-                    bargaining = true,
+                    isBargainingEnabled = true,
                     isPremium = TODO(),
                     isFavorite = TODO(),
                     category = TODO(),

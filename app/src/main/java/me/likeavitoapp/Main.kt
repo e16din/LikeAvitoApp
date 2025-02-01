@@ -8,9 +8,15 @@ import me.likeavitoapp.model.IAppPlatform
 val develop = true
 val scenariosEnabled = false
 
-val appModel = AppModel()
-val appBackend = AppBackend()
+lateinit var appModel: AppModel
+lateinit var appBackend: AppBackend
 lateinit var appPlatform: IAppPlatform
+
+fun initMain(platform: IAppPlatform) {
+    appPlatform = platform
+    appBackend = AppBackend()
+    appModel = AppModel()
+}
 
 fun println(key: String = "debug", text: String) {
     if (develop) {
