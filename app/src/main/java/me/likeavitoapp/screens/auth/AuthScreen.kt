@@ -3,23 +3,22 @@ package me.likeavitoapp.screens.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
-import me.likeavitoapp.actualScope
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.dataSources
+import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.provideCoroutineScope
+import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.screens.main.MainScreen
 import java.util.regex.Pattern
 
 
 class AuthScreen(
-    val scope: CoroutineScope = actualScope,
-    val sources: DataSources = dataSources(),
+    val parentNavigator: ScreensNavigator,
+    val scope: CoroutineScope = provideCoroutineScope(),
+    val sources: DataSources = provideDataSources()
 ) : IScreen {
-
-    val state = State()
-    val nav = Navigation()
 
     class State {
         val email = MutableStateFlow("")
@@ -31,15 +30,11 @@ class AuthScreen(
         val login = Loadable(emptyList<Unit>())
     }
 
-    class Navigation(val roots: Roots = Roots()) {
-        class Roots {
-            fun mainScreen() = MainScreen()
-        }
-    }
+    val state = State()
 
-
-    suspend fun ListenChangeEmailUseCase() {
-        state.email.debounce(390).collect { lastEmail ->
+    init {
+        scope.launchWithHandler {
+            state.email.debounce(390).collect { lastEmail ->
                 var isEmailValid = false
                 if (lastEmail.isNotBlank()) {
                     fun checkEmail(email: String): Boolean {
@@ -61,7 +56,9 @@ class AuthScreen(
                 state.loginButtonEnabled.value =
                     lastEmail.isNotBlank() && state.password.value.isNotBlank() && isEmailValid
             }
+        }
     }
+
     fun ChangeEmailUseCase(newEmail: String) {
         state.email.value = newEmail
     }
@@ -77,7 +74,7 @@ class AuthScreen(
         state.loginButtonEnabled.value = false
         state.login.loading.value = true
 
-        actualScope.launchWithHandler {
+        scope.launchWithHandler {
             val result = sources.backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
@@ -85,7 +82,7 @@ class AuthScreen(
 
                 sources.platform.appDataStore.saveId(loginData.user.id)
 
-                sources.app.navigator.startScreen(nav.roots.mainScreen())
+                parentNavigator.startScreen(MainScreen())
 
             } else {
                 state.login.loading.value = false

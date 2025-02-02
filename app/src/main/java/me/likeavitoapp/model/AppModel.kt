@@ -1,55 +1,51 @@
 package me.likeavitoapp.model
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.appBackend
-import me.likeavitoapp.appModel
-import me.likeavitoapp.appPlatform
 import me.likeavitoapp.log
+import me.likeavitoapp.screens.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
-import me.likeavitoapp.screens.splash.SplashScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import kotlin.reflect.KClass
 
 
-class AppModel(
-    val backend: AppBackend = appBackend,
-    val platform: IAppPlatform = appPlatform
-) {
+class AppModel {
+
     var user: User? = null
 
-    val navigator = ScreensNavigator(
-        SplashScreen(
-            sources = DataSources(
-                app = this,
-                platform = platform,
-                backend = backend
-            )
-        ),
-        javaClass.simpleName
-    )
+    lateinit var rootScreen: RootScreen
 
-    suspend fun Logout() {
-        navigator.startScreen(AuthScreen())
-        platform.appDataStore.clear()
+    fun onLogoutException() {
+        if (rootScreen.navigator.screen.value !is AuthScreen) {
+            rootScreen.LogoutUseCase()
+        }
     }
 }
 
 class StubScreen() : IScreen
-class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag:String = "") {
-    val screens = mutableListOf(initialScreen)
-    val nextScreen = MutableStateFlow(initialScreen)
 
-    fun startScreen(screen: IScreen) {
-        if(screens.last().javaClass.simpleName != screen.javaClass.simpleName) {
-            log("$tag.startScreen: ${screen.javaClass.simpleName}")
-            screens.add(screen)
-            nextScreen.value = screen
+class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = "") {
+    val screens = mutableListOf(initialScreen)
+    val screen = MutableStateFlow(initialScreen)
+
+    fun startScreen(nextScreen: IScreen, clearStack: Boolean = false) {
+        if (screens.last().javaClass.simpleName != nextScreen.javaClass.simpleName) {
+            if (clearStack) {
+                screens.clear()
+            }
+            log("$tag.startScreen: ${nextScreen.javaClass.simpleName}")
+            screens.add(nextScreen)
+            this@ScreensNavigator.screen.value = nextScreen
         }
     }
 
     fun backToPrevious() {
         screens.removeAt(screens.lastIndex)
-        nextScreen.value = screens.last()
-        log("$tag.backToPrevious: ${nextScreen.value.javaClass.simpleName}")
+        screen.value = screens.last()
+        log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
+    }
+
+    inline fun <reified T: IScreen> getScreenOrNull(klass: KClass<T>): T? {
+        return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
     }
 }
 

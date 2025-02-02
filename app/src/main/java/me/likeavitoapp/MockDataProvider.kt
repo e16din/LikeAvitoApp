@@ -12,13 +12,16 @@ import me.likeavitoapp.model.User
 
 
 class MockDataProvider {
-    val favorites = mutableListOf<Ad>()
-
-    fun dataSources(): DataSources = DataSources(
-        app = AppModel().apply { user = getUser() },
-        platform = AppPlatform(),
-        backend = AppBackend()
-    )
+    var ads = mutableListOf<Ad>()
+    init {
+        repeat(21) {
+            ads.add(
+                getAd(it.toLong()).copy(
+                    isFavorite = MutableStateFlow((it % 7) == 0)
+                )
+            )
+        }
+    }
 
     fun getUser(): User {
         return User(
@@ -33,13 +36,7 @@ class MockDataProvider {
     }
 
     fun getAds(categoryId: Int, page: Int, query: String): List<Ad> {
-        val result = mutableListOf<Ad>()
-        repeat(20) {
-            result.add(
-                getAd(it.toLong())
-            )
-        }
-        return result
+        return ads
     }
 
     fun getCategories(): List<Category> {
@@ -122,5 +119,16 @@ class MockDataProvider {
             Result.success(true)
         else
             Result.failure(Exception("Request failed"))
+    }
+
+    fun getInitialFavorites(): List<Ad> {
+        return listOf(
+            getAd(100500).apply { isFavorite.value = true },
+            getAd(100501).apply { isFavorite.value = true }
+        )
+    }
+
+    fun getFavorites(): List<Ad> {
+       return ads.filter { it.isFavorite.value }
     }
 }

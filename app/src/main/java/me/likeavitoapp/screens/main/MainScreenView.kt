@@ -35,10 +35,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
@@ -54,8 +56,8 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
     val mainTabScreen = remember { screen.mainTabScreen }
-    val nextScreen = screen.navigator.nextScreen.collectAsState()
-    val tabScreen = screen.tabsNavigator.nextScreen.collectAsState()
+    val nextScreen = screen.navigator.screen.collectAsState()
+    val tabScreen = screen.tabsNavigator.screen.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         MainScreenView(screen, mainTabScreen, tabScreen.value)
@@ -208,10 +210,15 @@ fun MainScreenView(screen: MainScreen, mainTabScreen: IScreen, tabScreen: IScree
 @Composable
 fun MainScreenPreview() {
     LikeAvitoAppTheme {
-        val searchScreen = SearchScreen(ScreensNavigator())
+        val searchScreen = SearchScreen(
+            parentNavigator = mockScreensNavigator(),
+            scope = mockCoroutineScope(),
+            sources = mockDataSource()
+        )
         MainScreenView(
             screen = MainScreen(
-                sources = MockDataProvider().dataSources()
+                sources = mockDataSource(),
+                scope = mockCoroutineScope()
             ),
             mainTabScreen = searchScreen,
             tabScreen = searchScreen

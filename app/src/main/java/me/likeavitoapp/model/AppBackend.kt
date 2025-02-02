@@ -23,9 +23,9 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class UserService {
 
-         suspend fun login(username: String, password: String): Result<LoginResult> {
+        suspend fun login(username: String, password: String): Result<LoginResult> {
             delay(1500)
-            if(username == "ss@ss.ss" && password == "123456") {
+            if (username == "ss@ss.ss" && password == "123456") {
                 return Result.success(
                     LoginResult(
                         user = mockDataProvider.getUser(),
@@ -37,11 +37,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             }
         }
 
-         suspend fun logout(userId: Long): Result<Boolean> {
+        suspend fun logout(userId: Long): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
-         suspend fun getUser(userId: Long): Result<User> {
+        suspend fun getUser(userId: Long): Result<User> {
             return Result.success(mockDataProvider.getUser())
         }
 
@@ -49,23 +49,29 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
     // NOTE: this is mock for an example
     inner class AdsService {
-         suspend fun getCategories(): Result<List<Category>> {
+        suspend fun getCategories(): Result<List<Category>> {
             return Result.success(
                 mockDataProvider.getCategories()
             )
         }
 
-         suspend fun getAds(range: PriceRange, regionId:Int, categoryId: Int,  query: String, page: Int,): Result<List<Ad>> {
+        suspend fun getAds(
+            range: PriceRange,
+            regionId: Int,
+            categoryId: Int,
+            query: String,
+            page: Int,
+        ): Result<List<Ad>> {
             return Result.success(
                 mockDataProvider.getAds(categoryId, page, query)
             )
         }
 
-         suspend fun getAdDetails(adId: Long): Result<Ad> {
+        suspend fun getAdDetails(adId: Long): Result<Ad> {
             TODO("Not yet implemented")
         }
 
-         suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
+        suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
             return Result.success(
                 listOf(
                     "Mac Book",
@@ -77,9 +83,9 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             )
         }
 
-        suspend fun updateFavoriteState(ad:Ad): Result<Boolean> {
+        suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
             if (develop) {
-                mockDataProvider.favorites.apply {
+                mockDataProvider.ads = mockDataProvider.ads.toMutableList().apply {
                     if (ad.isFavorite.value) {
                         add(ad)
                     } else {
@@ -90,22 +96,33 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
             return Result.success(true)
         }
+
+        suspend fun getFavorites(): Result<List<Ad>> {
+            return Result.success(mockDataProvider.getFavorites())
+        }
+
+        fun deleteAllFavorites(): Result<Boolean> {
+            mockDataProvider.ads = mockDataProvider.ads.toMutableList().apply {
+                forEach { it.isFavorite.value = false }
+            }
+            return mockDataProvider.getSuccessOrFail(true)
+        }
     }
 
     // NOTE: this is mock for an example
     inner class CartService {
-         suspend fun reserve(adId: Long): Result<Boolean> {
+        suspend fun reserve(adId: Long): Result<Boolean> {
             return mockDataProvider.getSuccessOrFail(adId != 2L)
         }
 
-         suspend fun order(
+        suspend fun order(
             adId: Long,
             buyType: Order.BuyType
         ): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
-         suspend fun getOrders(userId: Long): Result<List<Order>> {
+        suspend fun getOrders(userId: Long): Result<List<Order>> {
             TODO("Not yet implemented")
         }
 

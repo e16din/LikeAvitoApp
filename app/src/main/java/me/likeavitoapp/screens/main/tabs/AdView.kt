@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.tabs.search
+package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,9 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +36,7 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Preview(showBackground = true)
@@ -133,7 +131,8 @@ inline fun AdView(
                     onClick = {
                         onBuyClick(ad)
                     }) {
-                    Text(text = "Купить за " + "${ad.price}₽")
+                    Text(text = "Купить за " + "${ad.price}₽",
+                        style = AppTypography.bodySmall)
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -145,7 +144,9 @@ inline fun AdView(
                         onClick = {
                             onBargainingClick(ad)
                         }) {
-                        Text(text = stringResource(R.string.bargaining_button))
+                        Text(text = stringResource(R.string.bargaining_button)
+                        , style = AppTypography.labelSmall
+                        )
                     }
                 }
             }

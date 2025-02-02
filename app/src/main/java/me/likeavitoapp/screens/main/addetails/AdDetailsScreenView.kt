@@ -39,6 +39,9 @@ import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.log
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -149,7 +152,9 @@ fun AdDetailsScreenPreview() {
         AdDetailsScreenView(
             AdDetailsScreen(
                 ad = MockDataProvider().getAd(0L),
-                parentNavigator = ScreensNavigator()
+                parentNavigator = mockScreensNavigator(),
+                scope = mockCoroutineScope(),
+                sources = mockDataSource()
             )
         )
     }

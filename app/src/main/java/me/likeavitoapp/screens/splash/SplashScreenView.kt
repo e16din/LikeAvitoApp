@@ -6,10 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import me.likeavitoapp.scenariosEnabled
+import me.likeavitoapp.provideRootScreen
+
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -17,13 +19,13 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SplashScreenProvider(screen: SplashScreen) {
     SplashScreenView()
 
+    val scenariosEnabled = provideRootScreen().state.scenariosEnabled.collectAsState()
     LaunchedEffect(Unit) {
-        if (scenariosEnabled) {
-            RunAppFromScratchScenario()
+        if (scenariosEnabled.value) {
+            RunAppFromScratchScenario(screen)
 
         } else {
-            var startMs = System.currentTimeMillis()
-            screen.StartScreenUseCase(startMs)
+            screen.StartScreenUseCase()
         }
     }
 }

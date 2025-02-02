@@ -28,11 +28,13 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
 import me.likeavitoapp.model.User
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenView
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -40,7 +42,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun ProfileScreenProvider(screen: ProfileScreen) {
-    val nextScreen by screen.navigator.nextScreen.collectAsState()
+    val nextScreen by screen.navigator.screen.collectAsState()
 
     Box {
         ProfileScreenView(screen)
@@ -128,7 +130,10 @@ fun ProfileScreenPreview() {
                 contacts = Contacts(telegram = "@alex_ku_san"),
                 ownAds = emptyList(),
                 photoUrl = ""
-            )
+            ),
+            parentNavigator = mockScreensNavigator(),
+            scope = mockCoroutineScope(),
+            sources = mockDataSource()
         ))
     }
 }

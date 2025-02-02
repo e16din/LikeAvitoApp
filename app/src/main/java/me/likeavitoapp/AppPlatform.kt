@@ -20,22 +20,6 @@ import me.likeavitoapp.screens.auth.AuthScreen
 class AuthFiledException : Exception()
 
 
-@OptIn(DelicateCoroutinesApi::class)
-private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-    println("Error!")
-    println(throwable.message)
-    if (throwable is AuthFiledException) {
-        if (appModel.navigator.nextScreen.value !is AuthScreen) {
-            GlobalScope.launch {
-                appModel.Logout()
-            }
-        }
-
-    } else {
-        throwable.printStackTrace()
-    }
-}
-val defaultContext = Job() + exceptionHandler
 
 class AppPlatform : IAppPlatform, Application() {
 

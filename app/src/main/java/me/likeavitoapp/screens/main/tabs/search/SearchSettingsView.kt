@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.log
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -195,7 +198,9 @@ fun SearchSettingsViewPreview() {
     LikeAvitoAppTheme {
         SearchSettingsPanelView(
             panel = SearchScreen(
-                parentNavigator = ScreensNavigator()
+                parentNavigator = mockScreensNavigator(),
+                scope = mockCoroutineScope(),
+                sources = mockDataSource()
             ).searchSettingsPanel,
             onFocus = {}
         )

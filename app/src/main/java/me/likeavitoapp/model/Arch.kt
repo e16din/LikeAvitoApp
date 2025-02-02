@@ -1,17 +1,21 @@
 package me.likeavitoapp.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.appBackend
-import me.likeavitoapp.appModel
-import me.likeavitoapp.appPlatform
+import me.likeavitoapp.AppPlatform
+import me.likeavitoapp.defaultContext
 
 
 class DataSources(
     val app: AppModel,
     val platform: IAppPlatform,
     val backend: AppBackend
+)
+
+class ScreenArguments(
+    val scope: CoroutineScope,
+    val parentNavigator: ScreensNavigator,
+    val sources: DataSources
 )
 
 class DataSourcesWithScreen<T: IScreen>(
@@ -27,24 +31,10 @@ class Loadable<T>(initial: T) {
     var loadingFailed = MutableStateFlow(false)
 }
 
-@Composable
-fun rememberDataSources() = remember {
-    DataSources(
-        app = appModel,
-        platform = appPlatform,
-        backend = appBackend,
-    )
-}
-
-fun dataSources() = DataSources(
-    app = appModel,
-    platform = appPlatform,
-    backend = appBackend,
+fun mockDataSource() = DataSources(
+    app = AppModel(),
+    platform = AppPlatform(),
+    backend = AppBackend(),
 )
-
-inline fun <reified T : IScreen> dataSourcesWithScreen() = DataSourcesWithScreen(
-    app = appModel,
-    platform = appPlatform,
-    backend = appBackend,
-    screen = appModel.navigator.nextScreen.value as T
-)
+fun mockCoroutineScope() = CoroutineScope(defaultContext)
+fun mockScreensNavigator() = ScreensNavigator()

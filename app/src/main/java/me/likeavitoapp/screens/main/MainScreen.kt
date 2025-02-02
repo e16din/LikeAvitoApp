@@ -1,9 +1,11 @@
 package me.likeavitoapp.screens.main
 
+import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.dataSources
+import me.likeavitoapp.provideCoroutineScope
+import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
@@ -13,7 +15,8 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
 class MainScreen(
-    val sources: DataSources = dataSources(),
+    val scope: CoroutineScope = provideCoroutineScope(),
+    val sources: DataSources = provideDataSources()
 ) : IScreen {
 
     val state = State()
@@ -22,8 +25,11 @@ class MainScreen(
 
     val searchScreen = SearchScreen(parentNavigator = navigator)
     val favoritesScreen = FavoritesScreen(parentNavigator = navigator)
-    val profileScreen = ProfileScreen(user = sources.app.user!!)
-    val cartScreen = CartScreen()
+    val profileScreen = ProfileScreen(
+        user = sources.app.user!!,
+        parentNavigator = navigator,
+    )
+    val cartScreen = CartScreen(parentNavigator = navigator)
 
     val tabsNavigator =
         ScreensNavigator(initialScreen = searchScreen, tag = javaClass.simpleName + "Tab").apply {
@@ -49,7 +55,7 @@ class MainScreen(
     }
 
     fun ClickToCreateAdUseCase() {
-        sources.app.navigator.startScreen(CreateAdScreen())
+        navigator.startScreen(CreateAdScreen())
     }
 
     fun ClickToCartUseCase() {

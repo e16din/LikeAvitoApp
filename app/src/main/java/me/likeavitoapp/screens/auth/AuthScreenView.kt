@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 import me.likeavitoapp.R
-import me.likeavitoapp.scenariosEnabled
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.provideRootScreen
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -50,12 +54,11 @@ import me.likeavitoapp.scenariosEnabled
 fun AuthScreenProvider(screen: AuthScreen) {
     AuthScreenView(screen)
 
-    LaunchedEffect(Unit) {
-        screen.ListenChangeEmailUseCase()
-    }
-    LaunchedEffect(Unit) {
-        if (scenariosEnabled) {
-            RunAllAuthScenarios()
+    val scenariosEnabled = provideRootScreen().state.scenariosEnabled.collectAsState()
+    if (scenariosEnabled.value) {
+        val authScenarios = remember { AuthScenarios(screen) }
+        LaunchedEffect(Unit) {
+            authScenarios.start()
         }
     }
 }
@@ -178,6 +181,10 @@ fun AuthScreenView(screen: AuthScreen) {
 @OptIn(ExperimentalLayoutApi::class)
 @Preview(showBackground = true)
 @Composable
-fun PreviewLoginScreen() {
-    AuthScreenView(screen = AuthScreen())
+fun PreviewAuthScreen() {
+    AuthScreenView(screen = AuthScreen(
+        scope = mockCoroutineScope(),
+        parentNavigator = mockScreensNavigator(),
+        sources = mockDataSource()
+    ))
 }

@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenView
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
@@ -19,7 +18,7 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 
 @Composable
 fun CartScreenProvider(screen: CartScreen) {
-    val nextScreen by screen.navigator.nextScreen.collectAsState()
+    val nextScreen by screen.navigator.screen.collectAsState()
 
     Box {
         CartScreenView(screen)
