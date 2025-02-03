@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -25,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
 import me.likeavitoapp.model.User
@@ -59,10 +56,11 @@ fun ProfileScreenProvider(screen: ProfileScreen) {
 
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
-    Column(modifier = Modifier
-        .background(colorScheme.background)
-        .fillMaxSize()
-        .systemBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .background(colorScheme.background)
+            .fillMaxSize()
+    ) {
         Row {
             // Edit Button
         }
@@ -86,7 +84,11 @@ fun ProfileScreenView(screen: ProfileScreen) {
         Spacer(Modifier.size(24.dp))
 
         HorizontalDivider(thickness = 1.dp)
-        Text(modifier = Modifier.padding(start = 16.dp, top = 12.dp),text = stringResource(R.string.contacts_title), fontSize = 24.sp)
+        Text(
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+            text = stringResource(R.string.contacts_title),
+            fontSize = 24.sp
+        )
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             screen.state.user.contacts.phone?.let {
                 ContactItem(title = stringResource(R.string.phone_title), value = it)
@@ -124,17 +126,19 @@ fun ContactItem(title: String, value: String) {
 @Composable
 fun ProfileScreenPreview() {
     LikeAvitoAppTheme {
-        ProfileScreenView(ProfileScreen(
-            User(
-                id = 0,
-                name = "Иван Иванов",
-                contacts = Contacts(telegram = "@alex_ku_san"),
-                ownAds = emptyList(),
-                photoUrl = ""
-            ),
-            parentNavigator = mockScreensNavigator(),
-            scope = mockCoroutineScope(),
-            sources = mockDataSource()
-        ))
+        ProfileScreenView(
+            ProfileScreen(
+                User(
+                    id = 0,
+                    name = "Иван Иванов",
+                    contacts = Contacts(telegram = "@alex_ku_san"),
+                    ownAds = emptyList(),
+                    photoUrl = ""
+                ),
+                parentNavigator = mockScreensNavigator(),
+                scope = mockCoroutineScope(),
+                sources = mockDataSource()
+            )
+        )
     }
 }

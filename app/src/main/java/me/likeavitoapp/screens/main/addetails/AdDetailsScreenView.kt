@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,7 +48,9 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 
-    AdDetailsScreenView(screen)
+    Surface(modifier = Modifier.fillMaxSize()) {
+        AdDetailsScreenView(screen)
+    }
 
     BackHandler {
         screen.PressBack()
@@ -58,15 +61,8 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
     val favoriteSelected by screen.state.ad.isFavorite.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .pointerInput(Unit) {
-                detectTapGestures()
-            }
 
-    ) {
+    Column {
         Text(
             text = ad.title,
             style = AppTypography.titleLarge,
@@ -120,15 +116,12 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             overflow = TextOverflow.Companion.Ellipsis
         )
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-        ) {
+        Row(modifier = Modifier) {
             Button(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 onClick = {
-                    screen.ClickToBuyUseCase()
+                    screen.ClickToBuyUseCase(ad)
                 }) {
                 Text(text = "Купить за " + "${ad.price}₽")
             }

@@ -50,7 +50,7 @@ fun AdViewPreview() {
             onItemClick = {},
             onFavoriteClick = {},
             onBuyClick = {},
-            onBargainingClick = { }
+            onBargainingClick = {}
         )
     }
 }

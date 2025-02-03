@@ -16,6 +16,10 @@ class CreateOrderScreen(
     val sources: DataSources = provideDataSources()
 ) : IScreen {
 
+    fun PressBack() {
+        parentNavigator.backToPrevious()
+    }
+
     val state = State(ad)
 
     class State(val ad: Ad)

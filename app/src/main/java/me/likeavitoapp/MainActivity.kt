@@ -1,7 +1,10 @@
 package me.likeavitoapp
 
+import android.graphics.Color.BLACK
+import android.graphics.Color.WHITE
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -34,7 +37,22 @@ class MainActivity : ComponentActivity() {
 
         val app = initApp(application as AppPlatform, vm.viewModelScope)
 
-        enableEdgeToEdge()
+        val lightTransparentStyle = SystemBarStyle.light(
+            scrim = WHITE,
+            darkScrim = WHITE
+        )
+        val darkTransparentStyle = SystemBarStyle.light(
+            scrim = BLACK,
+            darkScrim = BLACK
+        )
+        val navigationBarStyle = if (resources.configuration.isNightModeActive)
+            darkTransparentStyle
+        else
+            lightTransparentStyle
+        enableEdgeToEdge(
+            navigationBarStyle = navigationBarStyle
+        )
+
         setContent {
             LikeAvitoAppTheme {
                 RootScreenView(app.rootScreen)

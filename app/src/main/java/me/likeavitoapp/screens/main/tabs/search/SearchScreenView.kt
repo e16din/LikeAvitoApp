@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,13 +25,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -44,7 +41,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -68,13 +64,14 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun SearchScreenProvider(screen: SearchScreen) {
+fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
     val nextScreen by screen.navigator.screen.collectAsState()
 
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
     }
-    Box {
+
+    Surface(modifier = modifier.fillMaxSize()) {
         SearchScreenView(screen)
 
         when (nextScreen) {
@@ -83,7 +80,6 @@ fun SearchScreenProvider(screen: SearchScreen) {
             is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -116,161 +112,157 @@ fun SearchScreenView(screen: SearchScreen) {
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 
-    Box(
-        Modifier.fillMaxSize()
-    ) {
-        LazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(
-                start = 16.dp, top = 12.dp, end = 16.dp, bottom = 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(
+            start = 16.dp, top = 12.dp, end = 16.dp, bottom = 16.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
 
+        ) {
+
+        stickyHeader {
+            AnimatedVisibility(
+                visible = displayTopBar,
+                enter = expandVertically(),
+                exit = shrinkVertically()
             ) {
-
-            stickyHeader {
-                AnimatedVisibility(
-                    visible = displayTopBar,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                Column(
+                    modifier = Modifier
                 ) {
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        SearchBar(
-                            inputField = {
-                                SearchBarDefaults.InputField(
-                                    onSearch = { searchBarExpanded = false },
-                                    expanded = searchBarExpanded,
-                                    onExpandedChange = { searchBarExpanded = it },
-                                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.Search,
-                                            contentDescription = "searchbar_leading_icon"
-                                        )
-                                    },
-                                    trailingIcon = {
-                                        Icon(
-                                            ImageVector.vectorResource(R.drawable.baseline_tune_24),
-                                            "searchbar_trailing_icon",
-                                            modifier = Modifier.clickable {
-                                                screen.searchBar.ClickToFilterButtonUseCase()
-                                            })
-                                    },
-                                    query = query,
-                                    onQueryChange = { newQuery ->
-                                        screen.searchBar.ChangeSearchQueryUseCase(newQuery)
-                                    },
-
+                    SearchBar(
+                        inputField = {
+                            SearchBarDefaults.InputField(
+                                onSearch = { searchBarExpanded = false },
+                                expanded = searchBarExpanded,
+                                onExpandedChange = { searchBarExpanded = it },
+                                placeholder = { Text(stringResource(R.string.search_hint)) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "searchbar_leading_icon"
                                     )
-                            },
-                            expanded = searchBarExpanded,
-                            onExpandedChange = { expanded ->
-                                searchBarExpanded = expanded
-                            }
-                        ) {
-                            // onExpanded
-                        }
+                                },
+                                trailingIcon = {
+                                    Icon(
+                                        ImageVector.vectorResource(R.drawable.baseline_tune_24),
+                                        "searchbar_trailing_icon",
+                                        modifier = Modifier.clickable {
+                                            screen.searchBar.ClickToFilterButtonUseCase()
+                                        })
+                                },
+                                query = query,
+                                onQueryChange = { newQuery ->
+                                    screen.searchBar.ChangeSearchQueryUseCase(newQuery)
+                                },
 
-                        AnimatedVisibility(visible = !hasSelectedCategory()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(136.dp)
+                                )
+                        },
+                        expanded = searchBarExpanded,
+                        onExpandedChange = { expanded ->
+                            searchBarExpanded = expanded
+                        }
+                    ) {
+                        // onExpanded
+                    }
+
+                    AnimatedVisibility(visible = !hasSelectedCategory()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(136.dp)
+                        ) {
+                            LazyHorizontalStaggeredGrid(
+                                modifier = Modifier.wrapContentHeight(),
+                                rows = StaggeredGridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalItemSpacing = 8.dp,
+                                contentPadding = PaddingValues(horizontal = 16.dp)
                             ) {
-                                LazyHorizontalStaggeredGrid(
-                                    modifier = Modifier.wrapContentHeight(),
-                                    rows = StaggeredGridCells.Fixed(2),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalItemSpacing = 8.dp,
-                                    contentPadding = PaddingValues(horizontal = 16.dp)
-                                ) {
-                                    items(categories.size) { index ->
-                                        Card(
-                                            modifier = Modifier
-                                                .wrapContentHeight()
-                                                .clickable {
-                                                    screen.searchBar.ClickToCategoryUseCase(
-                                                        categories[index]
-                                                    )
-                                                }
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.padding(16.dp),
-                                                text = categories[index].name
-                                            )
-                                        }
+                                items(categories.size) { index ->
+                                    Card(
+                                        modifier = Modifier
+                                            .wrapContentHeight()
+                                            .clickable {
+                                                screen.searchBar.ClickToCategoryUseCase(
+                                                    categories[index]
+                                                )
+                                            }
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.padding(16.dp),
+                                            text = categories[index].name
+                                        )
                                     }
                                 }
                             }
-
                         }
 
-                        AnimatedVisibility(visible = hasSelectedCategory()) {
-                            Text(
-                                text = selectedCategory?.name ?: "",
-                                modifier = Modifier
-                                    .background(Color.Yellow)
-                                    .padding(vertical = 4.dp, horizontal = 16.dp)
-                                    .fillMaxWidth()
-                            )
-                        }
+                    }
+
+                    AnimatedVisibility(visible = hasSelectedCategory()) {
+                        Text(
+                            text = selectedCategory?.name ?: "",
+                            modifier = Modifier
+                                .background(Color.Yellow)
+                                .padding(vertical = 4.dp, horizontal = 16.dp)
+                                .fillMaxWidth()
+                        )
                     }
                 }
-
-
             }
 
-            items(items = ads, key = { ad ->
-                ad.id
-            }) { ad ->
-                if (ad.isPremium) {
-                    AdView(
-                        modifier = Modifier.animateItem(),
-                        ad = ad,
-                        onItemClick = { ad ->
-                            screen.ClickToAdUseCase(ad)
-                        },
-                        onFavoriteClick = { ad ->
-                            screen.ClickToFavoriteUseCase(ad)
-                        },
-                        onBuyClick = {
-                            screen.ClickToBuyUseCase()
-                        },
-                        onBargainingClick = {
-                            screen.ClickToBargainingUseCase()
-                        }
-                    )
 
-                } else {
-                    MinAdView(
-                        modifier = Modifier.animateItem(),
-                        ad = ad,
-                        onItemClick = { ad ->
-                            screen.ClickToAdUseCase(ad)
-                        },
-                        onFavoriteClick = { ad ->
-                            screen.ClickToFavoriteUseCase(ad)
-                        }
-                    )
-                }
-            }
         }
 
-        if (searchFilterPanelEnabled) {
-            ModalBottomSheet(
-                modifier = Modifier.fillMaxHeight(),
-                contentWindowInsets = { WindowInsets.ime },
-                sheetState = searchSettingsSheetState,
-                onDismissRequest = {
-                    screen.CloseSearchSettingsPanelUseCase()
-                }
-            ) {
-                SearchSettingsPanelView(
-                    panel = screen.searchSettingsPanel
+        items(items = ads, key = { ad ->
+            ad.id
+        }) { ad ->
+            if (ad.isPremium) {
+                AdView(
+                    modifier = Modifier.animateItem(),
+                    ad = ad,
+                    onItemClick = { ad ->
+                        screen.ClickToAdUseCase(ad)
+                    },
+                    onFavoriteClick = { ad ->
+                        screen.ClickToFavoriteUseCase(ad)
+                    },
+                    onBuyClick = { ad ->
+                        screen.ClickToBuyUseCase(ad)
+                    },
+                    onBargainingClick = { ad ->
+                        screen.ClickToBargainingUseCase(ad)
+                    }
+                )
+
+            } else {
+                MinAdView(
+                    modifier = Modifier.animateItem(),
+                    ad = ad,
+                    onItemClick = { ad ->
+                        screen.ClickToAdUseCase(ad)
+                    },
+                    onFavoriteClick = { ad ->
+                        screen.ClickToFavoriteUseCase(ad)
+                    }
                 )
             }
+        }
+    }
+
+    if (searchFilterPanelEnabled) {
+        ModalBottomSheet(
+            modifier = Modifier.fillMaxHeight(),
+            contentWindowInsets = { WindowInsets.ime },
+            sheetState = searchSettingsSheetState,
+            onDismissRequest = {
+                screen.CloseSearchSettingsPanelUseCase()
+            }
+        ) {
+            SearchSettingsPanelView(
+                panel = screen.searchSettingsPanel
+            )
         }
     }
 }

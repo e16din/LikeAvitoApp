@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,16 +44,14 @@ import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-import me.likeavitoapp.ui.theme.inversePrimaryLight
 import me.likeavitoapp.ui.theme.onPrimaryContainerLightMediumContrast
 import me.likeavitoapp.ui.theme.onSecondaryContainerLight
 import me.likeavitoapp.ui.theme.primaryContainerLightMediumContrast
@@ -71,15 +66,13 @@ fun MainScreenProvider(screen: MainScreen) {
     val tabScreen = screen.tabsNavigator.screen.collectAsState()
 
     Box(
-        modifier = Modifier
-            .systemBarsPadding()
-            .navigationBarsPadding()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         MainScreenView(screen, mainTabScreen, tabScreen.value)
 
         when (nextScreen.value) {
             is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
+            is CreateOrderScreen -> CreateOrderScreenProvider(nextScreen.value as CreateOrderScreen)
         }
     }
 
@@ -88,33 +81,29 @@ fun MainScreenProvider(screen: MainScreen) {
     }
 }
 
-@Composable
-fun MainScreenView(screen: MainScreen, mainTabScreen: IScreen, tabScreen: IScreen) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        // Content:
-        Box(modifier = Modifier
-            ) {
-            when (mainTabScreen) {
-                is SearchScreen -> SearchScreenProvider(mainTabScreen)
-                is FavoritesScreen -> FavoritesScreenProvider(mainTabScreen)
-                is ProfileScreen -> ProfileScreenProvider(mainTabScreen)
-                is CartScreen -> CartScreenProvider(mainTabScreen)
-            }
-        }
+val tabBarHeight = 58.dp
 
-        Box(modifier = Modifier.align(Alignment.BottomStart)
-            .fillMaxWidth()
-            ) {
+@Composable
+fun MainScreenView(screen: MainScreen, mainTabScreen: SearchScreen, tabScreen: IScreen) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        SearchScreenProvider(mainTabScreen, modifier = Modifier.padding(bottom = tabBarHeight))
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+        ) {
             TabsView(tabScreen, screen)
-            Box(modifier = Modifier.fillMaxWidth().offset(y = (16).dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = (16).dp)
+            ) {
                 ButtonCreateNewView(screen)
             }
         }
-            // CreateAd
-
     }
 }
 
@@ -153,12 +142,13 @@ private fun BoxScope.TabsView(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(tabBarHeight)
+            .background(secondaryContainerLight)
             .align(Alignment.BottomStart),
         verticalAlignment = Alignment.Bottom,
     ) {
         val modifier = Modifier
         // Search
-
         Column(
             modifier = modifier
                 .weight(1f)
@@ -188,7 +178,6 @@ private fun BoxScope.TabsView(
         Column(
             modifier = modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(topEnd = 8.dp))
                 .background(
                     if (tabScreen is FavoritesScreen)
                         primaryLight else secondaryContainerLight
@@ -212,17 +201,29 @@ private fun BoxScope.TabsView(
         }
 
         // CreateAd Stub
-        Spacer(
+        Box(
             modifier = Modifier
-                .weight(1f)
-                .background(Color.Transparent)
+                .weight(0.45f)
+                .background(
+                    if (tabScreen is FavoritesScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .height(tabBarHeight)
+        )
+        Box(
+            modifier = Modifier
+                .weight(0.45f)
+                .background(
+                    if (tabScreen is CartScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .height(tabBarHeight)
         )
 
         // Cart
         Column(
             modifier = modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(topStart = 8.dp))
                 .background(
                     if (tabScreen is CartScreen)
                         primaryLight else secondaryContainerLight

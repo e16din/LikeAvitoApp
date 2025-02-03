@@ -7,11 +7,12 @@ import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.tabs.AdsListScreen
+import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
@@ -19,11 +20,14 @@ class FavoritesScreen(
     override val parentNavigator: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources()
-) : AdsListScreen(parentNavigator, scope, sources) {
+) : BaseAdScreen(parentNavigator, scope, sources) {
 
-    class State2(val moveToAdsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false))
+    class State(
+        val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
+        val moveToAdsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    ) : BaseAdState()
 
-    val state2 = State2()
+    override val state = State()
     lateinit var navigator: ScreensNavigator
 
     fun StartScreenUseCase() {
@@ -40,7 +44,7 @@ class FavoritesScreen(
                 },
                 onSuccess = { newFavorites ->
                     state.ads.data.value = newFavorites
-                    state2.moveToAdsEnabled.value = newFavorites.isEmpty()
+                    state.moveToAdsEnabled.value = newFavorites.isEmpty()
                 }
             )
         }
@@ -60,7 +64,7 @@ class FavoritesScreen(
                             remove(ad)
                         }
                         state.ads.data.value = newFavorites
-                        state2.moveToAdsEnabled.value = newFavorites.isEmpty()
+                        state.moveToAdsEnabled.value = newFavorites.isEmpty()
                     }
                 }
             )
@@ -77,7 +81,7 @@ class FavoritesScreen(
                 },
                 onSuccess = { data ->
                     state.ads.data.value = emptyList()
-                    state2.moveToAdsEnabled.value = true
+                    state.moveToAdsEnabled.value = true
                 }
             )
         }

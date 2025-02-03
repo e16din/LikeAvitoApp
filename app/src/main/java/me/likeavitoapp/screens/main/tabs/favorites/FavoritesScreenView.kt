@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -69,15 +68,13 @@ fun FavoritesScreenProvider(screen: FavoritesScreen) {
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
     val ads by screen.state.ads.data.collectAsState()
-    val moveToAdsEnabled by screen.state2.moveToAdsEnabled.collectAsState()
+    val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState()
 
     val listState = rememberLazyListState()
     val displayButton = !listState.canScrollBackward || listState.lastScrolledBackward
 
     Surface(
-        modifier = Modifier
-            .systemBarsPadding()
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures()
             }) {
@@ -139,11 +136,11 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
                         onFavoriteClick = { ad ->
                             screen.ClickToFavoriteUseCase(ad)
                         },
-                        onBuyClick = {
-                            screen.ClickToBuyUseCase()
+                        onBuyClick = { ad ->
+                            screen.ClickToBuyUseCase(ad)
                         },
-                        onBargainingClick = {
-                            screen.ClickToBargainingUseCase()
+                        onBargainingClick = { ad ->
+                            screen.ClickToBargainingUseCase(ad)
                         }
                     )
                 }

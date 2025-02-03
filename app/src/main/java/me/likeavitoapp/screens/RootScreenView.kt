@@ -3,7 +3,10 @@ package me.likeavitoapp.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,10 +35,17 @@ fun RootScreenView(rootScreen: RootScreen) {
     }
 
     Box(modifier = Modifier) {
-        when (screen.value) {
-            is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
-            is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)
-            is MainScreen -> MainScreenProvider(screen.value as MainScreen)
+        Box(
+            modifier = Modifier
+                .systemBarsPadding()
+                .navigationBarsPadding()
+                .fillMaxSize()
+        ) {
+            when (screen.value) {
+                is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
+                is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)
+                is MainScreen -> MainScreenProvider(screen.value as MainScreen)
+            }
         }
 
         if (rootScreen.state.demoLabelEnabled) {
@@ -48,8 +58,7 @@ fun RootScreenView(rootScreen: RootScreen) {
                     }
                     .background(primaryContainerDark)
                     .padding(8.dp)
-                    .align(Alignment.TopEnd)
-                    ,
+                    .align(Alignment.TopEnd),
                 text = "Demo",
                 color = onPrimaryDark,
                 style = AppTypography.labelSmall

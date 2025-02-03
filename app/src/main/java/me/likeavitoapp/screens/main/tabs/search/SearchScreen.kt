@@ -6,6 +6,7 @@ import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Loadable
@@ -15,22 +16,29 @@ import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.tabs.AdsListScreen
+import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 
 
 class SearchScreen(
     override val parentNavigator: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources()
-) : AdsListScreen(parentNavigator, scope, sources) {
+) : BaseAdScreen(parentNavigator, scope, sources) {
+
+    class State(
+        val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
+        var adsPage: MutableStateFlow<Int> = MutableStateFlow(0)
+    ) : BaseAdState()
+
+    override val state = State()
 
     lateinit var navigator: ScreensNavigator
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
 
-    override fun ScrollToEndUseCase() {
-        super.ScrollToEndUseCase()
+    fun ScrollToEndUseCase() {
+        recordScenarioStep()
 
         if (!state.ads.data.value.isEmpty()) {
             scope.launchWithHandler {
