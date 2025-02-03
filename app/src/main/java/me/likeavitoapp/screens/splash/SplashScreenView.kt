@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.splash
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.provideRootScreen
 
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -17,7 +21,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun SplashScreenProvider(screen: SplashScreen) {
-    SplashScreenView()
+    SplashScreenView(screen)
 
     val scenariosEnabled = provideRootScreen().state.scenariosEnabled.collectAsState()
     LaunchedEffect(Unit) {
@@ -31,12 +35,15 @@ fun SplashScreenProvider(screen: SplashScreen) {
 }
 
 @Composable
-fun SplashScreenView() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Splash Screen", style = MaterialTheme.typography.headlineMedium)
+fun SplashScreenView(screen: SplashScreen) {
+    val contentEnabled = screen.state.contentEnabled.collectAsState()
+    AnimatedVisibility(contentEnabled.value) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Добро\n\nпожаловать!", style = MaterialTheme.typography.headlineMedium)
+        }
     }
 }
 
@@ -44,6 +51,12 @@ fun SplashScreenView() {
 @Composable
 fun SplashScreenPreview() {
     LikeAvitoAppTheme {
-        SplashScreenView()
+        SplashScreenView(
+            screen = SplashScreen(
+                parentNavigator = mockScreensNavigator(),
+                scope = mockCoroutineScope(),
+                sources = mockDataSource()
+            )
+        )
     }
 }

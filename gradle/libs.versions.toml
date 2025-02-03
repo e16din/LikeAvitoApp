@@ -1,6 +1,7 @@
 [versions]
 agp = "8.10.0-alpha02"
 coilCompose = "3.0.4"
+coilNetworkKtor3 = "3.0.4"
 datastorePreferences = "1.1.2"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
@@ -8,6 +9,7 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
+ktorClientAndroid = "<ktor-version>"
 material = "1.12.0"
 constraintlayout = "2.2.0"
 navigationFragmentKtx = "2.8.6"
@@ -25,6 +27,7 @@ uiTextGoogleFonts = "1.7.7"
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil3-coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

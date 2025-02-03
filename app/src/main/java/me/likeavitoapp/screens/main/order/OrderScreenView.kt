@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.main.order
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.screens.ActualAsyncImage
 import kotlin.math.absoluteValue
 
 
@@ -55,6 +57,12 @@ fun OrderScreenView(screen: OrderScreen) = with(screen) {
                             )
                         }
                 ) {
+                    ActualAsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(210.dp),
+                        url = photoUrls[page]
+                    )
                     AsyncImage(model = photoUrls[page], contentDescription = "$page")
                 }
             }

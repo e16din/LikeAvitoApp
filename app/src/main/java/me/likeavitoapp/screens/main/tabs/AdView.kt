@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -36,6 +37,7 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -82,12 +84,11 @@ inline fun AdView(
             )
             Box(modifier = Modifier
                 .fillMaxWidth()) {
-                AsyncImage(
-                    model = ad.photoUrls.first(),
-                    alignment = Alignment.Center,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    error = painterResource(R.drawable.placeholder)
+                ActualAsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(210.dp),
+                    url = ad.photoUrls.first()
                 )
 
                 IconButton(

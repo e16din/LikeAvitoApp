@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +35,7 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Preview(showBackground = true)
@@ -74,10 +76,10 @@ inline fun MinAdView(
                 overflow = TextOverflow.Companion.Ellipsis
             )
             Box {
-                AsyncImage(
-                    model = ad.photoUrls.first(),
-                    contentDescription = null,
-                    error = painterResource(R.drawable.placeholder)
+                ActualAsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    url = ad.photoUrls.first()
                 )
 
                 IconButton(

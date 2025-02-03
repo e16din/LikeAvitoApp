@@ -81,7 +81,12 @@ class MockDataProvider {
             id = id.toLong(),
             title = "${id.toLong()}: MacBook Pro 14",
             description = "Ноутбук, который расширяет ваши возможности\n" + "Apple MacBook Pro 14\" 2024 года – это ноутбук, созданный для тех, кто привык к скорости, мощности и комфорту. С процессором M4 он обеспечивает идеальный баланс между автономностью и производительностью, достаточной для очень требовательных задач. В нём есть всё, чтобы работать или отдыхать где угодно, подключать любые дисплеи и аксессуары, а высокий уровень безопасности, в сочетании с идеальной оптимизацией macOS и сервисами Apple, позволяет не загружать себя лишними заботами, фокусируясь на том, что действительно важно.",
-            photoUrls = listOf("https://ir-3.ozone.ru/s3/multimedia-1-n/wc1000/6917949671.jpg"),
+            photoUrls = listOf(
+                "https://ir-3.ozone.ru/s3/multimedia-1-n/wc1000/6917949671.jpg",
+                "https://ir-3.ozone.ru/s3/multimedia-s/wc1000/6898199320.jpg",
+                "https://ir-3.ozone.ru/s3/multimedia-1-9/wc1000/7265953233.jpg",
+                "https://ir-3.ozone.ru/s3/multimedia-1-8/wc1000/7265953232.jpg",
+                ),
             contacts = Contacts(
                 phone = "8XXXXXX1234",
                 whatsapp = null,

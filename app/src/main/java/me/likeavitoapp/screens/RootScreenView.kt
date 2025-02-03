@@ -4,9 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +31,7 @@ fun RootScreenView(rootScreen: RootScreen) {
         rootScreen.StartScreenUseCase()
     }
 
-    Box {
+    Box(modifier = Modifier) {
         when (screen.value) {
             is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
             is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)

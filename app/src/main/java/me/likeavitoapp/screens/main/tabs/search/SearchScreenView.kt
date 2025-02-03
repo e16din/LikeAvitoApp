@@ -116,12 +116,8 @@ fun SearchScreenView(screen: SearchScreen) {
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 
-
     Box(
-        Modifier
-            .background(colorScheme.background)
-            .fillMaxSize()
-            .systemBarsPadding()
+        Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = listState,
@@ -180,7 +176,7 @@ fun SearchScreenView(screen: SearchScreen) {
                         AnimatedVisibility(visible = !hasSelectedCategory()) {
                             Column(
                                 modifier = Modifier
-                                    .background(Color.Black)
+                                    .fillMaxWidth()
                                     .height(136.dp)
                             ) {
                                 LazyHorizontalStaggeredGrid(

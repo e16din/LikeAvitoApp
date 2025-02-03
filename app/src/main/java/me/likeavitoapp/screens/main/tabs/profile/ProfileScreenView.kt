@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -31,6 +32,7 @@ import me.likeavitoapp.model.User
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
@@ -65,13 +67,12 @@ fun ProfileScreenView(screen: ProfileScreen) {
             // Edit Button
         }
         Row(modifier = Modifier.fillMaxWidth()) {
-            AsyncImage(
-                model = screen.state.user.photoUrl,
-                contentDescription = null,
-                modifier = Modifier.clip(CircleShape)
+            ActualAsyncImage(
+                modifier = Modifier
+                    .clip(CircleShape)
                     .padding(16.dp)
-                    .size(64.dp)
-
+                    .size(64.dp),
+                url = screen.state.user.photoUrl
             )
 
             Text(

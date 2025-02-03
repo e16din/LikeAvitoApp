@@ -18,7 +18,8 @@ class RootScreen(
 ) : IScreen {
 
     class State(
-        val demoLabelEnabled: Boolean = develop,
+        var isStarted: Boolean = false,
+        var demoLabelEnabled: Boolean = develop,
         val scenariosEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     )
 
@@ -28,7 +29,15 @@ class RootScreen(
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        navigator.screen.value = SplashScreen(parentNavigator = navigator)
+        if (state.isStarted) {
+            navigator.startScreen(navigator.screens.last())
+
+        } else {
+            state.isStarted = true
+            navigator.startScreen(
+                SplashScreen(parentNavigator = navigator)
+            )
+        }
     }
 
     fun LogoutUseCase() {

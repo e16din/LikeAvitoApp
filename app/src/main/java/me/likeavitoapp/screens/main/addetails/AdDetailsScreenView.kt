@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -27,21 +30,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.log
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -79,11 +77,17 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             overflow = TextOverflow.Companion.Ellipsis
         )
         Box {
-            AsyncImage(
-                model = ad.photoUrls.first(),
-                contentDescription = null,
-                error = painterResource(R.drawable.placeholder)
-            )
+            val pagerState = rememberPagerState(pageCount = {
+                ad.photoUrls.size
+            })
+            HorizontalPager(state = pagerState) { page ->
+                ActualAsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(210.dp),
+                    url = ad.photoUrls[page]
+                )
+            }
 
             IconButton(
                 modifier = Modifier

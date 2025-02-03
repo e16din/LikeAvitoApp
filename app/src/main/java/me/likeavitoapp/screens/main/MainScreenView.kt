@@ -6,14 +6,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -52,6 +56,13 @@ import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+import me.likeavitoapp.ui.theme.inversePrimaryLight
+import me.likeavitoapp.ui.theme.onPrimaryContainerLightMediumContrast
+import me.likeavitoapp.ui.theme.onSecondaryContainerLight
+import me.likeavitoapp.ui.theme.primaryContainerLightMediumContrast
+import me.likeavitoapp.ui.theme.primaryLight
+import me.likeavitoapp.ui.theme.primaryLightMediumContrast
+import me.likeavitoapp.ui.theme.secondaryContainerLight
 
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
@@ -59,7 +70,12 @@ fun MainScreenProvider(screen: MainScreen) {
     val nextScreen = screen.navigator.screen.collectAsState()
     val tabScreen = screen.tabsNavigator.screen.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .systemBarsPadding()
+            .navigationBarsPadding()
+            .fillMaxSize()
+    ) {
         MainScreenView(screen, mainTabScreen, tabScreen.value)
 
         when (nextScreen.value) {
@@ -74,9 +90,13 @@ fun MainScreenProvider(screen: MainScreen) {
 
 @Composable
 fun MainScreenView(screen: MainScreen, mainTabScreen: IScreen, tabScreen: IScreen) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         // Content:
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier
+            ) {
             when (mainTabScreen) {
                 is SearchScreen -> SearchScreenProvider(mainTabScreen)
                 is FavoritesScreen -> FavoritesScreenProvider(mainTabScreen)
@@ -85,123 +105,172 @@ fun MainScreenView(screen: MainScreen, mainTabScreen: IScreen, tabScreen: IScree
             }
         }
 
-        Box() {
-            // Tabs
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding(),
-                verticalAlignment = Alignment.Bottom
+        Box(modifier = Modifier.align(Alignment.BottomStart)
+            .fillMaxWidth()
             ) {
-                val modifier = Modifier
-                // Search
-
-                Column(
-                    modifier = modifier
-                        .weight(1f)
-                        .background(
-                            if (tabScreen is SearchScreen)
-                                Color(0xffcccccc) else Color(0xffffffff)
-                        )
-                        .clickable(onClick = {
-                            screen.ClickToSearchUseCase()
-                        }), horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(Icons.Rounded.Search, contentDescription = "search")
-                    Text(text = stringResource(R.string.search_tab), fontSize = 9.sp, maxLines = 1)
-                }
-
-                // Favorites
-                Column(
-                    modifier = modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(topEnd = 8.dp))
-                        .background(
-                            if (tabScreen is FavoritesScreen)
-                                Color(0xffcccccc) else Color(0xffffffff)
-                        )
-                        .clickable(onClick = {
-                            screen.ClickToFavoritesUseCase()
-                        }), horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(Icons.Rounded.Favorite, contentDescription = "favorite")
-                    Text(
-                        text = stringResource(R.string.favorite_tab),
-                        fontSize = 9.sp,
-                        maxLines = 1
-                    )
-                }
-
-                // CreateAd Stub
-                Spacer(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(72.dp)
-                )
-
-                // Cart
-                Column(
-                    modifier = modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(topStart = 8.dp))
-                        .background(
-                            if (tabScreen is CartScreen)
-                                Color(0xffcccccc) else Color(0xffffffff)
-                        )
-                        .clickable {
-                            screen.ClickToCartUseCase()
-
-                        }, horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(Icons.Rounded.ShoppingCart, contentDescription = "cart")
-                    Text(text = stringResource(R.string.cart_tab), fontSize = 9.sp, maxLines = 1)
-                }
-
-                // Profile
-                Column(
-                    modifier = modifier
-                        .weight(1f)
-                        .background(
-                            if (tabScreen is ProfileScreen)
-                                Color(0xffcccccc) else Color(0xffffffff)
-                        )
-                        .clickable {
-                            screen.ClickToProfileUseCase()
-
-                        }, horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(Icons.Rounded.Person, contentDescription = "profile")
-                    Text(text = stringResource(R.string.profile_tab), fontSize = 9.sp, maxLines = 1)
-                }
+            TabsView(tabScreen, screen)
+            Box(modifier = Modifier.fillMaxWidth().offset(y = (16).dp)) {
+                ButtonCreateNewView(screen)
             }
-
+        }
             // CreateAd
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .size(86.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xfffcfcfc))
-                    .border(width = 1.dp, color = Color.LightGray, shape = CircleShape)
-                    .clickable {
-                        screen.ClickToCreateAdUseCase()
 
-                    }
-            ) {
-                Icon(
-                    Icons.Rounded.Add,
-                    contentDescription = "create_ad",
-                    modifier = Modifier.size(40.dp)
-                )
-//                Text(text = stringResource(R.string.create_new_tab), fontSize = 9.sp, maxLines = 1)
-                Spacer(modifier = Modifier.size(8.dp))
+    }
+}
+
+@Composable
+fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .size(86.dp)
+            .clip(CircleShape)
+            .background(primaryContainerLightMediumContrast)
+            .border(width = 1.dp, color = primaryLightMediumContrast, shape = CircleShape)
+            .clickable {
+                screen.ClickToCreateAdUseCase()
+
             }
+    ) {
+        Icon(
+            Icons.Rounded.Add,
+            contentDescription = "create_ad",
+            tint = onPrimaryContainerLightMediumContrast,
+            modifier = Modifier.size(40.dp)
+        )
+        //                Text(text = stringResource(R.string.create_new_tab), fontSize = 9.sp, maxLines = 1)
+        Spacer(modifier = Modifier.size(8.dp))
+    }
+}
+
+@Composable
+private fun BoxScope.TabsView(
+    tabScreen: IScreen,
+    screen: MainScreen
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.BottomStart),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        val modifier = Modifier
+        // Search
+
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen is SearchScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable(onClick = {
+                    screen.ClickToSearchUseCase()
+                }), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.Search,
+                contentDescription = "search",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.search_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
+        }
+
+        // Favorites
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(topEnd = 8.dp))
+                .background(
+                    if (tabScreen is FavoritesScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable(onClick = {
+                    screen.ClickToFavoritesUseCase()
+                }), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.Favorite,
+                contentDescription = "favorite",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.favorite_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
+        }
+
+        // CreateAd Stub
+        Spacer(
+            modifier = Modifier
+                .weight(1f)
+                .background(Color.Transparent)
+        )
+
+        // Cart
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(topStart = 8.dp))
+                .background(
+                    if (tabScreen is CartScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable {
+                    screen.ClickToCartUseCase()
+
+                }, horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.ShoppingCart,
+                contentDescription = "cart",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.cart_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
+        }
+
+        // Profile
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen is ProfileScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable {
+                    screen.ClickToProfileUseCase()
+
+                }, horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.Person,
+                contentDescription = "profile",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.profile_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
         }
     }
 }

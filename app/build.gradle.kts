@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "me.likeavitoapp"
-        minSdk = 29
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil3.coil.network.ktor3)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.coil.compose)
     implementation(libs.androidx.datastore.preferences)
