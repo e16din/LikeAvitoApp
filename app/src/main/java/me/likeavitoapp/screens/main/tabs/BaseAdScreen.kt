@@ -48,7 +48,8 @@ open class BaseAdScreen(
         recordScenarioStep()
 
         scope.launchWithHandler {
-            ad.isFavorite.inverse()
+            ad.isFavorite.setUi(!ad.isFavorite.value)
+
             sources.backend.adsService.updateFavoriteState(ad)
         }
     }
@@ -95,7 +96,6 @@ open class BaseAdScreen(
                     timeMs / 1000 / 60 % 60, timeMs / 1000 % 60
                 )
             } ?: "")
-            log("tick: ${ad.timerLabel.value}")
             delay(1000)
         }
         ad.reservedTimeMs = null

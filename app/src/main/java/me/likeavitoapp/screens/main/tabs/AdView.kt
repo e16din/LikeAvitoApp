@@ -19,11 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
@@ -54,19 +53,23 @@ fun AdViewPreview() {
                 parentNavigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource()
-            )
+            ),
+            isFavorite = remember { mutableStateOf(true)},
+            timerLabel = remember { mutableStateOf("") }
         )
     }
 }
 
 @Composable
-inline fun AdView(
+fun AdView(
     ad: Ad,
     screen: BaseAdScreen,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFavorite: State<Boolean>,
+    timerLabel: State<String>
 ) {
-    val favoriteSelected by ad.isFavorite
-    val timerLabel by ad.timerLabel
+
+    log("favoriteSelected: $isFavorite")
 
     Card(
         modifier = modifier,
@@ -107,7 +110,7 @@ inline fun AdView(
                     }
                 ) {
                     Icon(
-                        imageVector = if (favoriteSelected)
+                        imageVector = if (isFavorite.value)
                             Icons.Default.Favorite
                         else
                             Icons.Default.FavoriteBorder,
@@ -117,7 +120,7 @@ inline fun AdView(
                     )
                 }
 
-                if (!timerLabel.isEmpty()) {
+                if (!timerLabel.value.isEmpty()) {
                     Text(
                         modifier = Modifier
                             .padding(vertical = 32.dp, horizontal = 24.dp)
@@ -126,7 +129,7 @@ inline fun AdView(
                             .align(Alignment.BottomStart)
                             .padding(16.dp),
                         color = Color.White,
-                        text = "Продолжить оформление заказа $timerLabel"
+                        text = stringResource(R.string.continue_order_label, timerLabel.value)
                     )
                     Button(onClick = {
                         screen.ClickToCloseTimerLabel(ad)

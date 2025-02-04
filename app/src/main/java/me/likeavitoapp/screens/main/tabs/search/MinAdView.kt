@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import coil3.compose.AsyncImage
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -43,6 +45,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun MinAdViewPreview() {
     LikeAvitoAppTheme {
         MinAdView(
+            isFavorite = remember { mutableStateOf(true) },
             ad = MockDataProvider().getAd(1),
             onItemClick = {},
             onFavoriteClick = {}
@@ -52,12 +55,13 @@ fun MinAdViewPreview() {
 
 @Composable
 inline fun MinAdView(
+    isFavorite: State<Boolean>,
     ad: Ad,
     crossinline onItemClick: (ad: Ad) -> Unit,
     crossinline onFavoriteClick: (ad: Ad) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val favoriteSelected by ad.isFavorite
+
     Card(
         modifier = modifier,
         onClick = {
@@ -93,7 +97,7 @@ inline fun MinAdView(
                     }
                 ) {
                     Icon(
-                        imageVector = if (favoriteSelected)
+                        imageVector = if (isFavorite.value)
                             Icons.Default.Favorite
                         else
                             Icons.Default.FavoriteBorder,

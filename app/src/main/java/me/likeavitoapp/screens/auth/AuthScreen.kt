@@ -1,9 +1,6 @@
 package me.likeavitoapp.screens.auth
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
 import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
@@ -11,6 +8,7 @@ import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.StateValue
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.screens.main.MainScreen
@@ -26,11 +24,11 @@ class AuthScreen(
 ) : IScreen {
 
     class State {
-        val email = mutableStateOf("")
-        val password = mutableStateOf("")
+        val email = StateValue("")
+        val password = StateValue("")
 
-        val emailErrorEnabled = mutableStateOf(false)
-        val loginButtonEnabled = mutableStateOf(false)
+        val emailErrorEnabled = StateValue(false)
+        val loginButtonEnabled = StateValue(false)
 
         val login = Loadable(emptyList<Unit>())
     }

@@ -1,10 +1,10 @@
 package me.likeavitoapp
 
-import androidx.compose.runtime.mutableStateOf
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.Region
+import me.likeavitoapp.model.StateValue
 import me.likeavitoapp.model.User
 
 
@@ -14,7 +14,7 @@ class MockDataProvider {
         repeat(21) {
             ads.add(
                 getAd(it.toLong()).copy(
-                    isFavorite = mutableStateOf((it % 7) == 0)
+                    isFavorite = StateValue((it % 7) == 0)
                 )
             )
         }
@@ -75,8 +75,8 @@ class MockDataProvider {
 
     fun getAd(id: Long): Ad {
         return Ad(
-            id = id.toLong(),
-            title = "${id.toLong()}: MacBook Pro 14",
+            id = id,
+            title = "${id}: MacBook Pro 14",
             description = "Ноутбук, который расширяет ваши возможности\n" + "Apple MacBook Pro 14\" 2024 года – это ноутбук, созданный для тех, кто привык к скорости, мощности и комфорту. С процессором M4 он обеспечивает идеальный баланс между автономностью и производительностью, достаточной для очень требовательных задач. В нём есть всё, чтобы работать или отдыхать где угодно, подключать любые дисплеи и аксессуары, а высокий уровень безопасности, в сочетании с идеальной оптимизацией macOS и сервисами Apple, позволяет не загружать себя лишними заботами, фокусируясь на том, что действительно важно.",
             photoUrls = listOf(
                 "https://ir-3.ozone.ru/s3/multimedia-1-n/wc1000/6917949671.jpg",
@@ -102,9 +102,9 @@ class MockDataProvider {
                 name = "Петр Петрович",
                 contacts = Contacts(phone = "8950XXXXX07")
             ),
-            isFavorite = mutableStateOf(false),
+            isFavorite = StateValue(false),
             reservedTimeMs = null,
-            timerLabel = mutableStateOf(""),
+            timerLabel = StateValue(""),
         )
     }
 

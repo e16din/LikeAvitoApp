@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +32,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.log
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -69,9 +68,9 @@ fun FavoritesScreenProvider(screen: FavoritesScreen) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
-    val ads = remember { screen.state.ads.data }
-    log("ads: ${ads.value}")
-    val moveToAdsEnabled by screen.state.moveToAdsEnabled
+    val ads = screen.state.ads.data.collectAsState(FavoritesScreen::class)
+
+    val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState(FavoritesScreen::class)
 
     val listState = rememberLazyListState()
     val displayButton = !listState.canScrollBackward || listState.lastScrolledBackward
@@ -128,13 +127,15 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
                     }
                 }
 
-                items(items = ads.value.toMutableStateList(), key = { ad ->
+                items(items = ads.value, key = { ad ->
                     ad.id
                 }) { ad ->
                     AdView(
                         ad = ad,
                         screen = screen,
-                        modifier = Modifier.animateItem()
+                        modifier = Modifier.animateItem(),
+                        isFavorite = ad.isFavorite.collectAsState(FavoritesScreen::class),
+                        timerLabel = ad.timerLabel.collectAsState(FavoritesScreen::class)
                     )
                 }
             }
@@ -150,7 +151,7 @@ fun FavoritesScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.ads.data.value = MockDataProvider().getFavorites().toMutableList()
+        state.ads.data.value = MockDataProvider().getFavorites().toMutableStateList()
     }
 
     LikeAvitoAppTheme {

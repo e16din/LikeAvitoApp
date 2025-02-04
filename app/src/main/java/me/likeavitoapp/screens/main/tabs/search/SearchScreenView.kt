@@ -1,13 +1,11 @@
 package me.likeavitoapp.screens.main.tabs.search
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,31 +36,24 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.invalidateGroupsWithKey
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.dropUnlessResumed
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.log
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -74,7 +65,6 @@ import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-import kotlin.coroutines.ContinuationInterceptor.Key
 
 
 @Composable
@@ -99,7 +89,7 @@ fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
-    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled
+    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(SearchScreen::class)
     PullToRefreshBox(
         isRefreshing = false,
         onRefresh = { },
@@ -142,8 +132,8 @@ private fun AdsListView(screen: SearchScreen) {
         screen.ScrollToEndUseCase()
     }
 
-    var ads = screen.state.ads.data.value.toMutableList()
-
+    var ads = screen.state.ads.data.collectAsState(key = SearchScreen::class)
+    val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>()}
     LazyColumn(
         state = listState,
         contentPadding = PaddingValues(
@@ -163,12 +153,15 @@ private fun AdsListView(screen: SearchScreen) {
             }
         }
 
-        items(items = ads, key = { ad ->
+        items(items = ads.value, key = { ad ->
             ad.id
         }) { ad ->
+            adsListenersMap[ad.id] = ad.isFavorite.collectAsState(SearchScreen::class)
 
             if (ad.isPremium) {
                 AdView(
+                    isFavorite = ad.isFavorite.collectAsState(SearchScreen::class),
+                    timerLabel = ad.timerLabel.collectAsState(SearchScreen::class),
                     modifier = Modifier.animateItem(),
                     ad = ad,
                     screen = screen
@@ -177,6 +170,7 @@ private fun AdsListView(screen: SearchScreen) {
             } else {
                 MinAdView(
                     modifier = Modifier.animateItem(),
+                    isFavorite = ad.isFavorite.collectAsState(SearchScreen::class),
                     ad = ad,
                     onItemClick = { ad ->
                         screen.ClickToAdUseCase(ad)
@@ -193,12 +187,12 @@ private fun AdsListView(screen: SearchScreen) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun SearchBarView(screen: SearchScreen) {
-    val query by screen.searchBar.state.query
+    val query by screen.searchBar.state.query.collectAsState(SearchScreen::class)
     val searchTips = remember {  screen.searchBar.state.searchTips.data.value.toMutableStateList() }
-    val selectedCategory by screen.searchSettingsPanel.state.selectedCategory
+    val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState(SearchScreen::class)
     val categories = remember { screen.searchSettingsPanel.state.categories.data.value.toMutableStateList() }
     var searchBarExpanded by remember { mutableStateOf(false) }
-    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled
+    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(SearchScreen::class)
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 

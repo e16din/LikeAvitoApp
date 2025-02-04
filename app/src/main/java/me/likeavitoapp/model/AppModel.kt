@@ -1,12 +1,10 @@
 package me.likeavitoapp.model
 
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.delay
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
-import kotlinx.coroutines.launch
 import me.likeavitoapp.log
-import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.screens.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
 import kotlin.reflect.KClass
@@ -15,6 +13,8 @@ import kotlin.reflect.KClass
 class AppModel {
 
     var user: User? = null
+
+    var ads: SnapshotStateList<Ad> = mutableStateListOf<Ad>()
 
     lateinit var rootScreen: RootScreen
 
@@ -81,9 +81,9 @@ data class Ad(
     val price: Int,
     val isBargainingEnabled: Boolean,
     val isPremium: Boolean,
-    var isFavorite: MutableState<Boolean> = mutableStateOf(false),
+    var isFavorite: StateValue<Boolean> = StateValue(false),
     var reservedTimeMs: Long?,
-    val timerLabel: MutableState<String> = mutableStateOf(""),
+    val timerLabel: StateValue<String> = StateValue(""),
     val category: Category,
     val address: Address,
     val owner: Owner

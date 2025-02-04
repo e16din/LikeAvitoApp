@@ -1,21 +1,26 @@
 package me.likeavitoapp.model
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.defaultContext
 
 
-class Listener<T>(var value: T) {
-    var onCall: ((value: T) -> Unit)? = null
+class StateValue<T>(var value: T) {
+    var callbacks = mutableMapOf<Any, (value: T) -> Unit>()
 
-    fun listen(onCall: (value: T) -> Unit) {
-        this.onCall = onCall
+    fun listen(key: Any, onChanged: (value: T) -> Unit) {
+        callbacks[key] = (onChanged)
     }
 
-    fun call(value: T) {
-        this@Listener.value = value
-        onCall?.invoke(value)
+    fun set(value: T) {
+        this.value = value
+        callbacks.values.forEach {
+            it.invoke(value)
+        }
+    }
+
+    fun free(key: Any) {
+        callbacks.remove(key)
     }
 }
 
@@ -31,7 +36,7 @@ class ScreenArguments(
     val sources: DataSources
 )
 
-class DataSourcesWithScreen<T: IScreen>(
+class DataSourcesWithScreen<T : IScreen>(
     val app: AppModel,
     val platform: IAppPlatform,
     val backend: AppBackend,
@@ -39,9 +44,9 @@ class DataSourcesWithScreen<T: IScreen>(
 )
 
 class Loadable<T>(initial: T) {
-    var data = Listener<T>(initial)
-    var loading = mutableStateOf(false)
-    var loadingFailed = mutableStateOf(false)
+    var data = StateValue<T>(initial)
+    var loading = StateValue(false)
+    var loadingFailed = StateValue(false)
 }
 
 
@@ -50,5 +55,6 @@ fun mockDataSource() = DataSources(
     platform = AppPlatform(),
     backend = AppBackend(),
 )
+
 fun mockCoroutineScope() = CoroutineScope(defaultContext)
 fun mockScreensNavigator() = ScreensNavigator()

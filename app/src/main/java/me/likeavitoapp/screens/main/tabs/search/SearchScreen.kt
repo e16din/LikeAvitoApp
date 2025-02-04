@@ -1,7 +1,8 @@
 package me.likeavitoapp.screens.main.tabs.search
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
@@ -15,6 +16,7 @@ import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.StateValue
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
@@ -29,8 +31,8 @@ class SearchScreen(
 ) : BaseAdScreen(parentNavigator, scope, sources) {
 
     class State(
-        val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
-        var adsPage: MutableState<Int> = mutableStateOf(0)
+        val ads: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
+        var adsPage: StateValue<Int> = StateValue(0)
     ) : BaseAdState()
 
     override val state = State()
@@ -64,7 +66,9 @@ class SearchScreen(
                 )
             },
             onSuccess = { newAds ->
-                state.ads.data.setUi(newAds)
+                val list = newAds.toMutableStateList()
+                sources.app.ads = list
+                state.ads.data.set(list)
             }
         )
     }
@@ -75,7 +79,7 @@ class SearchScreen(
                 return@load sources.backend.adsService.getCategories()
             },
             onSuccess = { newCategories ->
-                categories.data.setUi(newCategories)
+                categories.data.set(newCategories)
             }
         )
     }
@@ -87,6 +91,13 @@ class SearchScreen(
             loadCategories()
             loadAds()
         }
+    }
+
+    override fun ClickToFavoriteUseCase(ad: Ad) {
+        super.ClickToFavoriteUseCase(ad)
+
+        val i = state.ads.data.value.indexOf(ad)
+        state.ads.data.value = state.ads.data.value.toMutableStateList()
     }
 
     fun CloseSearchSettingsPanelUseCase() {
@@ -105,7 +116,7 @@ class SearchScreen(
         var queryDebouncer: Debouncer<String>? = null
 
         inner class State(
-            var query: MutableState<String> = mutableStateOf(""),
+            var query: StateValue<String> = StateValue(""),
             val searchTips: Loadable<List<String>> = Loadable(emptyList<String>())
         )
 
@@ -178,14 +189,14 @@ class SearchScreen(
         val state = State()
 
         inner class State(
-            var enabled: MutableState<Boolean> = mutableStateOf(false),
+            var enabled: StateValue<Boolean> = StateValue(false),
             val categories: Loadable<List<Category>> = Loadable(emptyList<Category>()),
-            var selectedCategory: MutableState<Category?> = mutableStateOf(null),
+            var selectedCategory: StateValue<Category?> = StateValue(null),
             val regions: Loadable<List<Region>> = Loadable(emptyList<Region>()),
-            var selectedRegion: MutableState<Region?> = mutableStateOf(null),
-            var priceRange: MutableState<PriceRange> = mutableStateOf(PriceRange()),
-            var categoryMenuEnabled: MutableState<Boolean> = mutableStateOf(false),
-            var regionMenuEnabled: MutableState<Boolean> = mutableStateOf(false),
+            var selectedRegion: StateValue<Region?> = StateValue(null),
+            var priceRange: StateValue<PriceRange> = StateValue(PriceRange()),
+            var categoryMenuEnabled: StateValue<Boolean> = StateValue(false),
+            var regionMenuEnabled: StateValue<Boolean> = StateValue(false),
         )
 
         fun ChangePriceFromUseCase(value: Int) {

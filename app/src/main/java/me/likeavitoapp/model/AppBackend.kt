@@ -86,9 +86,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
             if (develop) {
-                mockDataProvider.ads = mockDataProvider.ads.toMutableList().apply {
+                mockDataProvider.ads.apply {
                     if (ad.isFavorite.value) {
-                        add(ad)
+                        if (!contains(ad)) {
+                            add(ad)
+                        }
                     } else {
                         remove(ad)
                     }
@@ -103,7 +105,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         fun deleteAllFavorites(): Result<Boolean> {
-            mockDataProvider.ads = mockDataProvider.ads.toMutableList().apply {
+            mockDataProvider.ads = mockDataProvider.ads.apply {
                 forEach { it.isFavorite.value = false }
             }
             return mockDataProvider.getSuccessOrFail(true)

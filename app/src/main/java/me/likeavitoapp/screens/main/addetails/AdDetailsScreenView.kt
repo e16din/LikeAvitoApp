@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,6 +39,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.collectAsState
+import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -60,8 +63,14 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 
 @Composable
 fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
-    val favoriteSelected by screen.state.ad.isFavorite
+    val favoriteSelected by screen.state.ad.isFavorite.collectAsState(AdDetailsScreen::class)
 
+    DisposableEffect(Unit) {
+        onDispose {
+            log("AdDetailsScreen.dispose!")
+            screen.state.ad.isFavorite.free(AdDetailsScreen::class)
+        }
+    }
     Column {
         Text(
             text = ad.title,
