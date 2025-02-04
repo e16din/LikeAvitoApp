@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ class RootScreen(
     class State(
         var isStarted: Boolean = false,
         var demoLabelEnabled: Boolean = develop,
-        val scenariosEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+        val scenariosEnabled: MutableState<Boolean> = mutableStateOf(false),
     )
 
     val state = State()

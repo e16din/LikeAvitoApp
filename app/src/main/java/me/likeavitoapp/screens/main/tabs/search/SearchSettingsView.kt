@@ -54,9 +54,9 @@ inline fun SearchSettingsPanelView(
     panel: SearchScreen.SearchSettingsPanel,
     crossinline onFocus: () -> Unit = {}
 ) {
-    val category by panel.state.selectedCategory.collectAsState()
-    val region by panel.state.selectedRegion.collectAsState()
-    val priceRange by panel.state.priceRange.collectAsState()
+    val category by panel.state.selectedCategory
+    val region by panel.state.selectedRegion
+    val priceRange by panel.state.priceRange
     val textFrom = remember { priceRange.from.toString() }
     val textTo = remember {
         if (priceRange.to < 0)

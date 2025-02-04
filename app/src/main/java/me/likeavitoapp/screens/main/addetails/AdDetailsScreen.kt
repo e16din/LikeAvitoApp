@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.main.addetails
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.inverse
@@ -23,7 +25,7 @@ class AdDetailsScreen(
 
     class State(
         val ad: Ad,
-        val messages: MutableStateFlow<List<IMessage>> = MutableStateFlow(emptyList()),
+        val messages: MutableState<List<IMessage>> = mutableStateOf(emptyList()),
     ) : BaseAdState()
 
     override val state: State = State(ad)

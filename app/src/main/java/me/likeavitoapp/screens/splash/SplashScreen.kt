@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.splash
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +13,7 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
+import me.likeavitoapp.setUi
 
 
 class SplashScreen(
@@ -19,7 +22,7 @@ class SplashScreen(
     val sources: DataSources = provideDataSources()
 ) : IScreen {
 
-    class State(val contentEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false))
+    class State(val contentEnabled: MutableState<Boolean> = mutableStateOf(false))
 
     val state = State()
     // UseCases:
@@ -27,7 +30,7 @@ class SplashScreen(
     fun StartScreenUseCase(startMs: Long = System.currentTimeMillis()) {
         scope.launchWithHandler {
             delay(200)
-            state.contentEnabled.value = true
+            state.contentEnabled.setUi(true)
 
             sources.backend.token = sources.platform.appDataStore.loadToken()
             val userId = sources.platform.appDataStore.loadId()

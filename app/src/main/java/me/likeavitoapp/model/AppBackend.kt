@@ -1,6 +1,7 @@
 package me.likeavitoapp.model
 
 
+import androidx.compose.runtime.toMutableStateList
 import io.ktor.client.*
 import kotlinx.coroutines.delay
 import me.likeavitoapp.AuthFiledException
@@ -112,6 +113,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class CartService {
         suspend fun reserve(adId: Long): Result<Boolean> {
+            mockDataProvider.ads = mockDataProvider.ads.toMutableStateList().apply {
+                firstOrNull { ad -> ad.id == adId }?.let {
+                    it.reservedTimeMs = System.currentTimeMillis()
+                }
+            }
             return mockDataProvider.getSuccessOrFail(adId != 2L)
         }
 

@@ -41,7 +41,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun ProfileScreenProvider(screen: ProfileScreen) {
-    val nextScreen by screen.navigator.screen.collectAsState()
+    val nextScreen by screen.navigator.screen
 
     Box {
         ProfileScreenView(screen)

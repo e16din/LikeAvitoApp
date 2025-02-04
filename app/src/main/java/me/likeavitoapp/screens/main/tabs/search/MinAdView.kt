@@ -57,7 +57,7 @@ inline fun MinAdView(
     crossinline onFavoriteClick: (ad: Ad) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val favoriteSelected by ad.isFavorite.collectAsState()
+    val favoriteSelected by ad.isFavorite
     Card(
         modifier = modifier,
         onClick = {

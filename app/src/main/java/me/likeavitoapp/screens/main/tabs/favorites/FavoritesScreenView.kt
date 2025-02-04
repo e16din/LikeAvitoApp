@@ -18,8 +18,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -47,7 +49,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun FavoritesScreenProvider(screen: FavoritesScreen) {
-    val nextScreen by screen.navigator.screen.collectAsState()
+    val nextScreen by screen.navigator.screen
 
     Box {
         LaunchedEffect(Unit) {
@@ -67,14 +69,16 @@ fun FavoritesScreenProvider(screen: FavoritesScreen) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
-    val ads by screen.state.ads.data.collectAsState()
-    val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState()
+    val ads = remember { screen.state.ads.data }
+    log("ads: ${ads.value}")
+    val moveToAdsEnabled by screen.state.moveToAdsEnabled
 
     val listState = rememberLazyListState()
     val displayButton = !listState.canScrollBackward || listState.lastScrolledBackward
 
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures()
             }) {
@@ -124,24 +128,13 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
                     }
                 }
 
-                items(items = ads, key = { ad ->
+                items(items = ads.value.toMutableStateList(), key = { ad ->
                     ad.id
                 }) { ad ->
                     AdView(
-                        modifier = Modifier.animateItem(),
                         ad = ad,
-                        onItemClick = { ad ->
-                            screen.ClickToAdUseCase(ad)
-                        },
-                        onFavoriteClick = { ad ->
-                            screen.ClickToFavoriteUseCase(ad)
-                        },
-                        onBuyClick = { ad ->
-                            screen.ClickToBuyUseCase(ad)
-                        },
-                        onBargainingClick = { ad ->
-                            screen.ClickToBargainingUseCase(ad)
-                        }
+                        screen = screen,
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -157,7 +150,7 @@ fun FavoritesScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.ads.data.value = MockDataProvider().getFavorites()
+        state.ads.data.value = MockDataProvider().getFavorites().toMutableList()
     }
 
     LikeAvitoAppTheme {

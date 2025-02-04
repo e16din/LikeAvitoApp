@@ -62,8 +62,8 @@ import me.likeavitoapp.ui.theme.secondaryContainerLight
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
     val mainTabScreen = remember { screen.mainTabScreen }
-    val nextScreen = screen.navigator.screen.collectAsState()
-    val tabScreen = screen.tabsNavigator.screen.collectAsState()
+    val nextScreen = screen.navigator.screen
+    val tabScreen = screen.tabsNavigator.screen
 
     Box(
         modifier = Modifier.fillMaxSize()

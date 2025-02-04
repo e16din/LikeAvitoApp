@@ -28,7 +28,7 @@ import me.likeavitoapp.ui.theme.primaryContainerDark
 
 @Composable
 fun RootScreenView(rootScreen: RootScreen) {
-    val screen = rootScreen.navigator.screen.collectAsState()
+    val screen = rootScreen.navigator.screen
 
     LaunchedEffect(Unit) {
         rootScreen.StartScreenUseCase()

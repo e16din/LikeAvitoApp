@@ -1,12 +1,9 @@
 package me.likeavitoapp
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.runtime.mutableStateOf
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.AppBackend
-import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.User
 
@@ -17,7 +14,7 @@ class MockDataProvider {
         repeat(21) {
             ads.add(
                 getAd(it.toLong()).copy(
-                    isFavorite = MutableStateFlow((it % 7) == 0)
+                    isFavorite = mutableStateOf((it % 7) == 0)
                 )
             )
         }
@@ -86,7 +83,7 @@ class MockDataProvider {
                 "https://ir-3.ozone.ru/s3/multimedia-s/wc1000/6898199320.jpg",
                 "https://ir-3.ozone.ru/s3/multimedia-1-9/wc1000/7265953233.jpg",
                 "https://ir-3.ozone.ru/s3/multimedia-1-8/wc1000/7265953232.jpg",
-                ),
+            ),
             contacts = Contacts(
                 phone = "8XXXXXX1234",
                 whatsapp = null,
@@ -105,7 +102,9 @@ class MockDataProvider {
                 name = "Петр Петрович",
                 contacts = Contacts(phone = "8950XXXXX07")
             ),
-            isFavorite = MutableStateFlow(false)
+            isFavorite = mutableStateOf(false),
+            reservedTimeMs = null,
+            timerLabel = mutableStateOf(""),
         )
     }
 
@@ -124,13 +123,6 @@ class MockDataProvider {
             Result.success(true)
         else
             Result.failure(Exception("Request failed"))
-    }
-
-    fun getInitialFavorites(): List<Ad> {
-        return listOf(
-            getAd(100500).apply { isFavorite.value = true },
-            getAd(100501).apply { isFavorite.value = true }
-        )
     }
 
     fun getFavorites(): List<Ad> {

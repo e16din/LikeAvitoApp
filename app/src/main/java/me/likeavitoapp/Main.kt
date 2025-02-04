@@ -47,6 +47,7 @@ fun initApp(platform: IAppPlatform, scope: CoroutineScope): AppModel {
 fun provideDataSources() = actualDataSources!!
 fun provideCoroutineScope() = actualScope!!
 fun provideRootScreen() = appModel!!.rootScreen
+fun provideApp() = appModel!!
 
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -67,7 +68,7 @@ fun log(text: String, tag: String = "debug") {
 
 fun logError(text: String, tag: String = "debug") {
     if (develop) {
-        Log.e(tag, text)
+        Log.e(tag, "Error: $text")
     }
 }
 

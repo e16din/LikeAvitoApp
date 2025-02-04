@@ -1,10 +1,14 @@
 package me.likeavitoapp.model
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.delay
+
+import kotlinx.coroutines.launch
 import me.likeavitoapp.log
+import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.screens.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import kotlin.reflect.KClass
 
 
@@ -25,7 +29,7 @@ class StubScreen() : IScreen
 
 class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = "") {
     val screens = mutableListOf(initialScreen)
-    val screen = MutableStateFlow(initialScreen)
+    val screen = mutableStateOf(initialScreen)
 
     fun startScreen(nextScreen: IScreen, clearStack: Boolean = false) {
         if (screens.last().javaClass.simpleName != nextScreen.javaClass.simpleName) {
@@ -44,7 +48,7 @@ class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = 
         log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
     }
 
-    inline fun <reified T: IScreen> getScreenOrNull(klass: KClass<T>): T? {
+    inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
         return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
     }
 }
@@ -70,14 +74,16 @@ data class Category(val name: String, val id: Int)
 
 data class Ad(
     val id: Long,
-    val title: String,
+    var title: String,
     val description: String,
     val photoUrls: List<String>,
     val contacts: Contacts,
     val price: Int,
     val isBargainingEnabled: Boolean,
     val isPremium: Boolean,
-    val isFavorite: MutableStateFlow<Boolean>,
+    var isFavorite: MutableState<Boolean> = mutableStateOf(false),
+    var reservedTimeMs: Long?,
+    val timerLabel: MutableState<String> = mutableStateOf(""),
     val category: Category,
     val address: Address,
     val owner: Owner

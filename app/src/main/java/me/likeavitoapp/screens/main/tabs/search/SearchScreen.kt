@@ -1,11 +1,13 @@
 package me.likeavitoapp.screens.main.tabs.search
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.DataSources
@@ -17,6 +19,7 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
+import me.likeavitoapp.setUi
 
 
 class SearchScreen(
@@ -27,7 +30,7 @@ class SearchScreen(
 
     class State(
         val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
-        var adsPage: MutableStateFlow<Int> = MutableStateFlow(0)
+        var adsPage: MutableState<Int> = mutableStateOf(0)
     ) : BaseAdState()
 
     override val state = State()
@@ -49,6 +52,7 @@ class SearchScreen(
     }
 
     suspend fun loadAds() {
+        log("loadAds")
         state.ads.load(
             loading = {
                 return@load sources.backend.adsService.getAds(
@@ -60,7 +64,7 @@ class SearchScreen(
                 )
             },
             onSuccess = { newAds ->
-                state.ads.data.value = newAds
+                state.ads.data.setUi(newAds)
             }
         )
     }
@@ -71,7 +75,7 @@ class SearchScreen(
                 return@load sources.backend.adsService.getCategories()
             },
             onSuccess = { newCategories ->
-                categories.data.value = newCategories
+                categories.data.setUi(newCategories)
             }
         )
     }
@@ -89,7 +93,7 @@ class SearchScreen(
         recordScenarioStep()
 
         scope.launchWithHandler {
-            searchSettingsPanel.state.enabled.value = false
+            searchSettingsPanel.state.enabled.setUi(false)
             loadAds()
         }
     }
@@ -101,7 +105,7 @@ class SearchScreen(
         var queryDebouncer: Debouncer<String>? = null
 
         inner class State(
-            var query: MutableStateFlow<String> = MutableStateFlow(""),
+            var query: MutableState<String> = mutableStateOf(""),
             val searchTips: Loadable<List<String>> = Loadable(emptyList<String>())
         )
 
@@ -110,7 +114,7 @@ class SearchScreen(
             recordScenarioStep()
 
             scope.launchWithHandler {
-                searchSettingsPanel.state.selectedCategory.value = category
+                searchSettingsPanel.state.selectedCategory.setUi(category)
                 loadAds()
             }
         }
@@ -131,20 +135,20 @@ class SearchScreen(
                     scope.launchWithHandler {
                         with(state) {
                             if (lastQuery.isEmpty()) {
-                                searchTips.loading.value = false
-                                searchTips.data.value = emptyList()
+                                searchTips.loading.setUi(false)
+                                searchTips.data.setUi(emptyList())
                                 return@with
                             }
 
-                            searchTips.loading.value = true
+                            searchTips.loading.setUi(true)
 
                             val result = sources.backend.adsService.getSearchTips(
                                 categoryId = searchSettingsPanel.state.selectedCategory.value?.id
                                     ?: 0,
                                 query = searchBar.state.query.value
                             )
-                            searchTips.loading.value = false
-                            searchTips.data.value = result.getOrNull() ?: emptyList()
+                            searchTips.loading.setUi(false)
+                            searchTips.data.setUi(result.getOrNull() ?: emptyList())
                         }
                     }
                 }
@@ -174,14 +178,14 @@ class SearchScreen(
         val state = State()
 
         inner class State(
-            var enabled: MutableStateFlow<Boolean> = MutableStateFlow(false),
+            var enabled: MutableState<Boolean> = mutableStateOf(false),
             val categories: Loadable<List<Category>> = Loadable(emptyList<Category>()),
-            var selectedCategory: MutableStateFlow<Category?> = MutableStateFlow(null),
+            var selectedCategory: MutableState<Category?> = mutableStateOf(null),
             val regions: Loadable<List<Region>> = Loadable(emptyList<Region>()),
-            var selectedRegion: MutableStateFlow<Region?> = MutableStateFlow(null),
-            var priceRange: MutableStateFlow<PriceRange> = MutableStateFlow(PriceRange()),
-            var categoryMenuEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false),
-            var regionMenuEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false),
+            var selectedRegion: MutableState<Region?> = mutableStateOf(null),
+            var priceRange: MutableState<PriceRange> = mutableStateOf(PriceRange()),
+            var categoryMenuEnabled: MutableState<Boolean> = mutableStateOf(false),
+            var regionMenuEnabled: MutableState<Boolean> = mutableStateOf(false),
         )
 
         fun ChangePriceFromUseCase(value: Int) {

@@ -21,22 +21,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.mockCoroutineScope
+import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -47,10 +50,11 @@ fun AdViewPreview() {
     LikeAvitoAppTheme {
         AdView(
             ad = MockDataProvider().getAd(1),
-            onItemClick = {},
-            onFavoriteClick = {},
-            onBuyClick = {},
-            onBargainingClick = {}
+            screen = BaseAdScreen(
+                parentNavigator = mockScreensNavigator(),
+                scope = mockCoroutineScope(),
+                sources = mockDataSource()
+            )
         )
     }
 }
@@ -58,17 +62,16 @@ fun AdViewPreview() {
 @Composable
 inline fun AdView(
     ad: Ad,
-    crossinline onItemClick: (ad: Ad) -> Unit,
-    crossinline onFavoriteClick: (ad: Ad) -> Unit,
-    crossinline onBuyClick: (ad: Ad) -> Unit,
-    crossinline onBargainingClick: (ad: Ad) -> Unit,
+    screen: BaseAdScreen,
     modifier: Modifier = Modifier
 ) {
-    val favoriteSelected by ad.isFavorite.collectAsState()
+    val favoriteSelected by ad.isFavorite
+    val timerLabel by ad.timerLabel
+
     Card(
         modifier = modifier,
         onClick = {
-            onItemClick(ad)
+            screen.ClickToAdUseCase(ad)
         }) {
 
         Column {
@@ -82,8 +85,10 @@ inline fun AdView(
                 maxLines = 1,
                 overflow = TextOverflow.Companion.Ellipsis
             )
-            Box(modifier = Modifier
-                .fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 ActualAsyncImage(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -98,7 +103,7 @@ inline fun AdView(
                         .clip(CircleShape)
                         .background(Color.Transparent),
                     onClick = {
-                        onFavoriteClick(ad)
+                        screen.ClickToFavoriteUseCase(ad)
                     }
                 ) {
                     Icon(
@@ -110,6 +115,22 @@ inline fun AdView(
                         modifier = Modifier.size(32.dp),
                         tint = Color.Red
                     )
+                }
+
+                if (!timerLabel.isEmpty()) {
+                    Text(
+                        modifier = Modifier
+                            .padding(vertical = 32.dp, horizontal = 24.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black)
+                            .align(Alignment.BottomStart)
+                            .padding(16.dp),
+                        color = Color.White,
+                        text = "Продолжить оформление заказа $timerLabel"
+                    )
+                    Button(onClick = {
+                        screen.ClickToCloseTimerLabel(ad)
+                    }) { }
                 }
             }
 
@@ -130,10 +151,12 @@ inline fun AdView(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     onClick = {
-                        onBuyClick(ad)
+                        screen.ClickToBuyUseCase(ad)
                     }) {
-                    Text(text = "Купить за " + "${ad.price}₽",
-                        style = AppTypography.bodySmall)
+                    Text(
+                        text = "Купить за " + "${ad.price}₽",
+                        style = AppTypography.bodySmall
+                    )
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -143,10 +166,11 @@ inline fun AdView(
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         onClick = {
-                            onBargainingClick(ad)
+                            screen.ClickToBargainingUseCase(ad)
                         }) {
-                        Text(text = stringResource(R.string.bargaining_button)
-                        , style = AppTypography.labelSmall
+                        Text(
+                            text = stringResource(R.string.bargaining_button),
+                            style = AppTypography.labelSmall
                         )
                     }
                 }

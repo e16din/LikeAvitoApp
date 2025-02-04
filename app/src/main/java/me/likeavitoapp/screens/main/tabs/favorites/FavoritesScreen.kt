@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.main.tabs.favorites
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.inverse
@@ -14,6 +16,7 @@ import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.setUi
 
 
 class FavoritesScreen(
@@ -23,8 +26,8 @@ class FavoritesScreen(
 ) : BaseAdScreen(parentNavigator, scope, sources) {
 
     class State(
-        val ads: Loadable<List<Ad>> = Loadable(emptyList<Ad>()),
-        val moveToAdsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+        val ads: Loadable<MutableList<Ad>> = Loadable(mutableListOf<Ad>()),
+        val moveToAdsEnabled: MutableState<Boolean> = mutableStateOf(false)
     ) : BaseAdState()
 
     override val state = State()
@@ -43,8 +46,8 @@ class FavoritesScreen(
                     return@load sources.backend.adsService.getFavorites()
                 },
                 onSuccess = { newFavorites ->
-                    state.ads.data.value = newFavorites
-                    state.moveToAdsEnabled.value = newFavorites.isEmpty()
+                    state.ads.data.setUi(newFavorites.toMutableList())
+                    state.moveToAdsEnabled.setUi(newFavorites.isEmpty())
                 }
             )
         }
@@ -60,12 +63,13 @@ class FavoritesScreen(
                 },
                 onSuccess = { success ->
                     if (success) {
-                        val newFavorites = state.ads.data.value.toMutableList().apply {
+                        val newFavorites = state.ads.data.value.apply {
                             remove(ad)
                         }
-                        state.ads.data.value = newFavorites
-                        state.moveToAdsEnabled.value = newFavorites.isEmpty()
+                        state.ads.data.setUi(newFavorites)
+                        state.moveToAdsEnabled.setUi(newFavorites.isEmpty())
                     }
+
                 }
             )
         }
@@ -80,8 +84,8 @@ class FavoritesScreen(
                     return@load sources.backend.adsService.deleteAllFavorites()
                 },
                 onSuccess = { data ->
-                    state.ads.data.value = emptyList()
-                    state.moveToAdsEnabled.value = true
+                    state.ads.data.setUi(mutableListOf())
+                    state.moveToAdsEnabled.setUi(true)
                 }
             )
         }

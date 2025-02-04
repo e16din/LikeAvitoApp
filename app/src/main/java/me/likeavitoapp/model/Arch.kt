@@ -1,10 +1,23 @@
 package me.likeavitoapp.model
 
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.defaultContext
 
+
+class Listener<T>(var value: T) {
+    var onCall: ((value: T) -> Unit)? = null
+
+    fun listen(onCall: (value: T) -> Unit) {
+        this.onCall = onCall
+    }
+
+    fun call(value: T) {
+        this@Listener.value = value
+        onCall?.invoke(value)
+    }
+}
 
 class DataSources(
     val app: AppModel,
@@ -26,10 +39,11 @@ class DataSourcesWithScreen<T: IScreen>(
 )
 
 class Loadable<T>(initial: T) {
-    var data = MutableStateFlow(initial)
-    var loading = MutableStateFlow(false)
-    var loadingFailed = MutableStateFlow(false)
+    var data = Listener<T>(initial)
+    var loading = mutableStateOf(false)
+    var loadingFailed = mutableStateOf(false)
 }
+
 
 fun mockDataSource() = DataSources(
     app = AppModel(),

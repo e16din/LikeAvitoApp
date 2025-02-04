@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.coil.compose)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.lottie.compose)
     implementation(libs.ktor.client.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

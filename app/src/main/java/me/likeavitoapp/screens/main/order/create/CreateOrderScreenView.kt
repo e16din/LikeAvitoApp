@@ -33,6 +33,17 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
 
 @Composable
 fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
+    // самовывоз
+    //     адрес
+    //     время
+    //     посмотреть на карте
+    // доставка
+    //    компания доставки
+    // оплатить
+    // card number Номер карты
+    // mm/yy Действует до
+    // cvv/cvc три цифры с обратной стороны карты
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {

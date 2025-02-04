@@ -47,6 +47,7 @@ import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.provideRootScreen
+import me.likeavitoapp.setUi
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -54,7 +55,11 @@ import me.likeavitoapp.provideRootScreen
 fun AuthScreenProvider(screen: AuthScreen) {
     AuthScreenView(screen)
 
-    val scenariosEnabled = provideRootScreen().state.scenariosEnabled.collectAsState()
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
+
+    val scenariosEnabled = provideRootScreen().state.scenariosEnabled
     if (scenariosEnabled.value) {
         val authScenarios = remember { AuthScenarios(screen) }
         LaunchedEffect(Unit) {
@@ -80,12 +85,12 @@ fun AuthScreenView(screen: AuthScreen) {
 
     val localFocusManager = LocalFocusManager.current
 
-    val email = screen.state.email.collectAsStateSavable()
-    val password = screen.state.password.collectAsState()
-    val emailErrorEnabled = screen.state.emailErrorEnabled.collectAsState()
-    val loginButtonEnabled = screen.state.loginButtonEnabled.collectAsState()
-    val loginLoading = screen.state.login.loading.collectAsState()
-    val loginLoadingFailed = screen.state.login.loadingFailed.collectAsState()
+    val email = screen.state.email
+    val password = screen.state.password
+    val emailErrorEnabled = screen.state.emailErrorEnabled
+    val loginButtonEnabled = screen.state.loginButtonEnabled
+    val loginLoading = screen.state.login.loading
+    val loginLoadingFailed = screen.state.login.loadingFailed
 
     Box {
         Column(
@@ -172,7 +177,7 @@ fun AuthScreenView(screen: AuthScreen) {
     val errorMessage = stringResource(R.string.authorization_failed)
     LaunchedEffect(loginLoadingFailed.value) {
         if (loginLoadingFailed.value) {
-            screen.state.login.loadingFailed.value = false
+            screen.state.login.loadingFailed.setUi(false)
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }

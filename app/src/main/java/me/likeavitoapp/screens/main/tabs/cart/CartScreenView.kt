@@ -20,7 +20,7 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 
 @Composable
 fun CartScreenProvider(screen: CartScreen) {
-    val nextScreen by screen.navigator.screen.collectAsState()
+    val nextScreen by screen.navigator.screen
 
     Box {
         CartScreenView(screen)

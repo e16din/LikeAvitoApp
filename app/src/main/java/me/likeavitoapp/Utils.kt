@@ -2,31 +2,47 @@ package me.likeavitoapp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.screens.main.tabs.favorites.Listener
 
 
-inline fun <reified T> Loadable<*>.load(
+suspend inline fun <T> MutableState<T>.setUi(value:T){
+    withContext(Dispatchers.Main) {
+        this@setUi.value = value
+    }
+}
+
+suspend inline fun <T> Listener<T>.setUi(value:T){
+    withContext(Dispatchers.Main) {
+        this@setUi.value = value
+    }
+}
+
+suspend inline fun <reified T> Loadable<*>.load(
     loading: () -> Result<T>,
     onSuccess: (data: T) -> Unit
 ) {
-    this.loading.value = true
+    this.loading.setUi(true)
 
     val result = loading()
     val newData = result.getOrNull()
 
-    this.loading.value = false
+    this.loading.setUi(false)
 
     if (newData != null) {
         onSuccess(newData)
 
     } else {
-        this.loadingFailed.value = true
+        this.loadingFailed.setUi(true)
     }
 }
 
@@ -46,6 +62,10 @@ class Debouncer<T>(var value: T, timeoutMs: Long = 390L, onTimeout: (value: T) -
         value = newValue
         lastSetTimeMs = System.currentTimeMillis()
     }
+}
+
+fun MutableState<Boolean>.inverse() {
+    this.value = !this.value
 }
 
 fun MutableStateFlow<Boolean>.inverse() {

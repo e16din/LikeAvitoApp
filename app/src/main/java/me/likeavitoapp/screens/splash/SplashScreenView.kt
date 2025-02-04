@@ -23,7 +23,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SplashScreenProvider(screen: SplashScreen) {
     SplashScreenView(screen)
 
-    val scenariosEnabled = provideRootScreen().state.scenariosEnabled.collectAsState()
+    val scenariosEnabled = provideRootScreen().state.scenariosEnabled
     LaunchedEffect(Unit) {
         if (scenariosEnabled.value) {
             RunAppFromScratchScenario(screen)
@@ -36,7 +36,7 @@ fun SplashScreenProvider(screen: SplashScreen) {
 
 @Composable
 fun SplashScreenView(screen: SplashScreen) {
-    val contentEnabled = screen.state.contentEnabled.collectAsState()
+    val contentEnabled = screen.state.contentEnabled
     AnimatedVisibility(contentEnabled.value) {
         Box(
             modifier = Modifier.fillMaxSize(),
