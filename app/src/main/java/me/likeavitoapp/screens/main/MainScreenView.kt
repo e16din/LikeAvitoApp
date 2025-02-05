@@ -49,6 +49,8 @@ import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -73,6 +75,7 @@ fun MainScreenProvider(screen: MainScreen) {
         when (nextScreen.value) {
             is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
             is CreateOrderScreen -> CreateOrderScreenProvider(nextScreen.value as CreateOrderScreen)
+            is EditProfileScreen -> EditProfileScreenProvider(nextScreen.value as EditProfileScreen)
         }
     }
 

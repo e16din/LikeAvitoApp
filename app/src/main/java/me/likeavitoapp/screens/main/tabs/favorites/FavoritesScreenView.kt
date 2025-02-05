@@ -48,7 +48,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun FavoritesScreenProvider(screen: FavoritesScreen) {
-    val nextScreen by screen.navigator.screen
+    val nextScreen by screen.tabsNavigator.screen
 
     Box {
         LaunchedEffect(Unit) {

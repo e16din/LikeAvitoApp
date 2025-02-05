@@ -18,7 +18,6 @@ import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.setUi
 
 
 class FavoritesScreen(
@@ -33,7 +32,7 @@ class FavoritesScreen(
     ) : BaseAdState()
 
     override val state = State()
-    lateinit var navigator: ScreensNavigator
+    lateinit var tabsNavigator: ScreensNavigator
 
     fun StartScreenUseCase() {
         recordScenarioStep()
@@ -101,7 +100,7 @@ class FavoritesScreen(
 
     fun ClickToMoveToAdsUseCase() {
         val searchScreen =
-            navigator.getScreenOrNull(SearchScreen::class)!! // NOTE: please throw NPE if it is null here
-        navigator.startScreen(searchScreen, clearStack = true)
+            tabsNavigator.getScreenOrNull(SearchScreen::class)!! // NOTE: please throw NPE if it is null here
+        tabsNavigator.startScreen(searchScreen, clearStack = true)
     }
 }

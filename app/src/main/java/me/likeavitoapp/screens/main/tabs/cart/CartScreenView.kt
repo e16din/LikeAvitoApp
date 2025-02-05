@@ -3,13 +3,10 @@ package me.likeavitoapp.screens.main.tabs.cart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
@@ -20,7 +17,7 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 
 @Composable
 fun CartScreenProvider(screen: CartScreen) {
-    val nextScreen by screen.navigator.screen
+    val nextScreen by screen.tabsNavigator.screen
 
     Box {
         CartScreenView(screen)

@@ -42,5 +42,5 @@ class CartScreen(
         state.navHistory.add(tab)
     }
 
-    lateinit var navigator : ScreensNavigator
+    lateinit var tabsNavigator : ScreensNavigator
 }

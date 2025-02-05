@@ -25,18 +25,15 @@ class MainScreen(
 
     val searchScreen = SearchScreen(parentNavigator = navigator)
     val favoritesScreen = FavoritesScreen(parentNavigator = navigator)
-    val profileScreen = ProfileScreen(
-        user = sources.app.user!!,
-        parentNavigator = navigator,
-    )
+    val profileScreen = ProfileScreen(parentNavigator = navigator)
     val cartScreen = CartScreen(parentNavigator = navigator)
 
     val tabsNavigator =
         ScreensNavigator(initialScreen = searchScreen, tag = javaClass.simpleName + "Tab").apply {
-            searchScreen.navigator = this
-            favoritesScreen.navigator = this
-            profileScreen.navigator = this
-            cartScreen.navigator = this
+            searchScreen.tabsNavigator = this
+            favoritesScreen.tabsNavigator = this
+            profileScreen.tabsNavigator = this
+            cartScreen.tabsNavigator = this
         }
 
     val mainTabScreen = searchScreen

@@ -48,6 +48,7 @@ fun provideDataSources() = actualDataSources!!
 fun provideCoroutineScope() = actualScope!!
 fun provideRootScreen() = appModel!!.rootScreen
 fun provideApp() = appModel!!
+fun provideAndroidAppContext() = appPlatform as AppPlatform
 
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->

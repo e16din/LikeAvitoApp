@@ -1,6 +1,6 @@
-package me.likeavitoapp.screens.main.tabs.profile
+package me.likeavitoapp.screens.main.tabs.profile.edit
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +20,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,36 +36,33 @@ import me.likeavitoapp.model.User
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.provideApp
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-import me.likeavitoapp.ui.theme.primaryLight
 
 
 @Composable
-fun ProfileScreenProvider(screen: ProfileScreen) {
-    val nextScreen by screen.tabsNavigator.screen
+fun EditProfileScreenProvider(screen: EditProfileScreen) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        ProfileScreenView(screen)
+        EditProfileScreenView(screen)
 
-        when (nextScreen) {
-            is SearchScreen -> SearchScreenProvider(nextScreen as SearchScreen)
-            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
-            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
-        }
+    }
+
+    BackHandler {
+        screen.PressBack()
     }
 }
 
 @Composable
-fun ProfileScreenView(screen: ProfileScreen) {
+fun EditProfileScreenView(screen: EditProfileScreen) {
     Column(modifier = Modifier) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -85,18 +80,6 @@ fun ProfileScreenView(screen: ProfileScreen) {
                     style = AppTypography.headlineLarge
                 )
             }
-
-            IconButton(
-                onClick = {
-                    screen.ClickToEditProfileUseCase()
-                },
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .padding(8.dp)
-                   .align(Alignment.TopEnd)
-            ) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = "edit")
-            }
         }
 
         Spacer(Modifier.size(24.dp))
@@ -107,47 +90,30 @@ fun ProfileScreenView(screen: ProfileScreen) {
             text = stringResource(R.string.contacts_title),
             style = AppTypography.titleLarge
         )
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            screen.state.user.contacts.phone?.let {
-                ContactItem(
-                    label = stringResource(R.string.phone_title),
-                    value = it,
-                    screen = screen
-                )
-            }
-            screen.state.user.contacts.email?.let {
-                ContactItem(
-                    label = stringResource(R.string.email_title),
-                    value = it,
-                    screen = screen
-                )
-            }
-            screen.state.user.contacts.whatsapp?.let {
-                ContactItem(
-                    label = stringResource(R.string.whatsapp_title),
-                    value = it,
-                    screen = screen
-                )
-            }
-            screen.state.user.contacts.telegram?.let {
-                ContactItem(
-                    label = stringResource(R.string.telegram_title),
-                    value = it,
-                    screen = screen
-                )
-            }
-        }
+//        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+//            screen.state.user.contacts.phone?.let {
+//                ContactItem(label = stringResource(R.string.phone_title), value = it, screen = screen)
+//            }
+//            screen.state.user.contacts.email?.let {
+//                ContactItem(label = stringResource(R.string.email_title), value = it, screen = screen)
+//            }
+//            screen.state.user.contacts.whatsapp?.let {
+//                ContactItem(label = stringResource(R.string.whatsapp_title), value = it, screen = screen)
+//            }
+//            screen.state.user.contacts.telegram?.let {
+//                ContactItem(label = stringResource(R.string.telegram_title), value = it, screen = screen)
+//            }
+//        }
     }
 }
 
 @Composable
 fun ContactItem(label: String, value: String, screen: ProfileScreen) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                screen.ClickToContactUseCase(label, value)
-            }) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+            screen.ClickToContactUseCase(label, value)
+        }) {
         Text(
             text = label,
             style = AppTypography.labelMedium,
@@ -162,10 +128,10 @@ fun ContactItem(label: String, value: String, screen: ProfileScreen) {
 
 @Preview(showBackground = true)
 @Composable
-fun ProfileScreenPreview() {
+fun EditProfileScreenPreview() {
     LikeAvitoAppTheme {
-        ProfileScreenView(
-            ProfileScreen(
+        EditProfileScreenView(
+            EditProfileScreen(
                 parentNavigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource(),

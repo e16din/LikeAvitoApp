@@ -21,7 +21,6 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
-import me.likeavitoapp.setUi
 
 
 class SearchScreen(
@@ -37,7 +36,7 @@ class SearchScreen(
 
     override val state = State()
 
-    lateinit var navigator: ScreensNavigator
+    lateinit var tabsNavigator: ScreensNavigator
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()

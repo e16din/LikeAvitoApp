@@ -41,7 +41,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
@@ -69,7 +68,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
-    val nextScreen by screen.navigator.screen
+    val nextScreen by screen.tabsNavigator.screen
 
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()

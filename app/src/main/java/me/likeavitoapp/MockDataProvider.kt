@@ -22,12 +22,13 @@ class MockDataProvider {
 
     fun getUser(): User {
         return User(
-            id = 1, name = "Александр Кундрюков", contacts = Contacts(
-                phone = null,
-                whatsapp = null,
+            id = 0,
+            name = "Кундрюков Александр",
+            contacts = Contacts(
                 telegram = "@alex_ku_san",
-                email = null
-            ), ownAds = listOf(),
+                email = "a.kundryukov@gmail.com"
+            ),
+            ownAds = emptyList(),
             photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
         )
     }
