@@ -56,7 +56,7 @@ class AuthScreen(
 
                 } else {
                     isEmailValid = true
-                    state.emailErrorEnabled.setUi(false)
+                    state.emailErrorEnabled.set(false)
                 }
 
                 state.loginButtonEnabled.value =
@@ -78,8 +78,8 @@ class AuthScreen(
 
     fun LoginUseCase() {
         scope.launchWithHandler {
-            state.loginButtonEnabled.setUi(false)
-            state.login.loading.setUi(true)
+            state.loginButtonEnabled.set(false)
+            state.login.loading.set(true)
             val result = sources.backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
@@ -90,8 +90,8 @@ class AuthScreen(
                 parentNavigator.startScreen(MainScreen())
 
             } else {
-                state.login.loading.setUi(false)
-                state.login.loadingFailed.setUi(true)
+                state.login.loading.set(false)
+                state.login.loadingFailed.set(true)
             }
         }
     }

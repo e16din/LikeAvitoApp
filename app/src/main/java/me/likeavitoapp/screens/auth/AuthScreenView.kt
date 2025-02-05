@@ -177,7 +177,7 @@ fun AuthScreenView(screen: AuthScreen) {
     val errorMessage = stringResource(R.string.authorization_failed)
     LaunchedEffect(loginLoadingFailed.value) {
         if (loginLoadingFailed.value) {
-            screen.state.login.loadingFailed.setUi(false)
+            screen.state.login.loadingFailed.set(false)
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }

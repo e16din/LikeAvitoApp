@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.StateValue
 import me.likeavitoapp.model.Loadable
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 
@@ -26,32 +27,33 @@ suspend inline fun <T> MutableState<T>.setUi(value: T) {
     }
 }
 
-suspend inline fun <T> StateValue<T>.setUi(value: T) {
-    withContext(Dispatchers.Main) {
-        set(value)
-    }
-}
-
 @Composable
 fun <T : R, R> StateValue<T>.collectAsState(
     key: KClass<*>,
     initial: R = this.value,
-//    context: CoroutineContext = defaultContext + Dispatchers.Main
+    context: CoroutineContext = EmptyCoroutineContext
 ): State<R> = produceState(initial, this.value) {
-//    withContext(context) {
+    if (context == EmptyCoroutineContext) {
         listen(key) { value = it }
-//    }
+    } else withContext(context) {
+        listen(key) { value = it }
+    }
 }
 
 @Composable
-fun <V, T : List<V>> StateValue<T>.collectAsMutableStateList(key:Any): State<SnapshotStateList<V>> {
-    val coroutineContext = defaultContext + Dispatchers.Main
+fun <V, T : List<V>> StateValue<T>.collectAsMutableStateList(
+    key: Any,
+    context: CoroutineContext = EmptyCoroutineContext
+): State<SnapshotStateList<V>> {
+
     return produceState(
         (this.value as List<V>).toMutableStateList(),
         (this.value as List<V>).toMutableStateList(),
-        coroutineContext
+        context
     ) {
-        withContext(coroutineContext) {
+        if (context == EmptyCoroutineContext) {
+            listen(key) { value = (it as List<V>).toMutableStateList() }
+        } else withContext(context) {
             listen(key) { value = (it as List<V>).toMutableStateList() }
         }
     }
@@ -61,13 +63,13 @@ suspend inline fun <reified T> Loadable<*>.load(
     loading: () -> Result<T>,
     crossinline onSuccess: (data: T) -> Unit
 ) {
-    this.loading.setUi(true)
+    this.loading.set(true)
 
     val result = loading()
     val newData = result.getOrNull()
 
 
-    this.loading.setUi(false)
+    this.loading.set(false)
 
     withContext(defaultContext + Dispatchers.Main) {
         if (newData != null) {

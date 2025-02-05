@@ -1,8 +1,11 @@
 package me.likeavitoapp.model
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.defaultContext
+import me.likeavitoapp.provideCoroutineScope
 
 
 class StateValue<T>(var value: T) {
@@ -13,9 +16,11 @@ class StateValue<T>(var value: T) {
     }
 
     fun set(value: T) {
-        this.value = value
-        callbacks.values.forEach {
-            it.invoke(value)
+        provideCoroutineScope().launch(defaultContext + Dispatchers.Main) {
+            this@StateValue.value = value
+            callbacks.values.forEach {
+                it.invoke(value)
+            }
         }
     }
 

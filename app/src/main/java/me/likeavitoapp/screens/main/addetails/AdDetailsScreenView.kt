@@ -2,7 +2,6 @@ package me.likeavitoapp.screens.main.addetails
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,14 +24,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.collectAsState
-import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -57,7 +52,13 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
     }
 
     BackHandler {
-        screen.PressBack()
+        screen.PressBackUseCase()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            screen.CloseScreenUseCase()
+        }
     }
 }
 
@@ -65,12 +66,6 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
     val favoriteSelected by screen.state.ad.isFavorite.collectAsState(AdDetailsScreen::class)
 
-    DisposableEffect(Unit) {
-        onDispose {
-            log("AdDetailsScreen.dispose!")
-            screen.state.ad.isFavorite.free(AdDetailsScreen::class)
-        }
-    }
     Column {
         Text(
             text = ad.title,
@@ -142,7 +137,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     onClick = {
-                        screen.ClickToBargaining()
+                        screen.ClickToBargainingUseCase()
                     }) {
                     Text(text = stringResource(R.string.bargaining_button))
                 }

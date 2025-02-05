@@ -1,14 +1,12 @@
 package me.likeavitoapp.screens.main.tabs
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import me.likeavitoapp.inverse
+import me.likeavitoapp.defaultContext
 import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
@@ -17,7 +15,6 @@ import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
-import me.likeavitoapp.setUi
 
 open class BaseAdScreen(
     open val parentNavigator: ScreensNavigator,
@@ -30,6 +27,8 @@ open class BaseAdScreen(
     )
 
     open val state = BaseAdState()
+
+    private val timersScope = CoroutineScope(defaultContext)
 
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
@@ -48,7 +47,7 @@ open class BaseAdScreen(
         recordScenarioStep()
 
         scope.launchWithHandler {
-            ad.isFavorite.setUi(!ad.isFavorite.value)
+            ad.isFavorite.set(!ad.isFavorite.value)
 
             sources.backend.adsService.updateFavoriteState(ad)
         }
@@ -58,27 +57,34 @@ open class BaseAdScreen(
     fun ClickToBuyUseCase(ad: Ad) {
         recordScenarioStep()
 
+        val createOrderScreen = CreateOrderScreen(
+            ad = ad,
+            parentNavigator = parentNavigator
+        )
+        if (ad.reservedTimeMs != null) {
+            parentNavigator.startScreen(createOrderScreen)
+            return
+        }
+
         scope.launchWithHandler {
-            state.reserve.loading.setUi(true)
+            state.reserve.loading.set(true)
             val result = sources.backend.cartService.reserve(adId = ad.id)
-            state.reserve.loading.setUi(false)
+            state.reserve.loading.set(false)
 
             val isReserved = result.getOrNull()
             if (isReserved == true) {
-                state.reserve.data.setUi(isReserved)
-                parentNavigator.startScreen(
-                    CreateOrderScreen(
-                        ad = ad,
-                        parentNavigator = parentNavigator
-                    )
-                )
+                state.reserve.data.set(isReserved)
 
                 ad.reservedTimeMs = System.currentTimeMillis()
 
-                startReserveTimer(ad)
+                timersScope.launchWithHandler {
+                    startReserveTimer(ad)
+                }
+
+                parentNavigator.startScreen(createOrderScreen)
 
             } else {
-                state.reserve.loadingFailed.setUi(true)
+                state.reserve.loadingFailed.set(true)
             }
         }
     }
@@ -89,7 +95,7 @@ open class BaseAdScreen(
         var timeMs = getTimeMs()
         while (timeMs > 0) {
             timeMs = getTimeMs()
-            ad.timerLabel.setUi(ad.reservedTimeMs?.let {
+            ad.timerLabel.set(ad.reservedTimeMs?.let {
                 String.format(
                     Locale.current.platformLocale,
                     "%02d:%02d",
@@ -109,5 +115,11 @@ open class BaseAdScreen(
         recordScenarioStep()
 
 
+    }
+
+    open fun CloseScreenUseCase() {
+        recordScenarioStep()
+
+        timersScope.cancel()
     }
 }

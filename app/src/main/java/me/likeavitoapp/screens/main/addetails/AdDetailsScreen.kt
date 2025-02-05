@@ -35,7 +35,7 @@ class AdDetailsScreen(
         state.ad.isFavorite.inverse()
     }
 
-    fun ClickToBargaining() {
+    fun ClickToBargainingUseCase() {
         recordScenarioStep()
 
         parentNavigator.startScreen(
@@ -46,9 +46,18 @@ class AdDetailsScreen(
         )
     }
 
-    fun PressBack() {
+    fun PressBackUseCase() {
         recordScenarioStep()
 
         parentNavigator.backToPrevious()
+    }
+
+    override fun CloseScreenUseCase() {
+        super.CloseScreenUseCase()
+
+        with(AdDetailsScreen::class) {
+            state.ad.isFavorite.free(this)
+            state.ad.timerLabel.free(this)
+        }
     }
 }

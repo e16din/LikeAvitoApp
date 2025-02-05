@@ -28,7 +28,7 @@ class SplashScreen(
     fun StartScreenUseCase(startMs: Long = System.currentTimeMillis()) {
         scope.launchWithHandler {
             delay(200)
-            state.contentEnabled.setUi(true)
+            state.contentEnabled.set(true)
 
             sources.backend.token = sources.platform.appDataStore.loadToken()
             val userId = sources.platform.appDataStore.loadId()

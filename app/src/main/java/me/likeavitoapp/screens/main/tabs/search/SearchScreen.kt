@@ -104,7 +104,7 @@ class SearchScreen(
         recordScenarioStep()
 
         scope.launchWithHandler {
-            searchSettingsPanel.state.enabled.setUi(false)
+            searchSettingsPanel.state.enabled.set(false)
             loadAds()
         }
     }
@@ -125,7 +125,7 @@ class SearchScreen(
             recordScenarioStep()
 
             scope.launchWithHandler {
-                searchSettingsPanel.state.selectedCategory.setUi(category)
+                searchSettingsPanel.state.selectedCategory.set(category)
                 loadAds()
             }
         }
@@ -146,20 +146,20 @@ class SearchScreen(
                     scope.launchWithHandler {
                         with(state) {
                             if (lastQuery.isEmpty()) {
-                                searchTips.loading.setUi(false)
-                                searchTips.data.setUi(emptyList())
+                                searchTips.loading.set(false)
+                                searchTips.data.set(emptyList())
                                 return@with
                             }
 
-                            searchTips.loading.setUi(true)
+                            searchTips.loading.set(true)
 
                             val result = sources.backend.adsService.getSearchTips(
                                 categoryId = searchSettingsPanel.state.selectedCategory.value?.id
                                     ?: 0,
                                 query = searchBar.state.query.value
                             )
-                            searchTips.loading.setUi(false)
-                            searchTips.data.setUi(result.getOrNull() ?: emptyList())
+                            searchTips.loading.set(false)
+                            searchTips.data.set(result.getOrNull() ?: emptyList())
                         }
                     }
                 }
