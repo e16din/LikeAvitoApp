@@ -11,7 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import me.likeavitoapp.model.IAppPlatform
 
-class UnauthorizedException : Exception()
+class UnauthorizedException : Exception("UnauthorizedException")
 
 
 

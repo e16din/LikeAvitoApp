@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import me.likeavitoapp.model.AppBackend
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.DataSources
@@ -52,14 +53,12 @@ fun provideAndroidAppContext() = appPlatform as AppPlatform
 
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    logError(throwable.message ?: "")
     if (throwable is UnauthorizedException) {
         appModel?.onLogoutException()
-
-    } else {
-        logError(throwable.message ?: "")
     }
 }
-val defaultContext = Job() + exceptionHandler
+val defaultContext = SupervisorJob() + exceptionHandler
 
 fun log(text: String, tag: String = "debug") {
     if (develop) {

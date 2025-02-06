@@ -40,15 +40,18 @@ class RootScreen(
     }
 
     fun LogoutUseCase() {
+        recordScenarioStep()
+
+        navigator.startScreen(
+            nextScreen = AuthScreen(
+                scope = scope,
+                parentNavigator = navigator,
+                sources = sources
+            ),
+            clearStack = true
+        )
+
         scope.launchWithHandler {
-            navigator.startScreen(
-                nextScreen = AuthScreen(
-                    scope = scope,
-                    parentNavigator = navigator,
-                    sources = sources
-                ),
-                clearStack = true
-            )
             sources.platform.appDataStore.clear()
         }
     }

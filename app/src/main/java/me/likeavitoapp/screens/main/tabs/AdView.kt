@@ -63,7 +63,7 @@ fun AdViewPreview() {
             ad = MockDataProvider().getAd(1),
             screen = screen,
             isFavorite = remember { mutableStateOf(true) },
-            timerLabel = remember { mutableStateOf("Продолжить оформление заказа 12:12") }
+            timerLabel = remember { mutableStateOf("12:12") }
         )
     }
 }
@@ -133,7 +133,7 @@ fun AdView(
                     ) {
                         Text(
                             modifier = Modifier
-                                .padding(top = 12.dp, end = 12.dp)
+                                .padding(top = 8.dp, end = 8.dp)
                                 .clip(RoundedCornerShape(8))
                                 .background(primaryLight)
                                 .align(Alignment.BottomStart)
@@ -148,6 +148,7 @@ fun AdView(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .clip(CircleShape)
+                                .size(21.dp)
                                 .background(lightColorScheme().primaryContainer)
                                 .padding(4.dp)
                                 .clickable {
