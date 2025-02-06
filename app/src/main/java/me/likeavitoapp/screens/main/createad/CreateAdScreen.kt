@@ -3,17 +3,16 @@ package me.likeavitoapp.screens.main.createad
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.flow.MutableStateFlow
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Loadable
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.BaseScreen
 
 
 class CreateAdScreen(
     val input: Input = Input(),
     val state: State = State(),
-    ) : IScreen {
+    ) : BaseScreen() {
 
     class Input {
         var onTitleChanged: (title: String) -> Unit = {}

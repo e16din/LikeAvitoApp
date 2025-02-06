@@ -2,7 +2,7 @@ package me.likeavitoapp.screens.main
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.BaseScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
@@ -17,7 +17,7 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 class MainScreen(
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
-) : IScreen {
+) : BaseScreen() {
 
     val state = State()
 

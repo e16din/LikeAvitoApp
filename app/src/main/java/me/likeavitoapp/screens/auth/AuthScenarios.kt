@@ -114,14 +114,14 @@ class AuthScenarios(val screen: AuthScreen) {
     suspend fun RunLoginFailedScenario() {
         RunCorrectEmailScenario("failed@ss.ss")
         RunEnterPasswordScenario("failed")
-        screen.LoginUseCase()
+        screen.ClickToLoginUseCase()
         checkState(screen.state.login.loadingFailed.value)
     }
 
     suspend fun RunLoginSuccessScenario() {
         RunCorrectEmailScenario("ss@ss.ss")
         RunEnterPasswordScenario("12345678")
-        screen.LoginUseCase()
+        screen.ClickToLoginUseCase()
         checkState(!screen.state.login.loadingFailed.value)
     }
 }

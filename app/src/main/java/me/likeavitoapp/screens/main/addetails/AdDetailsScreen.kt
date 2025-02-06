@@ -2,11 +2,12 @@ package me.likeavitoapp.screens.main.addetails
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.inverse
+import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.StateValue
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
@@ -23,17 +24,10 @@ class AdDetailsScreen(
 
     class State(
         val ad: Ad,
-        val messages: StateValue<List<IMessage>> = StateValue(emptyList()),
+        val messages: UpdatableState<List<IMessage>> = UpdatableState(emptyList()),
     ) : BaseAdState()
 
     override val state: State = State(ad)
-
-
-    fun ClickToFavoriteUseCase() {
-        recordScenarioStep()
-
-        state.ad.isFavorite.inverse()
-    }
 
     fun ClickToBargainingUseCase() {
         recordScenarioStep()
@@ -55,9 +49,9 @@ class AdDetailsScreen(
     override fun CloseScreenUseCase() {
         super.CloseScreenUseCase()
 
-        with(AdDetailsScreen::class) {
-            state.ad.isFavorite.free(this)
-            state.ad.timerLabel.free(this)
-        }
+//        with(AdDetailsScreen::class) {
+//            state.ad.isFavorite.free(this)
+//            state.ad.timerLabel.free(this)
+//        }
     }
 }

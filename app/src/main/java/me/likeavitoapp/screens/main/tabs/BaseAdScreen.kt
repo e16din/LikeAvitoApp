@@ -5,11 +5,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
+import me.likeavitoapp.load
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.BaseScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
@@ -20,15 +22,14 @@ open class BaseAdScreen(
     open val parentNavigator: ScreensNavigator,
     open val scope: CoroutineScope,
     open val sources: DataSources,
-) : IScreen {
+    open val state: BaseAdState = BaseAdState()
+) : BaseScreen() {
 
     open class BaseAdState(
         val reserve: Loadable<Boolean> = Loadable(false)
     )
 
-    open val state = BaseAdState()
-
-    private val timersScope = CoroutineScope(defaultContext)
+    private val timersMap = mutableMapOf<Long, Job>()
 
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
@@ -44,10 +45,12 @@ open class BaseAdScreen(
     }
 
     open fun ClickToFavoriteUseCase(ad: Ad) {
-        recordScenarioStep()
+        recordScenarioStep(ad)
 
         scope.launchWithHandler {
-            ad.isFavorite.set(!ad.isFavorite.value)
+            log("ad.isFavorite: ${ad.isFavorite.value}")
+            ad.isFavorite.inverse()
+            log("ad.isFavorite after: ${ad.isFavorite.value}")
 
             sources.backend.adsService.updateFavoriteState(ad)
         }
@@ -67,35 +70,32 @@ open class BaseAdScreen(
         }
 
         scope.launchWithHandler {
-            state.reserve.loading.set(true)
-            val result = sources.backend.cartService.reserve(adId = ad.id)
-            state.reserve.loading.set(false)
+            state.reserve.load(loading = {
+                sources.backend.cartService.reserve(adId = ad.id)
+            }, onSuccess = { isReserved ->
+                if (isReserved == true) {
+                    state.reserve.data.post(isReserved)
 
-            val isReserved = result.getOrNull()
-            if (isReserved == true) {
-                state.reserve.data.set(isReserved)
+                    ad.reservedTimeMs = System.currentTimeMillis()
 
-                ad.reservedTimeMs = System.currentTimeMillis()
+                    timersMap[ad.id] = startReserveTimer(ad)
 
-                timersScope.launchWithHandler {
-                    startReserveTimer(ad)
+                    parentNavigator.startScreen(createOrderScreen)
+
+                } else {
+                    state.reserve.loadingFailed.post(true)
                 }
-
-                parentNavigator.startScreen(createOrderScreen)
-
-            } else {
-                state.reserve.loadingFailed.set(true)
-            }
+            })
         }
     }
 
-    private suspend fun startReserveTimer(ad: Ad) {
+    private fun startReserveTimer(ad: Ad) = scope.launchWithHandler {
         fun getTimeMs(): Long = 20 * 60 * 1000 - (System.currentTimeMillis() - ad.reservedTimeMs!!)
 
         var timeMs = getTimeMs()
         while (timeMs > 0) {
             timeMs = getTimeMs()
-            ad.timerLabel.set(ad.reservedTimeMs?.let {
+            ad.timerLabel.post(ad.reservedTimeMs?.let {
                 String.format(
                     Locale.current.platformLocale,
                     "%02d:%02d",
@@ -114,12 +114,16 @@ open class BaseAdScreen(
     fun ClickToCloseTimerLabel(ad: Ad) {
         recordScenarioStep()
 
-
+        timersMap[ad.id]?.cancel()
+        ad.timerLabel.post("")
+        ad.reservedTimeMs = null
     }
 
     open fun CloseScreenUseCase() {
         recordScenarioStep()
 
-        timersScope.cancel()
+        timersMap.values.forEach {
+            it.cancel()
+        }
     }
 }

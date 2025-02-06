@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
@@ -18,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -36,26 +40,30 @@ import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+import me.likeavitoapp.ui.theme.primaryLight
 
 @Preview(showBackground = true)
 @Composable
 fun AdViewPreview() {
     LikeAvitoAppTheme {
+        val screen = BaseAdScreen(
+            parentNavigator = mockScreensNavigator(),
+            scope = mockCoroutineScope(),
+            sources = mockDataSource()
+        )
+
         AdView(
             ad = MockDataProvider().getAd(1),
-            screen = BaseAdScreen(
-                parentNavigator = mockScreensNavigator(),
-                scope = mockCoroutineScope(),
-                sources = mockDataSource()
-            ),
-            isFavorite = remember { mutableStateOf(true)},
-            timerLabel = remember { mutableStateOf("") }
+            screen = screen,
+            isFavorite = remember { mutableStateOf(true) },
+            timerLabel = remember { mutableStateOf("Продолжить оформление заказа 12:12") }
         )
     }
 }
@@ -68,9 +76,6 @@ fun AdView(
     isFavorite: State<Boolean>,
     timerLabel: State<String>
 ) {
-
-    log("favoriteSelected: $isFavorite")
-
     Card(
         modifier = modifier,
         onClick = {
@@ -121,19 +126,35 @@ fun AdView(
                 }
 
                 if (!timerLabel.value.isEmpty()) {
-                    Text(
+                    Box(
                         modifier = Modifier
-                            .padding(vertical = 32.dp, horizontal = 24.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black)
                             .align(Alignment.BottomStart)
-                            .padding(16.dp),
-                        color = Color.White,
-                        text = stringResource(R.string.continue_order_label, timerLabel.value)
-                    )
-                    Button(onClick = {
-                        screen.ClickToCloseTimerLabel(ad)
-                    }) { }
+                            .padding(vertical = 24.dp, horizontal = 24.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(top = 12.dp, end = 12.dp)
+                                .clip(RoundedCornerShape(8))
+                                .background(primaryLight)
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp),
+                            color = Color.White,
+                            text = stringResource(R.string.continue_order_label, timerLabel.value)
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "close",
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .clip(CircleShape)
+                                .background(lightColorScheme().primaryContainer)
+                                .padding(4.dp)
+                                .clickable {
+                                    screen.ClickToCloseTimerLabel(ad)
+                                },
+                        )
+                    }
                 }
             }
 

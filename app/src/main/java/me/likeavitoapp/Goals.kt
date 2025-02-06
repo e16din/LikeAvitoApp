@@ -41,6 +41,16 @@ fun Goals() {
                 openScreen("Оплата товара")
             }
         }
+        "Получили уведомление что товар можно забирать".contains {
+            openScreen("Экран заказа").contains {
+                openScreen("Список заказов").contains {
+                    openScreen("Главный экран")
+                }
+            }
+            openScreen("Страница уведомлений").contains {
+                openScreen("Главный экран")
+            }
+        }
     }
 
     "Получили деньги".contains {

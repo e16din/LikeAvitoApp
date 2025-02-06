@@ -52,7 +52,7 @@ fun provideAndroidAppContext() = appPlatform as AppPlatform
 
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-    if (throwable is AuthFiledException) {
+    if (throwable is UnauthorizedException) {
         appModel?.onLogoutException()
 
     } else {

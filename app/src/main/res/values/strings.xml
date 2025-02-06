@@ -6,6 +6,7 @@
     <string name="email_error_text">Введите email вида: sendme@email.com</string>
     <string name="password_field">Пароль</string>
     <string name="login_button">Войти</string>
+    <string name="logout_button">Выйти</string>
     <string name="email_field">Электронная почта</string>
     <string name="search_tab">Поиск</string>
     <string name="favorite_tab">Избранное</string>

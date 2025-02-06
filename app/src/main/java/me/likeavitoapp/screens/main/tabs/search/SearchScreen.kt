@@ -16,7 +16,7 @@ import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.StateValue
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
@@ -31,7 +31,7 @@ class SearchScreen(
 
     class State(
         val ads: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
-        var adsPage: StateValue<Int> = StateValue(0)
+        var adsPage: UpdatableState<Int> = UpdatableState(0)
     ) : BaseAdState()
 
     override val state = State()
@@ -46,7 +46,7 @@ class SearchScreen(
 
         if (!state.ads.data.value.isEmpty()) {
             scope.launchWithHandler {
-                state.adsPage.value += 1
+                state.adsPage.post(state.adsPage.value + 1)
                 loadAds()
             }
         }
@@ -66,8 +66,8 @@ class SearchScreen(
             },
             onSuccess = { newAds ->
                 val list = newAds.toMutableStateList()
-                sources.app.ads = list
-                state.ads.data.set(list)
+//                sources.app.ads = list
+                state.ads.data.post(list)
             }
         )
     }
@@ -78,7 +78,7 @@ class SearchScreen(
                 return@load sources.backend.adsService.getCategories()
             },
             onSuccess = { newCategories ->
-                categories.data.set(newCategories)
+                categories.data.post(newCategories)
             }
         )
     }
@@ -92,22 +92,14 @@ class SearchScreen(
         }
     }
 
-    override fun ClickToFavoriteUseCase(ad: Ad) {
-        super.ClickToFavoriteUseCase(ad)
-
-        val i = state.ads.data.value.indexOf(ad)
-        state.ads.data.value = state.ads.data.value.toMutableStateList()
-    }
-
     fun CloseSearchSettingsPanelUseCase() {
         recordScenarioStep()
 
         scope.launchWithHandler {
-            searchSettingsPanel.state.enabled.set(false)
+            searchSettingsPanel.state.enabled.post(false)
             loadAds()
         }
     }
-
 
     inner class SearchBar {
 
@@ -115,7 +107,7 @@ class SearchScreen(
         var queryDebouncer: Debouncer<String>? = null
 
         inner class State(
-            var query: StateValue<String> = StateValue(""),
+            var query: UpdatableState<String> = UpdatableState(""),
             val searchTips: Loadable<List<String>> = Loadable(emptyList<String>())
         )
 
@@ -124,7 +116,7 @@ class SearchScreen(
             recordScenarioStep()
 
             scope.launchWithHandler {
-                searchSettingsPanel.state.selectedCategory.set(category)
+                searchSettingsPanel.state.selectedCategory.post(category)
                 loadAds()
             }
         }
@@ -132,36 +124,38 @@ class SearchScreen(
         fun ClickToFilterButtonUseCase() {
             recordScenarioStep()
 
-            searchSettingsPanel.state.enabled.inverse()
+//            scope.launchWithHandler {
+                searchSettingsPanel.state.enabled.inverse()
+//            }
         }
 
         fun ChangeSearchQueryUseCase(newQuery: String) {
             recordScenarioStep(newQuery)
 
-            state.query.value = newQuery
+
+            state.query.post(newQuery)
 
             if (queryDebouncer == null) {
                 queryDebouncer = Debouncer(newQuery) { lastQuery ->
                     scope.launchWithHandler {
-                        with(state) {
-                            if (lastQuery.isEmpty()) {
-                                searchTips.loading.set(false)
-                                searchTips.data.set(emptyList())
-                                return@with
-                            }
-
-                            searchTips.loading.set(true)
-
-                            val result = sources.backend.adsService.getSearchTips(
-                                categoryId = searchSettingsPanel.state.selectedCategory.value?.id
-                                    ?: 0,
-                                query = searchBar.state.query.value
-                            )
-                            searchTips.loading.set(false)
-                            searchTips.data.set(result.getOrNull() ?: emptyList())
+                        if (lastQuery.isEmpty()) {
+                            state.searchTips.loading.post(false)
+                            state.searchTips.data.post(emptyList())
+                            return@launchWithHandler
                         }
+
+                        state.searchTips.loading.post(true)
+
+                        val result = sources.backend.adsService.getSearchTips(
+                            categoryId = searchSettingsPanel.state.selectedCategory.value?.id
+                                ?: 0,
+                            query = searchBar.state.query.value
+                        )
+                        state.searchTips.loading.post(false)
+                        state.searchTips.data.post(result.getOrNull() ?: emptyList())
                     }
                 }
+
             } else {
                 queryDebouncer?.set(newQuery)
             }
@@ -188,38 +182,38 @@ class SearchScreen(
         val state = State()
 
         inner class State(
-            var enabled: StateValue<Boolean> = StateValue(false),
+            var enabled: UpdatableState<Boolean> = UpdatableState(false),
             val categories: Loadable<List<Category>> = Loadable(emptyList<Category>()),
-            var selectedCategory: StateValue<Category?> = StateValue(null),
+            var selectedCategory: UpdatableState<Category?> = UpdatableState(null),
             val regions: Loadable<List<Region>> = Loadable(emptyList<Region>()),
-            var selectedRegion: StateValue<Region?> = StateValue(null),
-            var priceRange: StateValue<PriceRange> = StateValue(PriceRange()),
-            var categoryMenuEnabled: StateValue<Boolean> = StateValue(false),
-            var regionMenuEnabled: StateValue<Boolean> = StateValue(false),
+            var selectedRegion: UpdatableState<Region?> = UpdatableState(null),
+            var priceRange: UpdatableState<PriceRange> = UpdatableState(PriceRange()),
+            var categoryMenuEnabled: UpdatableState<Boolean> = UpdatableState(false),
+            var regionMenuEnabled: UpdatableState<Boolean> = UpdatableState(false),
         )
 
         fun ChangePriceFromUseCase(value: Int) {
             recordScenarioStep(value)
 
-            state.priceRange.value = state.priceRange.value.copy(from = value)
+            state.priceRange.post(state.priceRange.value.copy(from = value))
         }
 
         fun ChangePriceToUseCase(value: Int) {
             recordScenarioStep(value)
 
-            state.priceRange.value = state.priceRange.value.copy(to = value)
+            state.priceRange.post(state.priceRange.value.copy(to = value))
         }
 
         fun ClickToCategoryUseCase() {
             recordScenarioStep()
 
-            state.categoryMenuEnabled.value = true
+            state.categoryMenuEnabled.post(true)
         }
 
         fun ClickToRegionUseCase() {
             recordScenarioStep()
 
-            state.regionMenuEnabled.value = true
+            state.regionMenuEnabled.post(true)
         }
 
     }

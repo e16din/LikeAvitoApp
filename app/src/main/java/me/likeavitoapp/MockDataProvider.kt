@@ -4,7 +4,7 @@ import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.Region
-import me.likeavitoapp.model.StateValue
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
 
 
@@ -14,7 +14,7 @@ class MockDataProvider {
         repeat(21) {
             ads.add(
                 getAd(it.toLong()).copy(
-                    isFavorite = StateValue((it % 7) == 0)
+                    isFavorite = UpdatableState((it % 7) == 0)
                 )
             )
         }
@@ -29,7 +29,7 @@ class MockDataProvider {
                 email = "a.kundryukov@gmail.com"
             ),
             ownAds = emptyList(),
-            photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
+            photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
         )
     }
 
@@ -103,9 +103,9 @@ class MockDataProvider {
                 name = "Петр Петрович",
                 contacts = Contacts(phone = "8950XXXXX07")
             ),
-            isFavorite = StateValue(false),
+            isFavorite = UpdatableState(false),
             reservedTimeMs = null,
-            timerLabel = StateValue(""),
+            timerLabel = UpdatableState(""),
         )
     }
 

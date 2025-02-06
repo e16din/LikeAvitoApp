@@ -4,9 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.develop
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.BaseScreen
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.StateValue
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
@@ -14,12 +14,12 @@ import me.likeavitoapp.screens.splash.SplashScreen
 class RootScreen(
     val scope: CoroutineScope,
     val sources: DataSources
-) : IScreen {
+) : BaseScreen() {
 
     class State(
         var isStarted: Boolean = false,
         var demoLabelEnabled: Boolean = develop,
-        val scenariosEnabled: StateValue<Boolean> = StateValue(false),
+        val scenariosEnabled: UpdatableState<Boolean> = UpdatableState(false),
     )
 
     val state = State()
@@ -42,17 +42,18 @@ class RootScreen(
     fun LogoutUseCase() {
         scope.launchWithHandler {
             navigator.startScreen(
-                AuthScreen(
+                nextScreen = AuthScreen(
                     scope = scope,
                     parentNavigator = navigator,
                     sources = sources
-                )
+                ),
+                clearStack = true
             )
             sources.platform.appDataStore.clear()
         }
     }
 
     fun ClickToDemoDeveloperUseCase() {
-        state.scenariosEnabled.value = true
+        state.scenariosEnabled.post(true)
     }
 }

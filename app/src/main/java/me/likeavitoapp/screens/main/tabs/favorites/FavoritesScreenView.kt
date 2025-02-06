@@ -48,7 +48,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun FavoritesScreenProvider(screen: FavoritesScreen) {
-    val nextScreen by screen.tabsNavigator.screen
+    val nextScreen by screen.tabsNavigator.screen.collectAsState()
 
     Box {
         LaunchedEffect(Unit) {
@@ -68,7 +68,7 @@ fun FavoritesScreenProvider(screen: FavoritesScreen) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
-    val ads = screen.state.ads.data.collectAsState(FavoritesScreen::class)
+    val ads = screen.state.favorites.data.collectAsState(FavoritesScreen::class)
 
     val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState(FavoritesScreen::class)
 
@@ -151,7 +151,7 @@ fun FavoritesScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.ads.data.value = MockDataProvider().getFavorites().toMutableStateList()
+        state.favorites.data.post(MockDataProvider().getFavorites().toMutableStateList())
     }
 
     LikeAvitoAppTheme {

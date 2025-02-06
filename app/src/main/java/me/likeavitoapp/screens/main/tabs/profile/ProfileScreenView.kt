@@ -10,15 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +36,7 @@ import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.defaultContext
 import me.likeavitoapp.initApp
 import me.likeavitoapp.model.User
@@ -53,7 +58,7 @@ import me.likeavitoapp.ui.theme.primaryLight
 
 @Composable
 fun ProfileScreenProvider(screen: ProfileScreen) {
-    val nextScreen by screen.tabsNavigator.screen
+    val nextScreen by screen.tabsNavigator.screen.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ProfileScreenView(screen)
@@ -64,11 +69,20 @@ fun ProfileScreenProvider(screen: ProfileScreen) {
             is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
         }
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            screen.CloseScreenUseCase()
+        }
+    }
 }
 
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
-    Column(modifier = Modifier) {
+    val logoutLoading = screen.state.logout.loading.collectAsState()
+    val photoUrl = screen.state.user.photoUrl.collectAsState(key = ProfileScreen::class)
+
+    Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 ActualAsyncImage(
@@ -76,7 +90,7 @@ fun ProfileScreenView(screen: ProfileScreen) {
                         .padding(16.dp)
                         .size(64.dp)
                         .clip(CircleShape),
-                    url = screen.state.user.photoUrl
+                    url = photoUrl.value
                 )
 
                 Text(
@@ -135,6 +149,21 @@ fun ProfileScreenView(screen: ProfileScreen) {
                     value = it,
                     screen = screen
                 )
+            }
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Button(
+            onClick = {
+                screen.ClickToLogoutUseCase()
+            },
+            modifier = Modifier.width(200.dp).padding(vertical = 16.dp).align(Alignment.CenterHorizontally)
+        ) {
+            if (logoutLoading.value) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            } else {
+                Text(text = stringResource(R.string.logout_button))
             }
         }
     }

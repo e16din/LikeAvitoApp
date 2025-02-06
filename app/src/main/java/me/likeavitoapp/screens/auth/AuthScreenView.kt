@@ -26,11 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -41,13 +37,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import me.likeavitoapp.R
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.provideRootScreen
-import me.likeavitoapp.setUi
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -68,16 +63,6 @@ fun AuthScreenProvider(screen: AuthScreen) {
     }
 }
 
-@Composable
-fun <T> StateFlow<T>.collectAsStateSavable(): State<T> {
-    val state = rememberSaveable { mutableStateOf(value) }
-    LaunchedEffect(Unit) {
-        collect {
-            state.value = it
-        }
-    }
-    return state
-}
 
 @ExperimentalLayoutApi
 @Composable
@@ -85,12 +70,12 @@ fun AuthScreenView(screen: AuthScreen) {
 
     val localFocusManager = LocalFocusManager.current
 
-    val email = screen.state.email
-    val password = screen.state.password
-    val emailErrorEnabled = screen.state.emailErrorEnabled
-    val loginButtonEnabled = screen.state.loginButtonEnabled
-    val loginLoading = screen.state.login.loading
-    val loginLoadingFailed = screen.state.login.loadingFailed
+    val email = screen.state.email.collectAsState()
+    val password = screen.state.password.collectAsState()
+    val emailErrorEnabled = screen.state.emailErrorEnabled.collectAsState()
+    val loginButtonEnabled = screen.state.loginButtonEnabled.collectAsState()
+    val loginLoading = screen.state.login.loading.collectAsState()
+    val loginLoadingFailed = screen.state.login.loadingFailed.collectAsState()
 
     Box {
         Column(
@@ -159,7 +144,7 @@ fun AuthScreenView(screen: AuthScreen) {
 
             Button(
                 onClick = {
-                    screen.LoginUseCase()
+                    screen.ClickToLoginUseCase()
                 },
                 modifier = Modifier.width(200.dp),
                 enabled = loginButtonEnabled.value
@@ -177,7 +162,7 @@ fun AuthScreenView(screen: AuthScreen) {
     val errorMessage = stringResource(R.string.authorization_failed)
     LaunchedEffect(loginLoadingFailed.value) {
         if (loginLoadingFailed.value) {
-            screen.state.login.loadingFailed.set(false)
+            screen.state.login.loadingFailed.post(false)
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }

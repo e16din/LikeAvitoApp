@@ -5,14 +5,14 @@ import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.BaseScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.StateValue
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
+import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.MainScreen
-import me.likeavitoapp.setUi
 import java.util.regex.Pattern
 import kotlin.String
 
@@ -21,16 +21,16 @@ class AuthScreen(
     val parentNavigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
-) : IScreen {
+) : BaseScreen() {
 
     class State {
-        val email = StateValue("")
-        val password = StateValue("")
+        val email = UpdatableState("")
+        val password = UpdatableState("")
 
-        val emailErrorEnabled = StateValue(false)
-        val loginButtonEnabled = StateValue(false)
+        val emailErrorEnabled = UpdatableState(false)
+        val loginButtonEnabled = UpdatableState(false)
 
-        val login = Loadable(emptyList<Unit>())
+        val login = Loadable(Unit)
     }
 
     val state = State()
@@ -39,6 +39,8 @@ class AuthScreen(
     var emailDebouncer: Debouncer<String>? = null
 
     fun StartScreenUseCase() {
+        recordScenarioStep()
+
         emailDebouncer = Debouncer<String>("") { lastEmail ->
             scope.launchWithHandler {
                 var isEmailValid = false
@@ -56,30 +58,40 @@ class AuthScreen(
 
                 } else {
                     isEmailValid = true
-                    state.emailErrorEnabled.set(false)
+                    state.emailErrorEnabled.post(false)
                 }
 
-                state.loginButtonEnabled.value =
+                state.loginButtonEnabled.post(
                     lastEmail.isNotBlank() && state.password.value.isNotBlank() && isEmailValid
+                )
             }
         }
     }
 
     fun ChangeEmailUseCase(newEmail: String) {
-        state.email.value = newEmail
+        recordScenarioStep()
+
+        state.email.post(newEmail)
     }
 
     fun ChangePasswordUseCase(newPassword: String) {
-        state.password.value = newPassword
-        val isEmailValid = !state.emailErrorEnabled.value
-        state.loginButtonEnabled.value =
-            state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
+        recordScenarioStep()
+
+        scope.launchWithHandler {
+            state.password.post(newPassword)
+            val isEmailValid = !state.emailErrorEnabled.value
+            state.loginButtonEnabled.post(
+                state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
+            )
+        }
     }
 
-    fun LoginUseCase() {
+    fun ClickToLoginUseCase() {
+        recordScenarioStep()
+
         scope.launchWithHandler {
-            state.loginButtonEnabled.set(false)
-            state.login.loading.set(true)
+            state.loginButtonEnabled.post(false)
+            state.login.loading.post(true)
             val result = sources.backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
@@ -90,8 +102,8 @@ class AuthScreen(
                 parentNavigator.startScreen(MainScreen())
 
             } else {
-                state.login.loading.set(false)
-                state.login.loadingFailed.set(true)
+                state.login.loading.post(false)
+                state.login.loadingFailed.post(true)
             }
         }
     }

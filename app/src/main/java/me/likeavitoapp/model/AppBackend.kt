@@ -4,7 +4,7 @@ package me.likeavitoapp.model
 import androidx.compose.runtime.toMutableStateList
 import io.ktor.client.*
 import kotlinx.coroutines.delay
-import me.likeavitoapp.AuthFiledException
+import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.develop
 
@@ -34,18 +34,24 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                     )
                 )
             } else {
-                return Result.failure(AuthFiledException())
+                return Result.failure(UnauthorizedException())
             }
         }
 
-        suspend fun logout(userId: Long): Result<Boolean> {
-            TODO("Not yet implemented")
+        suspend fun logout(): Result<Boolean> {
+            delay(300)
+            return Result.success(true)
         }
 
         suspend fun getUser(userId: Long): Result<User> {
+            delay(1000)
             return Result.success(mockDataProvider.getUser())
         }
 
+        suspend fun postPhoto(photoBase64: String): Result<String> { //todo: return url on prod
+            delay(2000)
+            return Result.success(photoBase64)
+        }
     }
 
     // NOTE: this is mock for an example
@@ -106,7 +112,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         fun deleteAllFavorites(): Result<Boolean> {
             mockDataProvider.ads = mockDataProvider.ads.apply {
-                forEach { it.isFavorite.value = false }
+                forEach { it.isFavorite.post(false) }
             }
             return mockDataProvider.getSuccessOrFail(true)
         }
@@ -115,12 +121,17 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class CartService {
         suspend fun reserve(adId: Long): Result<Boolean> {
-            mockDataProvider.ads = mockDataProvider.ads.toMutableStateList().apply {
-                firstOrNull { ad -> ad.id == adId }?.let {
-                    it.reservedTimeMs = System.currentTimeMillis()
+            val testFailId = 2L
+
+            if(adId != testFailId) {
+                mockDataProvider.ads = mockDataProvider.ads.toMutableStateList().apply {
+                    firstOrNull { ad -> ad.id == adId }?.let {
+                        it.reservedTimeMs = System.currentTimeMillis()
+                    }
                 }
             }
-            return mockDataProvider.getSuccessOrFail(adId != 2L)
+
+            return mockDataProvider.getSuccessOrFail(adId != testFailId)
         }
 
         suspend fun order(

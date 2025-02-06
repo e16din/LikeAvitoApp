@@ -11,11 +11,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import me.likeavitoapp.collectAsState
+import me.likeavitoapp.log
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.auth.AuthScreenProvider
 import me.likeavitoapp.screens.main.MainScreen
@@ -28,12 +29,13 @@ import me.likeavitoapp.ui.theme.primaryContainerDark
 
 @Composable
 fun RootScreenView(rootScreen: RootScreen) {
-    val screen = rootScreen.navigator.screen
+    val screen = rootScreen.navigator.screen.collectAsState()
 
     LaunchedEffect(Unit) {
         rootScreen.StartScreenUseCase()
     }
 
+    log("Root nextScreen: ${screen.value}")
     Box(modifier = Modifier) {
         Box(
             modifier = Modifier

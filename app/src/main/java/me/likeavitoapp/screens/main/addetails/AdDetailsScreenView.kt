@@ -96,7 +96,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
                     .clip(CircleShape)
                     .background(Color.Transparent),
                 onClick = {
-                    screen.ClickToFavoriteUseCase()
+                    screen.ClickToFavoriteUseCase(ad)
                 }
             ) {
                 Icon(

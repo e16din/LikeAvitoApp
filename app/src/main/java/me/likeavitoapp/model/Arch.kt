@@ -1,5 +1,6 @@
 package me.likeavitoapp.model
 
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -8,16 +9,23 @@ import me.likeavitoapp.defaultContext
 import me.likeavitoapp.provideCoroutineScope
 
 
-class StateValue<T>(var value: T) {
+class UpdatableState<T>(initial: T) {
+    private var _value: T = initial
+    var value: T
+        get() = _value
+        set(value) {
+            throw IllegalStateException("Use '.post($value)' instead")
+        }
+
     var callbacks = mutableMapOf<Any, (value: T) -> Unit>()
 
     fun listen(key: Any, onChanged: (value: T) -> Unit) {
-        callbacks[key] = (onChanged)
+        callbacks[key] = onChanged
     }
 
-    fun set(value: T) {
+    fun post(value: T) {
         provideCoroutineScope().launch(defaultContext + Dispatchers.Main) {
-            this@StateValue.value = value
+            _value = value
             callbacks.values.forEach {
                 it.invoke(value)
             }
@@ -41,7 +49,7 @@ class ScreenArguments(
     val sources: DataSources
 )
 
-class DataSourcesWithScreen<T : IScreen>(
+class DataSourcesWithScreen<T : BaseScreen>(
     val app: AppModel,
     val platform: IAppPlatform,
     val backend: AppBackend,
@@ -49,9 +57,15 @@ class DataSourcesWithScreen<T : IScreen>(
 )
 
 class Loadable<T>(initial: T) {
-    var data = StateValue<T>(initial)
-    var loading = StateValue(false)
-    var loadingFailed = StateValue(false)
+    var data = UpdatableState<T>(initial)
+    var loading = UpdatableState(false)
+    var loadingFailed = UpdatableState(false)
+}
+
+class LoadableState<T>(initial: T) {
+    var data = mutableStateOf(initial)
+    var loading = mutableStateOf(false)
+    var loadingFailed = mutableStateOf(false)
 }
 
 

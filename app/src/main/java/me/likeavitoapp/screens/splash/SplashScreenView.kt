@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -36,7 +37,7 @@ fun SplashScreenProvider(screen: SplashScreen) {
 
 @Composable
 fun SplashScreenView(screen: SplashScreen) {
-    val contentEnabled = screen.state.contentEnabled
+    val contentEnabled = screen.state.contentEnabled.collectAsState()
     AnimatedVisibility(contentEnabled.value) {
         Box(
             modifier = Modifier.fillMaxSize(),

@@ -1,9 +1,5 @@
 package me.likeavitoapp.model
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
@@ -14,7 +10,7 @@ class AppModel {
 
     var user: User? = null
 
-    var ads: SnapshotStateList<Ad> = mutableStateListOf<Ad>()
+//    var ads: SnapshotStateList<Ad> = mutableStateListOf<Ad>()
 
     lateinit var rootScreen: RootScreen
 
@@ -25,42 +21,44 @@ class AppModel {
     }
 }
 
-class StubScreen() : IScreen
+class StubScreen() : BaseScreen()
 
-class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = "") {
+class ScreensNavigator(initialScreen: BaseScreen = StubScreen(), val tag: String = "") {
     val screens = mutableListOf(initialScreen)
-    val screen = mutableStateOf(initialScreen)
+    val screen = UpdatableState(initialScreen)
 
-    fun startScreen(nextScreen: IScreen, clearStack: Boolean = false) {
+    fun startScreen(nextScreen: BaseScreen, clearStack: Boolean = false) {
         if (screens.last().javaClass.simpleName != nextScreen.javaClass.simpleName) {
             if (clearStack) {
                 screens.clear()
             }
             log("$tag.startScreen: ${nextScreen.javaClass.simpleName}")
             screens.add(nextScreen)
-            this@ScreensNavigator.screen.value = nextScreen
+            this@ScreensNavigator.screen.post(nextScreen)
         }
     }
 
     fun backToPrevious() {
         screens.removeAt(screens.lastIndex)
-        screen.value = screens.last()
+        screen.post(screens.last())
         log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
     }
 
-    inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
+    inline fun <reified T : BaseScreen> getScreenOrNull(klass: KClass<T>): T? {
         return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
     }
 }
 
-interface IScreen
+open class BaseScreen {
+    override fun toString() : String = javaClass.simpleName
+}
 
 data class User(
     val id: Long,
     var name: String,
     var contacts: Contacts,
     var ownAds: List<Ad>,
-    var photoUrl: String
+    var photoUrl: UpdatableState<String>
 )
 
 data class Contacts(
@@ -81,9 +79,9 @@ data class Ad(
     val price: Int,
     val isBargainingEnabled: Boolean,
     val isPremium: Boolean,
-    var isFavorite: StateValue<Boolean> = StateValue(false),
+    var isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     var reservedTimeMs: Long?,
-    val timerLabel: StateValue<String> = StateValue(""),
+    val timerLabel: UpdatableState<String> = UpdatableState(""),
     val category: Category,
     val address: Address,
     val owner: Owner

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Favorite
@@ -27,18 +26,17 @@ import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
-import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.BaseScreen
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -64,8 +62,8 @@ import me.likeavitoapp.ui.theme.secondaryContainerLight
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
     val mainTabScreen = remember { screen.mainTabScreen }
-    val nextScreen = screen.navigator.screen
-    val tabScreen = screen.tabsNavigator.screen
+    val nextScreen = screen.navigator.screen.collectAsState()
+    val tabScreen = screen.tabsNavigator.screen.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -87,7 +85,7 @@ fun MainScreenProvider(screen: MainScreen) {
 val tabBarHeight = 58.dp
 
 @Composable
-fun MainScreenView(screen: MainScreen, mainTabScreen: SearchScreen, tabScreen: IScreen) {
+fun MainScreenView(screen: MainScreen, mainTabScreen: SearchScreen, tabScreen: BaseScreen) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -139,7 +137,7 @@ fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
 
 @Composable
 private fun BoxScope.TabsView(
-    tabScreen: IScreen,
+    tabScreen: BaseScreen,
     screen: MainScreen
 ) {
     Row(

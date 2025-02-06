@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -68,7 +69,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
-    val nextScreen by screen.tabsNavigator.screen
+    val nextScreen by screen.tabsNavigator.screen.collectAsState()
 
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
@@ -89,29 +90,32 @@ fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
     val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(SearchScreen::class)
-    PullToRefreshBox(
-        isRefreshing = false,
-        onRefresh = { },
-        modifier = Modifier
-    ) {
-        AdsListView(screen)
-    }
 
-    if (searchFilterPanelEnabled) {
-        val searchSettingsSheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-        ModalBottomSheet(
-            modifier = Modifier.fillMaxHeight(),
-            contentWindowInsets = { WindowInsets.ime },
-            sheetState = searchSettingsSheetState,
-            onDismissRequest = {
-                screen.CloseSearchSettingsPanelUseCase()
-            }
+    Box(Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = false,
+            onRefresh = { },
+            modifier = Modifier
         ) {
-            SearchSettingsPanelView(
-                panel = screen.searchSettingsPanel
+            AdsListView(screen)
+        }
+
+        if (searchFilterPanelEnabled) {
+            val searchSettingsSheetState = rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
             )
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxHeight(),
+                contentWindowInsets = { WindowInsets.ime },
+                sheetState = searchSettingsSheetState,
+                onDismissRequest = {
+                    screen.CloseSearchSettingsPanelUseCase()
+                }
+            ) {
+                SearchSettingsPanelView(
+                    panel = screen.searchSettingsPanel
+                )
+            }
         }
     }
 }
@@ -131,7 +135,7 @@ private fun AdsListView(screen: SearchScreen) {
         screen.ScrollToEndUseCase()
     }
 
-    var ads = screen.state.ads.data.collectAsState(key = SearchScreen::class)
+    var ads = screen.state.ads.data.collectAsState()
     val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>()}
     LazyColumn(
         state = listState,
@@ -288,7 +292,7 @@ fun SearchScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.ads.data.value = MockDataProvider().getAds(0, 0, "").toMutableStateList()
+        state.ads.data.post(MockDataProvider().getAds(0, 0, "").toMutableStateList())
     }
 
     LikeAvitoAppTheme {
