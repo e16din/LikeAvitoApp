@@ -3,31 +3,23 @@ package me.likeavitoapp.screens.main.tabs.cart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import me.likeavitoapp.collectAsState
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
+import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 
 
 @Composable
-fun CartScreenProvider(screen: CartScreen) {
-    val nextScreen by screen.tabsNavigator.screen.collectAsState()
+fun CartScreenProvider(screen: CartScreen, tabsRootScreen: TabsRootScreen) {
 
-    Box {
-        CartScreenView(screen)
-
-        when (nextScreen) {
-            is SearchScreen -> SearchScreenProvider(nextScreen as SearchScreen)
-            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
-            is ProfileScreen -> ProfileScreenProvider(nextScreen as ProfileScreen)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            CartScreenView(screen)
         }
+
+        NextTabProvider(screen, tabsRootScreen)
     }
 }
 

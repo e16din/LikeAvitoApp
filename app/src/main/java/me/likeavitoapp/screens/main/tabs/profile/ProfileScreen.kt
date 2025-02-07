@@ -7,9 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.logError
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
@@ -24,8 +23,8 @@ class ProfileScreen(
     val scope: CoroutineScope = provideCoroutineScope(),
     val parentNavigator: ScreensNavigator,
     val sources: DataSources = provideDataSources(),
-    user: User = sources.app.user!!
-) : BaseScreen() {
+    user: User = sources.app.user.value!!
+) : IScreen {
 
     class State(
         val user: User,
@@ -55,7 +54,7 @@ class ProfileScreen(
     fun CloseScreenUseCase() {
         recordScenarioStep()
 
-//        state.user.photoUrl.free(ProfileScreen::class)
+        state.user.photoUrl.free(ProfileScreen::class)
     }
 
     fun ClickToLogoutUseCase() {

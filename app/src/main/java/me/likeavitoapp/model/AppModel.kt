@@ -1,5 +1,6 @@
 package me.likeavitoapp.model
 
+import me.likeavitoapp.className
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
@@ -8,9 +9,7 @@ import kotlin.reflect.KClass
 
 class AppModel {
 
-    var user: User? = null
-
-//    var ads: SnapshotStateList<Ad> = mutableStateListOf<Ad>()
+    val user = UpdatableState<User?>(null)
 
     lateinit var rootScreen: RootScreen
 
@@ -21,14 +20,14 @@ class AppModel {
     }
 }
 
-class StubScreen() : BaseScreen()
+class StubScreen() : IScreen
 
-class ScreensNavigator(initialScreen: BaseScreen = StubScreen(), val tag: String = "") {
+class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = "") {
     val screens = mutableListOf(initialScreen)
     val screen = UpdatableState(initialScreen)
 
-    fun startScreen(nextScreen: BaseScreen, clearStack: Boolean = false) {
-        if (screens.last().javaClass.simpleName != nextScreen.javaClass.simpleName) {
+    fun startScreen(nextScreen: IScreen, clearStack: Boolean = false) {
+        if (screens.last().className() != nextScreen.className()) {
             if (clearStack) {
                 screens.clear()
             }
@@ -44,14 +43,17 @@ class ScreensNavigator(initialScreen: BaseScreen = StubScreen(), val tag: String
         log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
     }
 
-    inline fun <reified T : BaseScreen> getScreenOrNull(klass: KClass<T>): T? {
+    inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
         return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
+    }
+
+    fun hasScreen(): Boolean {
+        val last = screens.lastOrNull()
+        return last != null && last !is StubScreen
     }
 }
 
-open class BaseScreen {
-    override fun toString() : String = javaClass.simpleName
-}
+interface IScreen
 
 data class User(
     val id: Long,
@@ -62,10 +64,10 @@ data class User(
 )
 
 data class Contacts(
-    val phone: String? = null,
-    val whatsapp: String? = null,
-    val telegram: String? = null,
-    val email: String? = null
+    var phone: String? = null,
+    var whatsapp: String? = null,
+    var telegram: String? = null,
+    var email: String? = null
 )
 
 data class Category(val name: String, val id: Int)

@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -18,18 +18,20 @@ class EditProfileScreen(
     val parentNavigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources(),
-    user: User = sources.app.user!!
-) : BaseScreen() {
+    user: User = sources.app.user.value!!
+) : IScreen {
 
     class State(
         val user: User,
         val userPickerEnabled: UpdatableState<Boolean> = UpdatableState(false),
-        val newPhoto: Loadable<ByteArray?> = Loadable(null)
+        val updateUser: Loadable<User> = Loadable(user),
+        var photo: ByteArray? = null
     )
 
-    val state = State(user)
+    val state = State(user.copy())
 
-    fun PressBack() {
+
+    fun PressBackUseCase() {
         recordScenarioStep()
 
         parentNavigator.backToPrevious()
@@ -46,26 +48,44 @@ class EditProfileScreen(
     fun ChangeUserPhotoUseCase(bytes: ByteArray?) {
         recordScenarioStep()
 
-        val photoBase64 = Base64.encodeToString(bytes, Base64.DEFAULT)
-        scope.launchWithHandler {
-            state.newPhoto.load(loading = {
-                return@load sources.backend.userService.postPhoto(photoBase64)
-
-            }, onSuccess = { newPhoto -> //todo: replace with url in real app
-                val bytes = Base64.decode(newPhoto, Base64.DEFAULT)
-                if (bytes != null) {
-                    state.newPhoto.data.post(bytes)
-                } else {
-                    state.newPhoto.loadingFailed.post(true)
-                }
-            })
-        }
-
+        state.photo = bytes
     }
 
     fun CloseScreenUseCase() {
         recordScenarioStep()
 
-//        state.user.photoUrl.free(EditProfileScreen::class)
+        state.user.photoUrl.free(EditProfileScreen::class)
+    }
+
+    fun ClickToCloseUseCase() {
+        recordScenarioStep()
+
+        parentNavigator.backToPrevious()
+    }
+
+    fun ClickToDoneUseCase() {
+        recordScenarioStep()
+
+        state.updateUser.loading.repostTo(
+            sources.app.rootScreen.state.loadingEnabled
+        )
+
+        scope.launchWithHandler {
+            state.updateUser.load(loading = {
+                val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
+                sources.backend.userService.postPhoto(photoBase64)
+
+                return@load sources.backend.userService.updateUser(
+                    name = state.user.name,
+                    phone = state.user.contacts.phone,
+                    telegram = state.user.contacts.telegram,
+                    whatsapp = state.user.contacts.whatsapp,
+                    email = state.user.contacts.email,
+                )
+
+            }, onSuccess = { newUser ->
+                sources.app.user.post(newUser)
+            })
+        }
     }
 }

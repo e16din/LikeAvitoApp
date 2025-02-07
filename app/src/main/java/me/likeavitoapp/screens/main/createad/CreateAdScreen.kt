@@ -6,13 +6,13 @@ import androidx.compose.runtime.setValue
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Loadable
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 
 
 class CreateAdScreen(
     val input: Input = Input(),
     val state: State = State(),
-    ) : BaseScreen() {
+    ) : IScreen {
 
     class Input {
         var onTitleChanged: (title: String) -> Unit = {}

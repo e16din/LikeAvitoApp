@@ -9,6 +9,17 @@ import me.likeavitoapp.model.User
 
 
 class MockDataProvider {
+    var user = User(
+        id = 0,
+        name = "Кундрюков Александр",
+        contacts = Contacts(
+            telegram = "@alex_ku_san",
+            email = "a.kundryukov@gmail.com"
+        ),
+        ownAds = emptyList(),
+        photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
+    )
+
     var ads = mutableListOf<Ad>()
     init {
         repeat(21) {
@@ -18,19 +29,6 @@ class MockDataProvider {
                 )
             )
         }
-    }
-
-    fun getUser(): User {
-        return User(
-            id = 0,
-            name = "Кундрюков Александр",
-            contacts = Contacts(
-                telegram = "@alex_ku_san",
-                email = "a.kundryukov@gmail.com"
-            ),
-            ownAds = emptyList(),
-            photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
-        )
     }
 
     fun getAds(categoryId: Int, page: Int, query: String): List<Ad> {

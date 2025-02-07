@@ -3,7 +3,6 @@ package me.likeavitoapp.screens.main.tabs
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
@@ -11,38 +10,26 @@ import me.likeavitoapp.load
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 open class BaseAdScreen(
     open val parentNavigator: ScreensNavigator,
     open val scope: CoroutineScope,
     open val sources: DataSources,
     open val state: BaseAdState = BaseAdState()
-) : BaseScreen() {
+) : IScreen {
 
     open class BaseAdState(
         val reserve: Loadable<Boolean> = Loadable(false)
     )
 
     private val timersMap = mutableMapOf<Long, Job>()
-
-    fun ClickToAdUseCase(ad: Ad) {
-        recordScenarioStep()
-
-        parentNavigator.startScreen(
-            AdDetailsScreen(
-                ad = ad,
-                scope = scope,
-                parentNavigator = parentNavigator,
-                sources = sources
-            )
-        )
-    }
 
     open fun ClickToFavoriteUseCase(ad: Ad) {
         recordScenarioStep(ad)
@@ -60,10 +47,7 @@ open class BaseAdScreen(
     fun ClickToBuyUseCase(ad: Ad) {
         recordScenarioStep()
 
-        val createOrderScreen = CreateOrderScreen(
-            ad = ad,
-            parentNavigator = parentNavigator
-        )
+        val createOrderScreen = CreateOrderScreen(ad, parentNavigator)
         if (ad.reservedTimeMs != null) {
             parentNavigator.startScreen(createOrderScreen)
             return
@@ -109,6 +93,10 @@ open class BaseAdScreen(
 
     fun ClickToBargainingUseCase(ad: Ad) {
         recordScenarioStep()
+
+        parentNavigator.startScreen(
+            ChatScreen(ad, parentNavigator)
+        )
     }
 
     fun ClickToCloseTimerLabel(ad: Ad) {
@@ -122,8 +110,8 @@ open class BaseAdScreen(
     open fun CloseScreenUseCase() {
         recordScenarioStep()
 
-        timersMap.values.forEach {
-            it.cancel()
-        }
+//        timersMap.values.forEach {
+//            it.cancel()
+//        }
     }
 }

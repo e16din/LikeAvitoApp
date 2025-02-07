@@ -58,38 +58,36 @@ import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.AdView
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
+import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun SearchScreenProvider(screen: SearchScreen, modifier: Modifier = Modifier) {
-    val nextScreen by screen.tabsNavigator.screen.collectAsState()
-
+fun SearchScreenProvider(
+    screen: SearchScreen,
+    tabsRootScreen: TabsRootScreen,
+    modifier: Modifier = Modifier
+) {
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
     }
 
-    Surface(modifier = modifier.fillMaxSize()) {
-        SearchScreenView(screen)
-
-        when (nextScreen) {
-            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
-            is ProfileScreen -> ProfileScreenProvider(nextScreen as ProfileScreen)
-            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
+    Box(modifier = modifier.fillMaxSize()) {
+        Surface(modifier = modifier.fillMaxSize()) {
+            SearchScreenView(screen)
         }
+
+        NextTabProvider(screen, tabsRootScreen)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchScreenView(screen: SearchScreen) {
-    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(SearchScreen::class)
+    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(
+        SearchScreen::class
+    )
 
     Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
@@ -136,7 +134,7 @@ private fun AdsListView(screen: SearchScreen) {
     }
 
     var ads = screen.state.ads.data.collectAsState()
-    val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>()}
+    val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>() }
     LazyColumn(
         state = listState,
         contentPadding = PaddingValues(
@@ -165,7 +163,11 @@ private fun AdsListView(screen: SearchScreen) {
                 AdView(
                     isFavorite = ad.isFavorite.collectAsState(SearchScreen::class),
                     timerLabel = ad.timerLabel.collectAsState(SearchScreen::class),
-                    modifier = Modifier.animateItem(),
+                    modifier = Modifier
+                        .animateItem()
+                        .clickable {
+                            screen.ClickToAdUseCase(ad)
+                        },
                     ad = ad,
                     screen = screen
                 )
@@ -191,11 +193,16 @@ private fun AdsListView(screen: SearchScreen) {
 @OptIn(ExperimentalMaterial3Api::class)
 private fun SearchBarView(screen: SearchScreen) {
     val query by screen.searchBar.state.query.collectAsState(SearchScreen::class)
-    val searchTips = remember {  screen.searchBar.state.searchTips.data.value.toMutableStateList() }
-    val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState(SearchScreen::class)
-    val categories = remember { screen.searchSettingsPanel.state.categories.data.value.toMutableStateList() }
+    val searchTips = remember { screen.searchBar.state.searchTips.data.value.toMutableStateList() }
+    val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState(
+        SearchScreen::class
+    )
+    val categories =
+        remember { screen.searchSettingsPanel.state.categories.data.value.toMutableStateList() }
     var searchBarExpanded by remember { mutableStateOf(false) }
-    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(SearchScreen::class)
+    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState(
+        SearchScreen::class
+    )
 
     fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
 

@@ -20,6 +20,7 @@ import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 
 
@@ -35,25 +36,14 @@ class SearchScreen(
     ) : BaseAdState()
 
     override val state = State()
-
-    lateinit var tabsNavigator: ScreensNavigator
+    
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
 
-    fun ScrollToEndUseCase() {
-        recordScenarioStep()
-
-        if (!state.ads.data.value.isEmpty()) {
-            scope.launchWithHandler {
-                state.adsPage.post(state.adsPage.value + 1)
-                loadAds()
-            }
-        }
-    }
-
     suspend fun loadAds() {
         log("loadAds")
+        state.ads.loading.repostTo(sources.app.rootScreen.state.loadingEnabled)
         state.ads.load(
             loading = {
                 return@load sources.backend.adsService.getAds(
@@ -89,6 +79,30 @@ class SearchScreen(
         scope.launchWithHandler {
             loadCategories()
             loadAds()
+        }
+    }
+
+    fun ClickToAdUseCase(ad: Ad) {
+        recordScenarioStep()
+
+        parentNavigator.startScreen(
+            AdDetailsScreen(
+                ad = ad,
+                scope = scope,
+                parentNavigator = parentNavigator,
+                sources = sources
+            )
+        )
+    }
+
+    fun ScrollToEndUseCase() {
+        recordScenarioStep()
+
+        if (!state.ads.data.value.isEmpty()) {
+            scope.launchWithHandler {
+                state.adsPage.post(state.adsPage.value + 1)
+                loadAds()
+            }
         }
     }
 

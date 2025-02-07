@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.develop
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
@@ -14,12 +14,13 @@ import me.likeavitoapp.screens.splash.SplashScreen
 class RootScreen(
     val scope: CoroutineScope,
     val sources: DataSources
-) : BaseScreen() {
+) : IScreen {
 
     class State(
         var isStarted: Boolean = false,
         var demoLabelEnabled: Boolean = develop,
         val scenariosEnabled: UpdatableState<Boolean> = UpdatableState(false),
+        val loadingEnabled: UpdatableState<Boolean> = UpdatableState(false),
     )
 
     val state = State()

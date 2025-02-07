@@ -30,4 +30,7 @@
     <string name="hint_max">Максимум</string>
     <string name="search_settings_title">Настройки поиска</string>
     <string name="continue_order_label">Продолжить оформление заказа %1$s</string>
+    <string name="edit_profile_title">Редактирование профиля</string>
+    <string name="clear">Очистить</string>
+    <string name="moe_to_ads_button">Перейти к объявлениям</string>
 </resources>

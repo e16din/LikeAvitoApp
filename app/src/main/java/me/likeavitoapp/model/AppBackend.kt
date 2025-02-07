@@ -29,7 +29,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             if (username == "ss@ss.ss" && password == "123456") {
                 return Result.success(
                     LoginResult(
-                        user = mockDataProvider.getUser(),
+                        user = mockDataProvider.user,
                         token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
                     )
                 )
@@ -45,12 +45,30 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun getUser(userId: Long): Result<User> {
             delay(1000)
-            return Result.success(mockDataProvider.getUser())
+            return Result.success(mockDataProvider.user)
         }
 
         suspend fun postPhoto(photoBase64: String): Result<String> { //todo: return url on prod
             delay(2000)
             return Result.success(photoBase64)
+        }
+
+        suspend fun updateUser(
+            name: String,
+            phone: String?,
+            telegram: String?,
+            whatsapp: String?,
+            email: String?
+        ): Result<User> {
+            delay(2000)
+            return Result.success(mockDataProvider.user.apply {
+                this.name = name
+
+                this.contacts.email = email
+                this.contacts.whatsapp = whatsapp
+                this.contacts.telegram = telegram
+                this.contacts.phone = phone
+            })
         }
     }
 
@@ -69,6 +87,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             query: String,
             page: Int,
         ): Result<List<Ad>> {
+            delay(2000)
             return Result.success(
                 mockDataProvider.getAds(categoryId, page, query)
             )
@@ -123,7 +142,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         suspend fun reserve(adId: Long): Result<Boolean> {
             val testFailId = 2L
 
-            if(adId != testFailId) {
+            if (adId != testFailId) {
                 mockDataProvider.ads = mockDataProvider.ads.toMutableStateList().apply {
                     firstOrNull { ad -> ad.id == adId }?.let {
                         it.reservedTimeMs = System.currentTimeMillis()

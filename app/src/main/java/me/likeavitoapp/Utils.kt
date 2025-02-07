@@ -21,6 +21,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
+fun Any.className(): String {
+    return javaClass.simpleName
+}
 
 suspend inline fun <T> MutableState<T>.setUi(value: T) {
     withContext(Dispatchers.Main) {
@@ -35,9 +38,8 @@ fun <T : R, R> UpdatableState<T>.collectAsState(
     context: CoroutineContext = EmptyCoroutineContext
 ): State<R> = produceState(initial, this.value) {
     if (context == EmptyCoroutineContext) {
-        withContext(Dispatchers.Main) {
-            listen(key) { value = it }
-        }
+        listen(key) { value = it }
+
     } else withContext(context) {
         listen(key) { value = it }
     }

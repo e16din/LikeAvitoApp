@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
@@ -17,7 +17,7 @@ class SplashScreen(
     val parentNavigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
-) : BaseScreen() {
+) : IScreen {
 
     class State(val contentEnabled: UpdatableState<Boolean> = UpdatableState(false))
 
@@ -35,7 +35,7 @@ class SplashScreen(
                 val result = sources.backend.userService.getUser(userId)
                 val user = result.getOrNull()
                 if (user != null) {
-                    sources.app.user = user
+                    sources.app.user.post(user)
                 }
             }
 

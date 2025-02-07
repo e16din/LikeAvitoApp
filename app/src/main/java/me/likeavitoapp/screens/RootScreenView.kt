@@ -6,13 +6,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.collectAsState
@@ -30,6 +34,7 @@ import me.likeavitoapp.ui.theme.primaryContainerDark
 @Composable
 fun RootScreenView(rootScreen: RootScreen) {
     val screen = rootScreen.navigator.screen.collectAsState()
+    val loadingEnabled = rootScreen.state.loadingEnabled.collectAsState()
 
     LaunchedEffect(Unit) {
         rootScreen.StartScreenUseCase()
@@ -47,6 +52,22 @@ fun RootScreenView(rootScreen: RootScreen) {
                 is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
                 is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)
                 is MainScreen -> MainScreenProvider(screen.value as MainScreen)
+            }
+        }
+
+        if (loadingEnabled.value) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.72f)
+            ) {
+                Box {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .align(Alignment.Center)
+                    )
+                }
             }
         }
 

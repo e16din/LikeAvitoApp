@@ -15,6 +15,7 @@ import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
@@ -32,12 +33,6 @@ class FavoritesScreen(
 
     override val state = State()
     lateinit var tabsNavigator: ScreensNavigator
-
-    fun StartScreenUseCase() {
-        recordScenarioStep()
-
-        loadFavorites()
-    }
 
     private fun loadFavorites() {
         scope.launchWithHandler {
@@ -72,6 +67,25 @@ class FavoritesScreen(
                 }
             )
         }
+    }
+
+    fun StartScreenUseCase() {
+        recordScenarioStep()
+
+        loadFavorites()
+    }
+
+    fun ClickToAdUseCase(ad: Ad) {
+        recordScenarioStep()
+
+        parentNavigator.startScreen(
+            AdDetailsScreen(
+                ad = ad,
+                scope = scope,
+                parentNavigator = parentNavigator,
+                sources = sources
+            )
+        )
     }
 
     fun ClickToClearAllUseCase() {

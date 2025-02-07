@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.main.addetails
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,8 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
@@ -22,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -40,15 +46,33 @@ import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
+import me.likeavitoapp.screens.ClosableMessage
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreenView
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+import me.likeavitoapp.ui.theme.backgroundLight
+import me.likeavitoapp.ui.theme.primaryLight
 
 
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
+    val nextScreen = screen.navigator.screen.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         AdDetailsScreenView(screen)
+
+        when (nextScreen.value) {
+            is PhotoScreen -> PhotoScreenProvider(nextScreen.value as PhotoScreen)
+        }
     }
 
     BackHandler {
@@ -65,8 +89,9 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 @Composable
 fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
     val favoriteSelected by screen.state.ad.isFavorite.collectAsState(AdDetailsScreen::class)
+    val timerLabel = ad.timerLabel.collectAsState(AdDetailsScreen::class)
 
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(
             text = ad.title,
             style = AppTypography.titleLarge,
@@ -80,12 +105,32 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             val pagerState = rememberPagerState(pageCount = {
                 ad.photoUrls.size
             })
-            HorizontalPager(state = pagerState) { page ->
-                ActualAsyncImage(
+            Box() {
+                HorizontalPager(state = pagerState) { page ->
+
+                    val url = ad.photoUrls[page]
+                    ActualAsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(210.dp)
+                            .clickable {
+                                screen.ClickToPhotoUseCase(url)
+                            },
+                        url = url
+                    )
+
+
+                }
+                Text(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(210.dp),
-                    url = ad.photoUrls[page]
+                        .align(Alignment.BottomCenter)
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            backgroundLight
+                        )
+                        .padding(vertical = 4.dp, horizontal = 12.dp),
+                    text = "${pagerState.currentPage + 1} / ${pagerState.pageCount}"
                 )
             }
 
@@ -111,6 +156,18 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             }
         }
 
+        if (!timerLabel.value.isEmpty()) {
+            ClosableMessage(
+                text = stringResource(R.string.continue_order_label, timerLabel.value),
+                onCloseClick = {
+                    screen.ClickToCloseTimerLabel(ad)
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 16.dp, horizontal = 16.dp)
+            )
+        }
+
         Text(
             text = ad.description,
             modifier = Modifier.Companion
@@ -134,10 +191,9 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
 
             if (ad.isBargainingEnabled) {
                 Button(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     onClick = {
-                        screen.ClickToBargainingUseCase()
+                        screen.ClickToBargainingUseCase(ad)
                     }) {
                     Text(text = stringResource(R.string.bargaining_button))
                 }

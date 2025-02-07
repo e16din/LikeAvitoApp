@@ -24,9 +24,10 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,8 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
+import me.likeavitoapp.className
 import me.likeavitoapp.collectAsState
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -44,13 +46,13 @@ import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.onPrimaryContainerLightMediumContrast
 import me.likeavitoapp.ui.theme.onSecondaryContainerLight
@@ -61,14 +63,16 @@ import me.likeavitoapp.ui.theme.secondaryContainerLight
 
 @Composable
 fun MainScreenProvider(screen: MainScreen) {
-    val mainTabScreen = remember { screen.mainTabScreen }
     val nextScreen = screen.navigator.screen.collectAsState()
-    val tabScreen = screen.tabsNavigator.screen.collectAsState()
 
-    Box(
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
+
+    Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        MainScreenView(screen, mainTabScreen, tabScreen.value)
+        MainScreenView(screen)
 
         when (nextScreen.value) {
             is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
@@ -85,18 +89,20 @@ fun MainScreenProvider(screen: MainScreen) {
 val tabBarHeight = 58.dp
 
 @Composable
-fun MainScreenView(screen: MainScreen, mainTabScreen: SearchScreen, tabScreen: BaseScreen) {
+fun MainScreenView(screen: MainScreen) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        SearchScreenProvider(mainTabScreen, modifier = Modifier.padding(bottom = tabBarHeight))
+        Box(modifier = Modifier.padding(bottom = tabBarHeight)) {
+            NextTabProvider(screen, screen.tabsRootScreen)
+        }
 
         Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
         ) {
-            TabsView(tabScreen, screen)
+            TabsView(screen)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,10 +142,10 @@ fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
 }
 
 @Composable
-private fun BoxScope.TabsView(
-    tabScreen: BaseScreen,
-    screen: MainScreen
-) {
+private fun BoxScope.TabsView(screen: MainScreen) {
+    val tabScreen = screen.tabsRootScreen.navigator.screen.collectAsState()
+
+    log("Tab: ${tabScreen.value.className()}")
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,11 +160,12 @@ private fun BoxScope.TabsView(
             modifier = modifier
                 .weight(1f)
                 .background(
-                    if (tabScreen is SearchScreen)
+                    if (tabScreen.value is SearchScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .clickable(onClick = {
                     screen.ClickToSearchUseCase()
+
                 }), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.size(8.dp))
@@ -180,7 +187,7 @@ private fun BoxScope.TabsView(
             modifier = modifier
                 .weight(1f)
                 .background(
-                    if (tabScreen is FavoritesScreen)
+                    if (tabScreen.value is FavoritesScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .clickable(onClick = {
@@ -206,7 +213,7 @@ private fun BoxScope.TabsView(
             modifier = Modifier
                 .weight(0.45f)
                 .background(
-                    if (tabScreen is FavoritesScreen)
+                    if (tabScreen.value is FavoritesScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .height(tabBarHeight)
@@ -215,7 +222,7 @@ private fun BoxScope.TabsView(
             modifier = Modifier
                 .weight(0.45f)
                 .background(
-                    if (tabScreen is CartScreen)
+                    if (tabScreen.value is CartScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .height(tabBarHeight)
@@ -226,7 +233,7 @@ private fun BoxScope.TabsView(
             modifier = modifier
                 .weight(1f)
                 .background(
-                    if (tabScreen is CartScreen)
+                    if (tabScreen.value is CartScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .clickable {
@@ -253,7 +260,7 @@ private fun BoxScope.TabsView(
             modifier = modifier
                 .weight(1f)
                 .background(
-                    if (tabScreen is ProfileScreen)
+                    if (tabScreen.value is ProfileScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .clickable {
@@ -290,9 +297,7 @@ fun MainScreenPreview() {
             screen = MainScreen(
                 sources = mockDataSource(),
                 scope = mockCoroutineScope()
-            ),
-            mainTabScreen = searchScreen,
-            tabScreen = searchScreen
+            )
         )
     }
 }

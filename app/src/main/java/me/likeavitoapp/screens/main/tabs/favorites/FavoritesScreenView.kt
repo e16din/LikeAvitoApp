@@ -2,7 +2,7 @@ package me.likeavitoapp.screens.main.tabs.favorites
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +23,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -32,36 +32,29 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.R
 import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.AdView
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
+import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun FavoritesScreenProvider(screen: FavoritesScreen) {
-    val nextScreen by screen.tabsNavigator.screen.collectAsState()
+fun FavoritesScreenProvider(screen: FavoritesScreen, tabsRootScreen: TabsRootScreen) {
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
 
-    Box {
-        LaunchedEffect(Unit) {
-            screen.StartScreenUseCase()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            FavoritesScreenView(screen)
         }
 
-        FavoritesScreenView(screen)
-
-        when (nextScreen) {
-            is SearchScreen -> SearchScreenProvider(nextScreen as SearchScreen)
-            is ProfileScreen -> ProfileScreenProvider(nextScreen as ProfileScreen)
-            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
-        }
+        NextTabProvider(screen, tabsRootScreen)
     }
 }
 
@@ -75,69 +68,63 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
     val listState = rememberLazyListState()
     val displayButton = !listState.canScrollBackward || listState.lastScrolledBackward
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures()
-            }) {
-
-        if (moveToAdsEnabled) {
-            Box {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = buildAnnotatedString {
-                        val link =
-                            LinkAnnotation.Url(
-                                "stub",
-                                TextLinkStyles(SpanStyle(color = Color.Blue))
-                            ) {
-                                screen.ClickToMoveToAdsUseCase()
-                            }
-                        withLink(link) { append("Перейти к объявлениям") }
-                    }
-                )
-            }
-
-        } else {
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(
-                    start = 16.dp, top = 12.dp, end = 16.dp, bottom = 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-            ) {
-
-                stickyHeader {
-                    AnimatedVisibility(displayButton) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
+    if (moveToAdsEnabled) {
+        Box {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = buildAnnotatedString {
+                    val link =
+                        LinkAnnotation.Url(
+                            "stub",
+                            TextLinkStyles(SpanStyle(color = Color.Blue))
                         ) {
-                            ElevatedButton(
-                                modifier = Modifier
-                                    .align(Alignment.End)
-                                    .padding(horizontal = 16.dp),
-                                onClick = {
-                                    screen.ClickToClearAllUseCase()
-                                }) {
-                                Text("Очистить")
-                            }
+                            screen.ClickToMoveToAdsUseCase()
+                        }
+                    withLink(link) { append(stringResource(R.string.moe_to_ads_button)) }
+                }
+            )
+        }
+
+    } else {
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(
+                start = 16.dp, top = 12.dp, end = 16.dp, bottom = 16.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+
+            stickyHeader {
+                AnimatedVisibility(displayButton) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        ElevatedButton(
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(horizontal = 16.dp),
+                            onClick = {
+                                screen.ClickToClearAllUseCase()
+                            }) {
+                            Text(stringResource(R.string.clear))
                         }
                     }
                 }
+            }
 
-                items(items = ads.value, key = { ad ->
-                    ad.id
-                }) { ad ->
-                    AdView(
-                        ad = ad,
-                        screen = screen,
-                        modifier = Modifier.animateItem(),
-                        isFavorite = ad.isFavorite.collectAsState(FavoritesScreen::class),
-                        timerLabel = ad.timerLabel.collectAsState(FavoritesScreen::class)
-                    )
-                }
+            items(items = ads.value, key = { ad ->
+                ad.id
+            }) { ad ->
+                AdView(
+                    ad = ad,
+                    screen = screen,
+                    modifier = Modifier.animateItem().clickable {
+                        screen.ClickToAdUseCase(ad)
+                    },
+                    isFavorite = ad.isFavorite.collectAsState(FavoritesScreen::class),
+                    timerLabel = ad.timerLabel.collectAsState(FavoritesScreen::class)
+                )
             }
         }
     }

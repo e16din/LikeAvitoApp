@@ -1,6 +1,5 @@
 package me.likeavitoapp.screens.main.tabs.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
@@ -27,47 +28,38 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.R
 import me.likeavitoapp.collectAsState
-import me.likeavitoapp.defaultContext
-import me.likeavitoapp.initApp
-import me.likeavitoapp.model.User
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.provideApp
 import me.likeavitoapp.screens.ActualAsyncImage
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
+import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
+import me.likeavitoapp.screens.main.tabs.cart.CartScreenView
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-import me.likeavitoapp.ui.theme.primaryLight
 
 
 @Composable
-fun ProfileScreenProvider(screen: ProfileScreen) {
-    val nextScreen by screen.tabsNavigator.screen.collectAsState()
+fun ProfileScreenProvider(screen: ProfileScreen, tabsRootScreen: TabsRootScreen) {
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        ProfileScreenView(screen)
-
-        when (nextScreen) {
-            is SearchScreen -> SearchScreenProvider(nextScreen as SearchScreen)
-            is FavoritesScreen -> FavoritesScreenProvider(nextScreen as FavoritesScreen)
-            is CartScreen -> CartScreenProvider(nextScreen as CartScreen)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            ProfileScreenView(screen)
         }
+
+        NextTabProvider(screen, tabsRootScreen)
     }
 
     DisposableEffect(Unit) {
@@ -82,7 +74,11 @@ fun ProfileScreenView(screen: ProfileScreen) {
     val logoutLoading = screen.state.logout.loading.collectAsState()
     val photoUrl = screen.state.user.photoUrl.collectAsState(key = ProfileScreen::class)
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 ActualAsyncImage(
@@ -107,7 +103,7 @@ fun ProfileScreenView(screen: ProfileScreen) {
                 modifier = Modifier
                     .clip(CircleShape)
                     .padding(8.dp)
-                   .align(Alignment.TopEnd)
+                    .align(Alignment.TopEnd)
             ) {
                 Icon(imageVector = Icons.Default.Edit, contentDescription = "edit")
             }
@@ -158,7 +154,10 @@ fun ProfileScreenView(screen: ProfileScreen) {
             onClick = {
                 screen.ClickToLogoutUseCase()
             },
-            modifier = Modifier.width(200.dp).padding(vertical = 16.dp).align(Alignment.CenterHorizontally)
+            modifier = Modifier
+                .width(200.dp)
+                .padding(vertical = 16.dp)
+                .align(Alignment.CenterHorizontally)
         ) {
             if (logoutLoading.value) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -198,7 +197,7 @@ fun ProfileScreenPreview() {
                 parentNavigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource(),
-                user = MockDataProvider().getUser()
+                user = MockDataProvider().user
             )
         )
     }

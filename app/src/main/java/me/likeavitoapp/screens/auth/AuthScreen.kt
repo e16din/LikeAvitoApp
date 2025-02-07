@@ -5,7 +5,7 @@ import me.likeavitoapp.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.BaseScreen
+import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -21,7 +21,7 @@ class AuthScreen(
     val parentNavigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
-) : BaseScreen() {
+) : IScreen {
 
     class State {
         val email = UpdatableState("")
@@ -95,7 +95,7 @@ class AuthScreen(
             val result = sources.backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
-                sources.app.user = loginData.user
+                sources.app.user.post(loginData.user)
 
                 sources.platform.appDataStore.saveId(loginData.user.id)
 
