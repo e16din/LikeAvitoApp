@@ -23,6 +23,7 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun OrderScreenProvider() {
+
 }
 
 @Composable
@@ -32,44 +33,8 @@ fun OrderScreenView(screen: OrderScreen) = with(screen) {
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        with(state.order.ad) {
-            Text(title)
 
-            val pagerState = rememberPagerState(pageCount = { photoUrls.size })
-            HorizontalPager(state = pagerState) { page ->
-                Card(
-                    Modifier
-                        .size(200.dp)
-                        .graphicsLayer {
-                            // Calculate the absolute offset for the current page from the
-                            // scroll position. We use the absolute value which allows us to mirror
-                            // any effects for both directions
-                            val pageOffset = (
-                                    (pagerState.currentPage - page) + pagerState
-                                        .currentPageOffsetFraction
-                                    ).absoluteValue
 
-                            // We animate the alpha, between 50% and 100%
-                            alpha = lerp(
-                                start = 0.5f,
-                                stop = 1f,
-                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                            )
-                        }
-                ) {
-                    ActualAsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(210.dp),
-                        url = photoUrls[page]
-                    )
-                    AsyncImage(model = photoUrls[page], contentDescription = "$page")
-                }
-            }
-        }
 
-        if (state.order.state == Order.State.Active) {
-            ChatView()
-        }
     }
 }

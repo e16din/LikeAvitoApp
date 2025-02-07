@@ -5,8 +5,10 @@ import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
+import me.likeavitoapp.recordScenarioStep
 
 
 class CreateOrderScreen(
@@ -16,12 +18,28 @@ class CreateOrderScreen(
     val sources: DataSources = provideDataSources()
 ) : IScreen {
 
+    enum class OrderType(val text:String) {
+        Delivery("Доставка"),
+        Pickup("Самовывоз")
+    }
+
+    class State(
+        val ad: Ad,
+        var orderType: UpdatableState<OrderType> = UpdatableState(OrderType.Delivery)
+    )
+
     fun PressBack() {
+        recordScenarioStep()
+
         parentNavigator.backToPrevious()
     }
 
-    val state = State(ad)
+    fun ClickToOrderTypeUseCase(orderType: OrderType) {
+        recordScenarioStep()
 
-    class State(val ad: Ad)
+        state.orderType.post(orderType)
+    }
+
+    val state = State(ad)
 
 }

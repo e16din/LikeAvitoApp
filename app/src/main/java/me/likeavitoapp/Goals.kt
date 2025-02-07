@@ -23,6 +23,9 @@ fun Goals() {
                             openScreen("Главный экран")
                         }
                     }
+                    openScreen("Избранное").contains {
+                        openScreen("Главный экран")
+                    }
                 }
                 "Посмотрели подробности о товаре".contains {
                     values {
@@ -34,11 +37,34 @@ fun Goals() {
                         "фото продавца"
                         "имя продавца"
                     }
-                    openScreen("Детали товара")
+                    openScreen("Детали товара").contains {
+                        openScreen("Страница поиска").contains {
+                            openScreen("Главный экран")
+                        }
+                        openScreen("Избранное").contains {
+                            openScreen("Главный экран")
+                        }
+                    }
                 }
             }
             "Оплатили товар".contains {
-                openScreen("Оплата товара")
+                openScreen("Оплата товара").contains {
+                    "Заполнили данные для доставки".contains {
+                        values {
+                            "адрес"
+                            "время"
+                            "компания доставки"
+                        }
+                        openScreen("Страница создания заказа").contains {
+                            openScreen("Страница деталей объявления").contains {
+                                openScreen("Главный экран")
+                            }
+                        }
+                        openScreen("Страница создания заказа").contains {
+                            openScreen("Главный экран")
+                        }
+                    }
+                }
             }
         }
         "Получили уведомление что товар можно забирать".contains {
@@ -61,6 +87,7 @@ fun Goals() {
                         "фото"
                         "ФИО"
                         "регион"
+                        "контакты"
                     }
 
                     openScreen("Профиль продавца").contains {
@@ -83,7 +110,6 @@ fun Goals() {
                         openScreen("Главный экран")
                     }
                 }
-                ""
             }
             "Одобрили предложение от покупателя".contains {
                 "Получили предложение от покупателя".contains {

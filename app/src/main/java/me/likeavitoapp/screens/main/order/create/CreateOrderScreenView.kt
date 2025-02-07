@@ -1,30 +1,33 @@
 package me.likeavitoapp.screens.main.order.create
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
-import coil3.compose.AsyncImage
-import me.likeavitoapp.model.Order
-import me.likeavitoapp.screens.ActualAsyncImage
-import me.likeavitoapp.screens.main.order.ChatView
-import kotlin.math.absoluteValue
+import me.likeavitoapp.collectAsState
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen.OrderType
 
 
 @Composable
 fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
-    CreateOrderScreenView(screen)
+    Surface(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CreateOrderScreenView(screen)
+    }
 
     BackHandler {
         screen.PressBack()
@@ -33,6 +36,42 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
 
 @Composable
 fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
+    val selectedOrderType = screen.state.orderType.collectAsState()
+
+    Column(Modifier.selectableGroup()) {
+        listOf(OrderType.Delivery, OrderType.Pickup).forEach { orderType ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .selectable(
+                        selected = (orderType == selectedOrderType.value),
+                        onClick = { screen.ClickToOrderTypeUseCase(orderType) },
+                        role = Role.RadioButton
+                    )
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (orderType == selectedOrderType.value),
+                    onClick = null // null recommended for accessibility with screen readers
+                )
+                Text(
+                    text = orderType.text,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+        }
+    }
+
+    when(selectedOrderType.value) {
+        OrderType.Delivery -> {
+
+        }
+        OrderType.Pickup -> {
+
+        }
+    }
     // самовывоз
     //     адрес
     //     время
@@ -44,43 +83,4 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
     // mm/yy Действует до
     // cvv/cvc три цифры с обратной стороны карты
 
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        with(state.ad) {
-            Text(title)
-
-            val pagerState = rememberPagerState(pageCount = { photoUrls.size })
-            HorizontalPager(state = pagerState) { page ->
-                Card(
-                    Modifier
-                        .size(200.dp)
-                        .graphicsLayer {
-                            // Calculate the absolute offset for the current page from the
-                            // scroll position. We use the absolute value which allows us to mirror
-                            // any effects for both directions
-                            val pageOffset = (
-                                    (pagerState.currentPage - page) + pagerState
-                                        .currentPageOffsetFraction
-                                    ).absoluteValue
-
-                            // We animate the alpha, between 50% and 100%
-                            alpha = lerp(
-                                start = 0.5f,
-                                stop = 1f,
-                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                            )
-                        }
-                ) {
-                    ActualAsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(210.dp),
-                        url = photoUrls[page]
-                    )
-                    AsyncImage(model = photoUrls[page], contentDescription = "$page")
-                }
-            }
-        }
-    }
 }

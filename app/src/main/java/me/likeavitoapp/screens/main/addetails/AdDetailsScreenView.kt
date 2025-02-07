@@ -19,15 +19,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.OfferMessage
+import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -49,18 +50,10 @@ import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreenView
+import me.likeavitoapp.screens.main.order.ChatView
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
-import me.likeavitoapp.ui.theme.primaryLight
 
 
 @Composable
@@ -198,6 +191,27 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
                     Text(text = stringResource(R.string.bargaining_button))
                 }
             }
+        }
+
+        if (screen.state.messages.value.isNotEmpty()) {
+            Text(stringResource(R.string.new_messages_label, screen.state.messages.value.size))
+            Column {
+                screen.state.messages.value.filter { it.isNew }.forEach {
+                    when (it) {
+                        is TextMessage -> Text(it.text)
+                        is OfferMessage -> Text("offer: ${it.newPrice}")
+                    }
+                }
+            }
+            OutlinedButton(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = {
+                    screen.ClickToOpenChatUseCase()
+                }) {
+                Text(stringResource(R.string.move_to_chat_button))
+            }
+
+            ChatView()
         }
     }
 }

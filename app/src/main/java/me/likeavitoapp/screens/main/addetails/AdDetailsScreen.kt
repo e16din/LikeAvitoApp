@@ -51,4 +51,12 @@ class AdDetailsScreen(
             PhotoScreen(url, navigator)
         )
     }
+
+    fun ClickToOpenChatUseCase() {
+        recordScenarioStep()
+
+        navigator.startScreen(
+            ChatScreen(state.ad, navigator)
+        )
+    }
 }

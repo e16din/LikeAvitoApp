@@ -108,7 +108,7 @@ data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
         Archived
     }
 
-    sealed class BuyType {
+    sealed class BuyType(val name:String) {
         class Pickup(address: Ad.Address)
         class Delivery(delivery: DeliveryType)
     }
