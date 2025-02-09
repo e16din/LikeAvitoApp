@@ -1,16 +1,23 @@
 package me.likeavitoapp
 
 import android.util.Log
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.Composable
+import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import me.likeavitoapp.model.AppBackend
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IAppPlatform
+import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ISource
 import me.likeavitoapp.screens.RootScreen
+import java.util.Properties
+import kotlin.reflect.KClass
 
 const val develop = true
 
@@ -20,10 +27,14 @@ private var appPlatform: IAppPlatform? = null
 private var actualScope: CoroutineScope? = null
 private var actualDataSources: DataSources? = null
 
-fun initApp(platform: IAppPlatform, scope: CoroutineScope): AppModel {
+
+fun initApp(platform: AppPlatform, scope: CoroutineScope): AppModel {
     if (appModel != null) {
         return appModel!!
     }
+
+    MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
+    MapKitFactory.initialize(platform)
 
     appPlatform = platform
     actualScope = scope
@@ -51,6 +62,9 @@ fun provideRootScreen() = appModel!!.rootScreen
 fun provideApp() = appModel!!
 fun provideAndroidAppContext() = appPlatform as AppPlatform
 
+@Composable
+fun isPreviewMode(): Boolean = runCatching { provideApp() }.isFailure
+
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
     logError(throwable.message ?: "")
@@ -76,21 +90,62 @@ fun checkState(condition: Boolean) {
     assert(condition)
 }
 
+class ScenarioStep(
+    val owner: IScreen,
+    val useCase: String,
+    val delayMs: Long,
+    val argument: Any? = null
+)
+
 private var lastCallMs = System.currentTimeMillis()
-fun recordScenarioStep(value: Any? = Unit) {
+private val scenarioSteps = mutableListOf<ScenarioStep>()
+private val scenarioDataSourcesMap = mutableMapOf<KClass<*>, List<ISource>>()
+
+
+fun runRecordedScenario(scope: CoroutineScope) {
+    scope.launchWithHandler {
+        scenarioSteps.forEach { step ->
+            step.owner::class.members.firstOrNull { it.name == step.useCase }?.apply {
+                if (step.argument == null) {
+                    call()
+                } else {
+                    if (step.argument is ISource) {
+                        val data = scenarioDataSourcesMap[step.argument::class]
+                            ?.first { it.id == step.argument.id }
+                        call(data)
+
+                    } else {
+                        call(step.argument)
+                    }
+                }
+            }
+            delay(step.delayMs)
+        }
+    }
+}
+
+fun IScreen.bindScenarioDataSource(key: KClass<*>, list: List<ISource>) {
+    scenarioDataSourcesMap[key] = list
+}
+
+class NameAndId(val name:String, val id: Long)
+
+fun IScreen.recordScenarioStep(argument: Any? = null) {
     if (develop) {
         var end = "()"
-        if (value != Unit) {
-            end = "(${value})"
+        if (argument != Unit) {
+            end = "(${argument})"
         }
         val methodName = Thread.currentThread().stackTrace.first {
             it.methodName.first().isUpperCase()
         }.methodName
 
-        val timeMs = System.currentTimeMillis() - lastCallMs
+        val delayMs = System.currentTimeMillis() - lastCallMs
         lastCallMs = System.currentTimeMillis()
-        val tag = "record_scenario"
-        log("delay(${Math.round(timeMs / 100f) * 100})", tag)
-        log("$methodName$end", tag)
+
+        val argumentValue = if(argument is ISource) NameAndId(argument.className(), argument.id) else argument
+        scenarioSteps.add(ScenarioStep(this, methodName, delayMs, argumentValue))
+        log("delay(${Math.round(delayMs / 100f) * 100})")
+        log("$methodName$end")
     }
 }

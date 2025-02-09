@@ -4,11 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 
 
 class CreateOrderScreen(
@@ -25,8 +27,12 @@ class CreateOrderScreen(
 
     class State(
         val ad: Ad,
-        var orderType: UpdatableState<OrderType> = UpdatableState(OrderType.Delivery)
+        var orderType: UpdatableState<OrderType> = UpdatableState(OrderType.Delivery),
+        var selectedPickupPoint: UpdatableState<PickupPoint?> = UpdatableState(null)
     )
+
+    val state = State(ad)
+    val navigator = ScreensNavigator()
 
     fun PressBack() {
         recordScenarioStep()
@@ -40,6 +46,16 @@ class CreateOrderScreen(
         state.orderType.post(orderType)
     }
 
-    val state = State(ad)
+    fun ClickToOwnerAddressUseCase() {
+        recordScenarioStep()
+
+        state.selectedPickupPoint.post(null)
+    }
+
+    fun ClickToPickupUseCase() {
+        recordScenarioStep()
+
+        navigator.startScreen(SelectPickupScreen(state.selectedPickupPoint, navigator))
+    }
 
 }

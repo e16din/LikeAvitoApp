@@ -16,22 +16,23 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
-import me.likeavitoapp.screens.main.tabs.BaseAdScreen
+import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen.State
 
 
 class FavoritesScreen(
     override val parentNavigator: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
-    override val sources: DataSources = provideDataSources()
-) : BaseAdScreen(parentNavigator, scope, sources) {
+    override val sources: DataSources = provideDataSources(),
+    override val state: State = State()
+) : BaseAdContainerScreen(parentNavigator, scope, sources, state) {
 
     class State(
         val favorites: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
         val moveToAdsEnabled: UpdatableState<Boolean> = UpdatableState(false)
-    ) : BaseAdState()
+    ) : BaseAdContainerState()
 
-    override val state = State()
     lateinit var tabsNavigator: ScreensNavigator
 
     private fun loadFavorites() {

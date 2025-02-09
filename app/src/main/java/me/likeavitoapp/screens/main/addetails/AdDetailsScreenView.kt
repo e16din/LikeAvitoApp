@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.addetails
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -149,7 +150,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             }
         }
 
-        if (!timerLabel.value.isEmpty()) {
+        AnimatedVisibility(!timerLabel.value.isEmpty()) {
             ClosableMessage(
                 text = stringResource(R.string.continue_order_label, timerLabel.value),
                 onCloseClick = {

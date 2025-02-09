@@ -28,8 +28,8 @@ class UpdatableState<T>(initial: T) {
         } ?: listOf(onChanged)
     }
 
-    fun post(value: T) {
-        provideCoroutineScope().launch(defaultContext + Dispatchers.Main) {
+    fun post(value: T, scope: CoroutineScope = provideCoroutineScope()) {
+        scope.launch(defaultContext + Dispatchers.Main) {
             _value = value
             callbacks.keys.forEach {
                 callbacks[it]?.forEach { onChange ->

@@ -93,7 +93,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             )
         }
 
-        suspend fun getAdDetails(adId: Long): Result<Ad> {
+        suspend fun getAdDetails(ad: Ad): Result<Ad> {
             TODO("Not yet implemented")
         }
 

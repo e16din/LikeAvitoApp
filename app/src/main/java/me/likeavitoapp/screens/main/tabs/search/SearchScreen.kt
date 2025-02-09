@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
+import me.likeavitoapp.bindScenarioDataSource
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
@@ -21,22 +22,20 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
-import me.likeavitoapp.screens.main.tabs.BaseAdScreen
+import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 
 
 class SearchScreen(
     override val parentNavigator: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
-    override val sources: DataSources = provideDataSources()
-) : BaseAdScreen(parentNavigator, scope, sources) {
+    override val sources: DataSources = provideDataSources(),
+    override val state: State = State()
+) : BaseAdContainerScreen(parentNavigator, scope, sources, state) {
 
     class State(
         val ads: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
         var adsPage: UpdatableState<Int> = UpdatableState(0)
-    ) : BaseAdState()
-
-    override val state = State()
-    
+    ) : BaseAdContainerState()
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
@@ -55,9 +54,10 @@ class SearchScreen(
                 )
             },
             onSuccess = { newAds ->
-                val list = newAds.toMutableStateList()
-//                sources.app.ads = list
-                state.ads.data.post(list)
+                with(newAds.toMutableStateList()) {
+                    state.ads.data.post(this)
+                    bindScenarioDataSource(Ad::class, this)
+                }
             }
         )
     }
@@ -76,9 +76,20 @@ class SearchScreen(
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
-            loadCategories()
-            loadAds()
+        val ads = state.ads.data.value
+        val isInited = ads.isEmpty()
+        if (isInited) {
+            scope.launchWithHandler {
+                loadCategories()
+                loadAds()
+            }
+        } else {
+            ads.forEach {
+                if (it.reservedTimeMs != null) {
+                    timersMap[it.id] = startReserveTimer(it)
+                }
+            }
+
         }
     }
 
@@ -138,14 +149,11 @@ class SearchScreen(
         fun ClickToFilterButtonUseCase() {
             recordScenarioStep()
 
-//            scope.launchWithHandler {
-                searchSettingsPanel.state.enabled.inverse()
-//            }
+            searchSettingsPanel.state.enabled.inverse()
         }
 
         fun ChangeSearchQueryUseCase(newQuery: String) {
             recordScenarioStep(newQuery)
-
 
             state.query.post(newQuery)
 

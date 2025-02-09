@@ -1,5 +1,6 @@
 package me.likeavitoapp.model
 
+
 import me.likeavitoapp.className
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.RootScreen
@@ -72,8 +73,12 @@ data class Contacts(
 
 data class Category(val name: String, val id: Int)
 
+interface ISource {
+    val id: Long
+}
+
 data class Ad(
-    val id: Long,
+    override val id: Long,
     var title: String,
     val description: String,
     val photoUrls: List<String>,
@@ -85,9 +90,10 @@ data class Ad(
     var reservedTimeMs: Long?,
     val timerLabel: UpdatableState<String> = UpdatableState(""),
     val category: Category,
-    val address: Address,
+    val address: Address?,
+    val isPickupEnabled: Boolean,
     val owner: Owner
-) {
+) : ISource {
     data class Address(val address: String)
     data class Owner(
         var id: Long,
@@ -96,9 +102,15 @@ data class Ad(
     )
 }
 
-
 data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
+
+data class PickupPoint(
+    override val id: Long,
+    val address: String,
+    val openingHoursFrom: Int,
+    val openingHoursTo: Int
+) : ISource
 
 
 data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
@@ -108,7 +120,7 @@ data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
         Archived
     }
 
-    sealed class BuyType(val name:String) {
+    sealed class BuyType(val name: String) {
         class Pickup(address: Ad.Address)
         class Delivery(delivery: DeliveryType)
     }

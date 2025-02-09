@@ -19,6 +19,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,38 +36,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
-@Preview(showBackground = true)
-@Composable
-fun AdViewPreview() {
-    LikeAvitoAppTheme {
-        val screen = BaseAdScreen(
-            parentNavigator = mockScreensNavigator(),
-            scope = mockCoroutineScope(),
-            sources = mockDataSource()
-        )
 
-        AdView(
-            ad = MockDataProvider().getAd(1),
-            screen = screen,
-            isFavorite = remember { mutableStateOf(true) },
-            timerLabel = remember { mutableStateOf("12:12") }
-        )
-    }
-}
+
 
 @Composable
 fun AdView(
     ad: Ad,
-    screen: BaseAdScreen,
+    screen: BaseAdContainerScreen,
     modifier: Modifier = Modifier,
     isFavorite: State<Boolean>,
     timerLabel: State<String>
@@ -147,12 +135,13 @@ fun AdView(
                         screen.ClickToBuyUseCase(ad)
                     }) {
                     Text(
-                        text = "Купить за " + "${ad.price}₽",
+                        text = stringResource(R.string.buy_with_price, ad.price),
                         style = AppTypography.bodySmall
                     )
                 }
 
                 Spacer(Modifier.weight(1f))
+
 
                 if (ad.isBargainingEnabled) {
                     Button(
@@ -160,7 +149,8 @@ fun AdView(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         onClick = {
                             screen.ClickToBargainingUseCase(ad)
-                        }) {
+                        }
+                    ) {
                         Text(
                             text = stringResource(R.string.bargaining_button),
                             style = AppTypography.labelSmall
@@ -169,6 +159,26 @@ fun AdView(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AdViewPreview() {
+    LikeAvitoAppTheme {
+        val screen = BaseAdContainerScreen(
+            parentNavigator = mockScreensNavigator(),
+            scope = mockCoroutineScope(),
+            sources = mockDataSource(),
+            state = BaseAdContainerScreen.BaseAdContainerState()
+        )
+        val ad = MockDataProvider().getAd(1)
+        AdView(
+            ad = ad,
+            screen = screen,
+            isFavorite = remember { mutableStateOf(true) },
+            timerLabel = remember { mutableStateOf("12:12") }
+        )
     }
 }
 

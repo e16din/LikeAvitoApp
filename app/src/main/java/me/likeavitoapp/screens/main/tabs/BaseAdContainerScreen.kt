@@ -14,22 +14,21 @@ import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Loadable
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
-open class BaseAdScreen(
+open class BaseAdContainerScreen(
     open val parentNavigator: ScreensNavigator,
     open val scope: CoroutineScope,
     open val sources: DataSources,
-    open val state: BaseAdState = BaseAdState()
+    open val state: BaseAdContainerState
 ) : IScreen {
 
-    open class BaseAdState(
+    open class BaseAdContainerState(
         val reserve: Loadable<Boolean> = Loadable(false)
     )
 
-    private val timersMap = mutableMapOf<Long, Job>()
+    val timersMap = mutableMapOf<Long, Job>()
 
     open fun ClickToFavoriteUseCase(ad: Ad) {
         recordScenarioStep(ad)
@@ -58,7 +57,7 @@ open class BaseAdScreen(
                 sources.backend.cartService.reserve(adId = ad.id)
             }, onSuccess = { isReserved ->
                 if (isReserved == true) {
-                    state.reserve.data.post(isReserved)
+                    state.reserve.data.post(true)
 
                     ad.reservedTimeMs = System.currentTimeMillis()
 
@@ -73,7 +72,7 @@ open class BaseAdScreen(
         }
     }
 
-    private fun startReserveTimer(ad: Ad) = scope.launchWithHandler {
+    fun startReserveTimer(ad: Ad) = scope.launchWithHandler {
         fun getTimeMs(): Long = 20 * 60 * 1000 - (System.currentTimeMillis() - ad.reservedTimeMs!!)
 
         var timeMs = getTimeMs()
@@ -92,7 +91,7 @@ open class BaseAdScreen(
     }
 
     fun ClickToBargainingUseCase(ad: Ad) {
-        recordScenarioStep()
+        recordScenarioStep(ad)
 
         parentNavigator.startScreen(
             ChatScreen(ad, parentNavigator)
@@ -100,7 +99,7 @@ open class BaseAdScreen(
     }
 
     fun ClickToCloseTimerLabel(ad: Ad) {
-        recordScenarioStep()
+        recordScenarioStep(ad)
 
         timersMap[ad.id]?.cancel()
         ad.timerLabel.post("")

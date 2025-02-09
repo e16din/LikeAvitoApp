@@ -1,7 +1,16 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+val localProps = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProps.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -19,12 +28,19 @@ android {
     }
 
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            buildConfigField("String", "MAPKIT_API_KEY", "\"${localProps["MAPKIT_API_KEY"]}\"")
+        }
+
+        debug {
+            buildConfigField("String", "MAPKIT_API_KEY", "\"${localProps["MAPKIT_API_KEY"]}\"")
         }
     }
     compileOptions {
@@ -37,10 +53,14 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.maps.mobile)
     implementation(libs.coil3.coil.network.ktor3)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.coil.compose)

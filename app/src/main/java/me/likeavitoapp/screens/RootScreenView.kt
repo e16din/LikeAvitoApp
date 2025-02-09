@@ -2,6 +2,7 @@ package me.likeavitoapp.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.collectAsState
 import me.likeavitoapp.log
@@ -40,8 +42,22 @@ fun RootScreenView(rootScreen: RootScreen) {
         rootScreen.StartScreenUseCase()
     }
 
-    log("Root nextScreen: ${screen.value}")
-    Box(modifier = Modifier) {
+    Box(modifier = Modifier.pointerInput(Unit) {
+
+        detectTapGestures {
+            log("Tap: x = ${it.x}, y = ${it.y}")
+        }
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                // handle pointer event
+//                if (filter == null || event.type == filter) {
+                    log("PointerEvent | ${event.type}, ${event.changes.first().position}")
+//                }
+            }
+        }
+
+    }) {
         Box(
             modifier = Modifier
                 .systemBarsPadding()

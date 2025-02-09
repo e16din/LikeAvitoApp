@@ -104,6 +104,7 @@ class MockDataProvider {
             isFavorite = UpdatableState(false),
             reservedTimeMs = null,
             timerLabel = UpdatableState(""),
+            isPickupEnabled = true
         )
     }
 

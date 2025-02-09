@@ -10,7 +10,7 @@ import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
-import me.likeavitoapp.screens.main.tabs.BaseAdScreen
+import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 
@@ -19,15 +19,15 @@ class AdDetailsScreen(
     override val parentNavigator: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources(),
+    override val state: State = State(ad),
     val navigator: ScreensNavigator = ScreensNavigator()
-) : BaseAdScreen(navigator, scope, sources) {
+) : BaseAdContainerScreen(navigator, scope, sources, state) {
 
     class State(
         val ad: Ad,
         val messages: UpdatableState<List<IMessage>> = UpdatableState(emptyList()),
-    ) : BaseAdState()
+    ) : BaseAdContainerState()
 
-    override val state: State = State(ad)
 
     fun PressBackUseCase() {
         recordScenarioStep()
