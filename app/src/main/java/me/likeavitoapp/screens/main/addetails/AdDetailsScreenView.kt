@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.OfferMessage
 import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.mockCoroutineScope
@@ -52,6 +52,8 @@ import me.likeavitoapp.screens.ClosableMessage
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
 import me.likeavitoapp.screens.main.order.ChatView
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
@@ -59,13 +61,16 @@ import me.likeavitoapp.ui.theme.backgroundLight
 
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
-    val nextScreen = screen.navigator.screen.collectAsState()
+    val nextScreen = screen.navigatorNext.screen.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         AdDetailsScreenView(screen)
 
-        when (nextScreen.value) {
-            is PhotoScreen -> PhotoScreenProvider(nextScreen.value as PhotoScreen)
+        with(nextScreen.value) {
+            when (this) {
+                is PhotoScreen -> PhotoScreenProvider(this)
+                is ChatScreen -> ChatScreenProvider(this)
+            }
         }
     }
 
@@ -82,7 +87,7 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 
 @Composable
 fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
-    val favoriteSelected by screen.state.ad.isFavorite.collectAsState(AdDetailsScreen::class)
+    val favoriteSelected by screen.state.ad.isFavorite.collectAsState()
     val timerLabel = ad.timerLabel.collectAsState(AdDetailsScreen::class)
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -223,8 +228,8 @@ fun AdDetailsScreenPreview() {
     LikeAvitoAppTheme {
         AdDetailsScreenView(
             AdDetailsScreen(
-                ad = MockDataProvider().getAd(0L),
-                parentNavigator = mockScreensNavigator(),
+                ad = MockDataProvider().ads.first(),
+                navigatorNext = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource()
             )

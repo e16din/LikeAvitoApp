@@ -24,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,20 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenProvider
-import me.likeavitoapp.screens.main.tabs.cart.CartScreenView
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
-import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -72,7 +64,7 @@ fun ProfileScreenProvider(screen: ProfileScreen, tabsRootScreen: TabsRootScreen)
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
     val logoutLoading = screen.state.logout.loading.collectAsState()
-    val photoUrl = screen.state.user.photoUrl.collectAsState(key = ProfileScreen::class)
+    val photoUrl = screen.state.user.photoUrl.collectAsState()
 
     Column(
         modifier = Modifier
@@ -194,7 +186,7 @@ fun ProfileScreenPreview() {
     LikeAvitoAppTheme {
         ProfileScreenView(
             ProfileScreen(
-                parentNavigator = mockScreensNavigator(),
+                navigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource(),
                 user = MockDataProvider().user

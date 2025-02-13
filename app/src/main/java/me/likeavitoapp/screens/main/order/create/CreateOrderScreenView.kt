@@ -14,7 +14,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,25 +27,36 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen.OrderType
-import me.likeavitoapp.ui.theme.AppTypography
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
 fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
+    val nextScreen = screen.navigatorNext.screen.collectAsState()
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         CreateOrderScreenView(screen)
+
+        with(nextScreen.value) {
+            when (this) {
+                is SelectPickupScreen -> SelectPickupScreenProvider(this)
+                is PaymentScreen -> PaymentScreenProvider(this)
+            }
+        }
     }
 
     BackHandler {
-        screen.PressBack()
+        screen.PressBackUseCase()
     }
 }
 
@@ -76,76 +89,64 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
             }
         }
 
-        @Composable
-        fun BoxScope.SelectedIcon() {
-            Icon(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                imageVector = Icons.Default.Done,
-                contentDescription = "selected"
-            )
-        }
-
         when (selectedOrderType.value) {
             OrderType.Delivery -> {
-
+                DeliveryModeView(screen)
             }
 
             OrderType.Pickup -> {
-                val selectedPickupPoint = state.selectedPickupPoint.collectAsState()
-                state.ad.address?.let {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clickable {
-                                screen.ClickToOwnerAddressUseCase()
-                            }
-                    ) {
-                        Column {
-                            Text(text = "Адрес продавца", style = AppTypography.labelSmall)
-                            Text(text = it.address, style = AppTypography.bodyMedium)
-                        }
-                        if (selectedPickupPoint.value == null) {
-                            SelectedIcon()
-                        }
-                    }
-                }
+                PickupModeView(screen)
+            }
+        }
 
-                if (state.ad.isPickupEnabled) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clickable {
-                                screen.ClickToPickupUseCase()
-                            }
-                    ) {
-                        Column {
-                            Text(text = "Пункт выдачи", style = AppTypography.labelSmall)
-                            Text(
-                                text = selectedPickupPoint.value?.address
-                                    ?: "Выбрать", style = AppTypography.bodyMedium
-                            )
-                        }
-                        if (selectedPickupPoint.value != null) {
-                            SelectedIcon()
-                        }
-                    }
+        Button(onClick = {
+            screen.ClickToOrderUseCase()
+        }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Text("Заказать")
+        }
+    }
+}
+
+@Composable
+private fun DeliveryModeView(screen: CreateOrderScreen) = with(screen) {
+
+}
+
+@Composable
+private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
+
+    @Composable
+    fun BoxScope.SelectedIcon() {
+        Icon(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            imageVector = Icons.Default.Done,
+            contentDescription = "selected"
+        )
+    }
+
+    val selectedPickupPoint = state.selectedPickupPoint.collectAsState()
+
+    if (state.ad.isPickupEnabled) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .clickable {
+                    screen.ClickToPickupUseCase()
                 }
+        ) {
+            Column {
+                Text(text = "Пункт выдачи", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    text = selectedPickupPoint.value?.address
+                        ?: "Выбрать", style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            if (selectedPickupPoint.value != null) {
+                SelectedIcon()
             }
         }
     }
-    // самовывоз
-    //     адрес
-    //     время
-    //     посмотреть на карте
-    // доставка
-    //    компания доставки
-    // оплатить
-    // card number Номер карты
-    // mm/yy Действует до
-    // cvv/cvc три цифры с обратной стороны карты
-
 }
 
 @Preview
@@ -155,8 +156,8 @@ fun CreateOrderScreenPreview() {
         val scope = mockCoroutineScope()
         CreateOrderScreenProvider(
             screen = CreateOrderScreen(
-                ad = MockDataProvider().getAd(0),
-                parentNavigator = mockScreensNavigator(),
+                ad = MockDataProvider().ads.first(),
+                navigatorPrev = mockScreensNavigator(),
                 scope = scope,
                 sources = mockDataSource()
             ).apply {
@@ -165,3 +166,4 @@ fun CreateOrderScreenPreview() {
         )
     }
 }
+

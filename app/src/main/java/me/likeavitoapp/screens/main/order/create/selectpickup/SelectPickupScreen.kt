@@ -1,12 +1,14 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
-import androidx.work.WorkQuery
-import com.google.android.play.core.integrity.q
+import com.yandex.mapkit.geometry.Point
 import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.model.Ad
+import me.likeavitoapp.launchWithHandler
+import me.likeavitoapp.load
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.PickupPoint
+import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.MapItem
+import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
@@ -16,45 +18,73 @@ import me.likeavitoapp.recordScenarioStep
 
 class SelectPickupScreen(
     selectedPickupPoint: UpdatableState<PickupPoint?>,
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
 ) : IScreen {
 
-
-    class State(
-        var selectedPickupPoint: UpdatableState<PickupPoint?>,
-        var query: UpdatableState<String> = UpdatableState(""),
-        var suggestions: UpdatableState<List<String>> = UpdatableState(emptyList())
-    )
+    class State(val selectedPickupPoint: UpdatableState<PickupPoint?>) {
+        val pickupPointType = UpdatableState(PickupPoint.Type.OwnerAddress)
+        val query = UpdatableState("")
+        val areaPoint = UpdatableState(Point())
+        val suggestions = Loadable<List<MapItem>>(emptyList())
+    }
 
     val state = State(selectedPickupPoint)
 
-    fun PressBack() {
+    fun PressBackUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ChangeQueryUseCase(query: String) {
         recordScenarioStep(query)
 
         state.query.post(query)
-        state.suggestions.post(
-            allSuggestions.filter { it.contains(query, ignoreCase = true) }
-        )
+
+        scope.launchWithHandler {
+            state.suggestions.load(loading = {
+                sources.backend.mapService.getAddressesBy(query, state.areaPoint.value)
+            }, onSuccess = { data ->
+                state.suggestions.data.post(data)
+            })
+        }
     }
 
     fun ClickToClearAddress() {
         state.query.post("")
-        state.suggestions.post(allSuggestions)
+        state.suggestions.resetWith(emptyList())
     }
 
-    fun ClickToSelectSuggestion(address: String) {
-        state.query.post(address)
-        state.suggestions.post(emptyList())
+    fun ClickToSelectSuggestion(item: MapItem) {
+        state.query.post(item.name)
+        state.suggestions.resetWith(emptyList())
+        state.areaPoint.post(item.point)
     }
 
-    private val allSuggestions = listOf("Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург")
+    fun ChangeAreaPointUseCase(point: Point) {
+        recordScenarioStep()
+
+        state.areaPoint.post(point)
+    }
+
+    fun SelectPickupPointTypeUseCase(type: PickupPoint.Type) {
+        recordScenarioStep()
+
+        state.pickupPointType.post(type)
+    }
+
+    fun ClickToCloseUseCase() {
+        recordScenarioStep()
+
+        navigator.backToPrevious()
+    }
+
+    fun ClickToDoneUseCase() {
+        recordScenarioStep()
+
+        navigator.backToPrevious()
+    }
 
 }

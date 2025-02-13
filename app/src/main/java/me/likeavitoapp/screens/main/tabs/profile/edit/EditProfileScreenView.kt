@@ -45,11 +45,12 @@ import kotlinx.io.IOException
 import me.likeavitoapp.MainActivity
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
-import me.likeavitoapp.logError
+import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.ui.theme.AppTypography
@@ -61,8 +62,17 @@ import me.likeavitoapp.ui.theme.backgroundLight
 fun EditProfileScreenProvider(screen: EditProfileScreen) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        EditProfileScreenView(screen)
-
+        ActionTopBar(
+            title = stringResource(R.string.edit_profile_title),
+            onClose = {
+                screen.ClickToCloseUseCase()
+            },
+            onDone = {
+                screen.ClickToDoneUseCase()
+            },
+        ) { innerPadding ->
+            EditProfileScreenView(screen, Modifier.padding(innerPadding))
+        }
     }
 
     BackHandler {
@@ -78,7 +88,7 @@ fun EditProfileScreenProvider(screen: EditProfileScreen) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreenView(screen: EditProfileScreen) {
+fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
     val activity = LocalActivity.current
     val pickMedia = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
         uri?.let {
@@ -87,7 +97,7 @@ fun EditProfileScreenView(screen: EditProfileScreen) {
                 screen.ChangeUserPhotoUseCase(bytes)
 
             } catch (error: IOException) {
-                logError(error.message ?: "IOException")
+                error.log()
                 screen.ChangeUserPhotoUseCase(null)
             }
         }
@@ -97,7 +107,7 @@ fun EditProfileScreenView(screen: EditProfileScreen) {
     val photoUrl = screen.state.user.photoUrl.collectAsState()
 
     Scaffold(
-        modifier = Modifier,
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -258,11 +268,12 @@ fun EditProfileScreenPreview() {
     LikeAvitoAppTheme {
         EditProfileScreenView(
             EditProfileScreen(
-                parentNavigator = mockScreensNavigator(),
+                navigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource(),
                 user = MockDataProvider().user
-            )
+            ),
+            Modifier
         )
     }
 }

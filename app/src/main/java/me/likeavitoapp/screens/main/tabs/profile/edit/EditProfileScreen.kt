@@ -15,7 +15,7 @@ import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
 
 class EditProfileScreen(
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources(),
     user: User = sources.app.user.value!!
@@ -34,7 +34,7 @@ class EditProfileScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ClickToEditPhotoUseCase() {
@@ -54,13 +54,13 @@ class EditProfileScreen(
     fun CloseScreenUseCase() {
         recordScenarioStep()
 
-        state.user.photoUrl.free(EditProfileScreen::class)
+//        state.user.photoUrl.free(EditProfileScreen::class)
     }
 
     fun ClickToCloseUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ClickToDoneUseCase() {

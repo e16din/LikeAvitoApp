@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -61,9 +61,9 @@ fun FavoritesScreenProvider(screen: FavoritesScreen, tabsRootScreen: TabsRootScr
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
-    val ads = screen.state.favorites.data.collectAsState(FavoritesScreen::class)
+    val ads = screen.state.favorites.data.collectAsState()
 
-    val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState(FavoritesScreen::class)
+    val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState()
 
     val listState = rememberLazyListState()
     val displayButton = !listState.canScrollBackward || listState.lastScrolledBackward
@@ -122,8 +122,8 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
                     modifier = Modifier.animateItem().clickable {
                         screen.ClickToAdUseCase(ad)
                     },
-                    isFavorite = ad.isFavorite.collectAsState(FavoritesScreen::class),
-                    timerLabel = ad.timerLabel.collectAsState(FavoritesScreen::class)
+                    isFavorite = ad.isFavorite.collectAsState(),
+                    timerLabel = ad.timerLabel.collectAsState()
                 )
             }
         }
@@ -134,7 +134,7 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
 @Composable
 fun FavoritesScreenPreview() {
     val screen = FavoritesScreen(
-        parentNavigator = mockScreensNavigator(),
+        navigatorNext = mockScreensNavigator(),
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {

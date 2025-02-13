@@ -18,15 +18,14 @@ import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
-import me.likeavitoapp.screens.main.tabs.search.SearchScreen.State
 
 
 class FavoritesScreen(
-    override val parentNavigator: ScreensNavigator,
+    override val navigatorNext: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(parentNavigator, scope, sources, state) {
+) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
 
     class State(
         val favorites: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
@@ -79,11 +78,11 @@ class FavoritesScreen(
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
-        parentNavigator.startScreen(
+        navigatorNext.startScreen(
             AdDetailsScreen(
                 ad = ad,
                 scope = scope,
-                parentNavigator = parentNavigator,
+                navigatorNext = navigatorNext,
                 sources = sources
             )
         )
@@ -114,6 +113,6 @@ class FavoritesScreen(
     fun ClickToMoveToAdsUseCase() {
         val searchScreen =
             tabsNavigator.getScreenOrNull(SearchScreen::class)!! // NOTE: please throw NPE if it is null here
-        tabsNavigator.startScreen(searchScreen, clearStack = true)
+        tabsNavigator.startScreen(searchScreen, clearAll = true)
     }
 }

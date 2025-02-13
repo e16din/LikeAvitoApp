@@ -11,7 +11,7 @@ import me.likeavitoapp.recordScenarioStep
 
 class PhotoScreen(
     photoUrl: String,
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources(),
     val state: State = State(photoUrl)
@@ -25,6 +25,6 @@ class PhotoScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigator.backToPrevious()
     }
 }

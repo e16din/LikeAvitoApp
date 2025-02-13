@@ -4,18 +4,19 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.PickupPoint
+import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 
 
 class CreateOrderScreen(
     ad: Ad,
-    val parentNavigator: ScreensNavigator,
+    val navigatorPrev: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
 ) : IScreen {
@@ -25,19 +26,19 @@ class CreateOrderScreen(
         Pickup("Самовывоз")
     }
 
-    class State(
-        val ad: Ad,
-        var orderType: UpdatableState<OrderType> = UpdatableState(OrderType.Delivery),
-        var selectedPickupPoint: UpdatableState<PickupPoint?> = UpdatableState(null)
-    )
+    class State(val ad: Ad) {
+        val orderType = UpdatableState(OrderType.Delivery)
+        var selectedPickupPoint = UpdatableState<PickupPoint?>(null)
+        var hasPayment = UpdatableState(false)
+    }
 
     val state = State(ad)
-    val navigator = ScreensNavigator()
+    val navigatorNext = ScreensNavigator()
 
-    fun PressBack() {
+    fun PressBackUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigatorPrev.backToPrevious()
     }
 
     fun ClickToOrderTypeUseCase(orderType: OrderType) {
@@ -46,16 +47,19 @@ class CreateOrderScreen(
         state.orderType.post(orderType)
     }
 
-    fun ClickToOwnerAddressUseCase() {
-        recordScenarioStep()
-
-        state.selectedPickupPoint.post(null)
-    }
-
     fun ClickToPickupUseCase() {
         recordScenarioStep()
 
-        navigator.startScreen(SelectPickupScreen(state.selectedPickupPoint, navigator))
+        navigatorNext.startScreen(
+            SelectPickupScreen(state.selectedPickupPoint, navigatorNext))
+    }
+
+    fun ClickToOrderUseCase() {
+        recordScenarioStep()
+
+        navigatorNext.startScreen(
+            PaymentScreen(state.ad, navigatorNext, navigatorPrev)
+        )
     }
 
 }

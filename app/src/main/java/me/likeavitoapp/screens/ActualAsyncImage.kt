@@ -12,6 +12,7 @@ import coil3.request.ImageRequest
 import coil3.request.error
 import coil3.request.placeholder
 import me.likeavitoapp.R
+import me.likeavitoapp.log
 import me.likeavitoapp.logError
 
 @Composable
@@ -33,7 +34,7 @@ fun ActualAsyncImage(modifier: Modifier = Modifier, url: String) {
         onSuccess = {
         },
         onError = { error ->
-            logError(error.result.throwable.message ?: "coil error")
+            error.result.throwable.log()
         }
     )
 }

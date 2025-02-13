@@ -13,7 +13,7 @@ import me.likeavitoapp.provideDataSources
 
 
 class CartScreen(
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
 ) : IScreen {

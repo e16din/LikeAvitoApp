@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.tabs.search
+package me.likeavitoapp.screens.main.tabs.search.views
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,11 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -51,9 +52,9 @@ inline fun SearchSettingsPanelView(
     panel: SearchScreen.SearchSettingsPanel,
     crossinline onFocus: () -> Unit = {}
 ) {
-    val category by panel.state.selectedCategory.collectAsState(SearchScreen::class)
-    val region by panel.state.selectedRegion.collectAsState(SearchScreen::class)
-    val priceRange by panel.state.priceRange.collectAsState(SearchScreen::class)
+    val category by panel.state.selectedCategory.collectAsState()
+    val region by panel.state.selectedRegion.collectAsState()
+    val priceRange by panel.state.priceRange.collectAsState()
     val textFrom = remember { priceRange.from.toString() }
     val textTo = remember {
         if (priceRange.to < 0)
@@ -195,7 +196,7 @@ fun SearchSettingsViewPreview() {
     LikeAvitoAppTheme {
         SearchSettingsPanelView(
             panel = SearchScreen(
-                parentNavigator = mockScreensNavigator(),
+                navigatorNext = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource()
             ).searchSettingsPanel,

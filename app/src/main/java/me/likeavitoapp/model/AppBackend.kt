@@ -2,11 +2,21 @@ package me.likeavitoapp.model
 
 
 import androidx.compose.runtime.toMutableStateList
+import com.yandex.mapkit.geometry.Geometry
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.search.Response
+import com.yandex.mapkit.search.SearchFactory
+import com.yandex.mapkit.search.SearchManagerType
+import com.yandex.mapkit.search.SearchOptions
+import com.yandex.mapkit.search.SearchType
+import com.yandex.mapkit.search.Session.SearchListener
+import com.yandex.runtime.Error
 import io.ktor.client.*
 import kotlinx.coroutines.delay
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.develop
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class AppBackend(val client: HttpClient = HttpClient()) {
@@ -15,11 +25,89 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
     var userService = UserService()
     var adsService = AdsService()
-    var cartService = CartService()
+    var orderService = OrderService()
+    var mapService = MapService()
+
 
     var mockDataProvider = MockDataProvider()
 
     data class LoginResult(val user: User, val token: String)
+
+    inner class MapService {
+        val searchManager by lazy {
+            SearchFactory.getInstance().createSearchManager(SearchManagerType.ONLINE)
+        }
+
+        suspend fun getPickupPoints(centerPoint: Order.PickupPoint.Point): Result<List<Order.PickupPoint>> {
+            delay(800)
+            return Result.success(mockDataProvider.pickupPoints.filter {
+                return@filter it.point.latitude < centerPoint.latitude + 0.5
+                        && it.point.latitude > centerPoint.latitude - 0.5
+                        && it.point.longitude < centerPoint.longitude + 0.5
+                        && it.point.longitude > centerPoint.longitude - 0.5
+            })
+        }
+
+        suspend fun getAddressesBy(
+            query: String,
+            areaPoint: Point
+        ): Result<List<MapItem>> {
+//            val suggestSession = searchManager.createSuggestSession()
+//            val suggestOptions = SuggestOptions().setSuggestTypes(SuggestType.GEO.value)
+//
+//            suggestSession.suggest("кафе", BoundingBox(map.visibleRegion.bottomLeft, map.visibleRegion.topRight), suggestOptions, object : SuggestSession.SuggestListener {
+//                override fun onResponse(items: MutableList<SuggestItem>) {
+//
+//                }
+//
+//                override fun onResponse(response: SuggestResponse) {
+//                    response.items
+//                    TODO("Not yet implemented")
+//                }
+//
+//                override fun onError(error: Error) {
+//                    showMessage("Ошибка получения подсказок")
+//                }
+//            })
+
+            val searchOptions = SearchOptions().apply {
+                searchTypes = SearchType.GEO.value
+                resultPageSize = 32
+            }
+
+            val geometry = Geometry.fromPoint(areaPoint)
+
+            return suspendCoroutine { continuation ->
+                searchManager.submit(
+                    query,
+                    geometry,
+                    searchOptions,
+                    object : SearchListener {
+                        override fun onSearchResponse(response: Response) {
+                            val resultData = mutableListOf<MapItem>()
+                            response.collection.children.forEach { item ->
+                                val name = item.obj?.name
+                                val point = item.obj?.geometry?.first()?.point
+                                if (name != null && point != null) {
+                                    resultData.add(
+                                        MapItem(name, point)
+                                    )
+                                }
+                            }
+                            continuation.resume(
+                                Result.success(resultData)
+                            )
+                        }
+
+                        override fun onSearchError(fail: Error) {
+                            continuation.resumeWith(
+                                Result.failure(IllegalStateException("see: onSearchError()"))
+                            )
+                        }
+                    })
+            }
+        }
+    }
 
     // NOTE: this is mock for an example
     inner class UserService {
@@ -30,7 +118,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 return Result.success(
                     LoginResult(
                         user = mockDataProvider.user,
-                        token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
+                        token = mockDataProvider.token
                     )
                 )
             } else {
@@ -75,9 +163,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class AdsService {
         suspend fun getCategories(): Result<List<Category>> {
-            return Result.success(
-                mockDataProvider.getCategories()
-            )
+            return Result.success(mockDataProvider.categories)
         }
 
         suspend fun getAds(
@@ -88,9 +174,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             page: Int,
         ): Result<List<Ad>> {
             delay(2000)
-            return Result.success(
-                mockDataProvider.getAds(categoryId, page, query)
-            )
+            return Result.success(mockDataProvider.ads)
         }
 
         suspend fun getAdDetails(ad: Ad): Result<Ad> {
@@ -110,17 +194,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
-            if (develop) {
-                mockDataProvider.ads.apply {
-                    if (ad.isFavorite.value) {
-                        if (!contains(ad)) {
-                            add(ad)
-                        }
-                    } else {
-                        remove(ad)
-                    }
-                }
-            }
+
 
             return Result.success(true)
         }
@@ -138,7 +212,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     }
 
     // NOTE: this is mock for an example
-    inner class CartService {
+    inner class OrderService {
+        suspend fun getLastDeliveryAddresses(): Result<List<String>> {
+            delay(700)
+            return Result.success(mockDataProvider.lastDeliveryAddresses)
+        }
+
         suspend fun reserve(adId: Long): Result<Boolean> {
             val testFailId = 2L
 
@@ -155,13 +234,21 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun order(
             adId: Long,
-            buyType: Order.BuyType
+            type: Order.Type
         ): Result<Boolean> {
             TODO("Not yet implemented")
         }
 
         suspend fun getOrders(userId: Long): Result<List<Order>> {
-            TODO("Not yet implemented")
+            delay(300)
+            return Result.success(mockDataProvider.orders)
+        }
+
+        suspend fun pay(ad: Ad, data: PaymentData): Result<Order> {
+            delay(700)
+            return Result.success(
+                mockDataProvider.createOrder()
+            )
         }
 
     }

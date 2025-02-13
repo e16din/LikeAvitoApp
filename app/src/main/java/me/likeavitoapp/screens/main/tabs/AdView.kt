@@ -19,8 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,17 +31,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
@@ -65,7 +60,7 @@ fun AdView(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 text = ad.title,
-                fontSize = 21.sp,
+                style = AppTypography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Companion.Ellipsis
@@ -167,12 +162,12 @@ fun AdView(
 fun AdViewPreview() {
     LikeAvitoAppTheme {
         val screen = BaseAdContainerScreen(
-            parentNavigator = mockScreensNavigator(),
+            navigatorNext = mockScreensNavigator(),
             scope = mockCoroutineScope(),
             sources = mockDataSource(),
             state = BaseAdContainerScreen.BaseAdContainerState()
         )
-        val ad = MockDataProvider().getAd(1)
+        val ad = MockDataProvider().ads[1]
         AdView(
             ad = ad,
             screen = screen,

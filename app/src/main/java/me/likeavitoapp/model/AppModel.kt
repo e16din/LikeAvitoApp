@@ -1,6 +1,7 @@
 package me.likeavitoapp.model
 
 
+import com.yandex.mapkit.geometry.Point
 import me.likeavitoapp.className
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.RootScreen
@@ -27,14 +28,24 @@ class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = 
     val screens = mutableListOf(initialScreen)
     val screen = UpdatableState(initialScreen)
 
-    fun startScreen(nextScreen: IScreen, clearStack: Boolean = false) {
-        if (screens.last().className() != nextScreen.className()) {
-            if (clearStack) {
+    fun startScreen(
+        screen: IScreen,
+        clearAll: Boolean = false,
+        clearAfterFirst: Boolean = false
+    ) {
+        if (screens.last().className() != screen.className()) {
+            if (clearAll) {
                 screens.clear()
             }
-            log("$tag.startScreen: ${nextScreen.javaClass.simpleName}")
-            screens.add(nextScreen)
-            this@ScreensNavigator.screen.post(nextScreen)
+            if (clearAfterFirst) {
+                val first = screens.first()
+                screens.clear()
+                screens.add(first)
+            }
+
+            log("$tag.startScreen: ${screen.javaClass.simpleName}")
+            screens.add(screen)
+            this@ScreensNavigator.screen.post(screen)
         }
     }
 
@@ -79,20 +90,20 @@ interface ISource {
 
 data class Ad(
     override val id: Long,
-    var title: String,
+    val title: String,
     val description: String,
     val photoUrls: List<String>,
     val contacts: Contacts,
     val price: Int,
     val isBargainingEnabled: Boolean,
     val isPremium: Boolean,
-    var isFavorite: UpdatableState<Boolean> = UpdatableState(false),
-    var reservedTimeMs: Long?,
-    val timerLabel: UpdatableState<String> = UpdatableState(""),
-    val category: Category,
+    val categoryId: Long,
     val address: Address?,
     val isPickupEnabled: Boolean,
-    val owner: Owner
+    val owner: Owner,
+    val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
+    val timerLabel: UpdatableState<String> = UpdatableState(""),
+    var reservedTimeMs: Long?
 ) : ISource {
     data class Address(val address: String)
     data class Owner(
@@ -105,48 +116,68 @@ data class Ad(
 data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
 
-data class PickupPoint(
-    override val id: Long,
-    val address: String,
-    val openingHoursFrom: Int,
-    val openingHoursTo: Int
-) : ISource
-
-
-data class Order(val ad: Ad, val buyType: BuyType, val state: State) {
+data class Order(val ad: Ad, val type: Type, val state: State) {
     enum class State {
-        New,
+        Edit,
         Active,
         Archived
     }
 
-    sealed class BuyType(val name: String) {
-        class Pickup(address: Ad.Address)
-        class Delivery(delivery: DeliveryType)
+    data class PickupPoint(
+        override val id: Long,
+        val address: String,
+        val openingHoursFrom: Int,
+        val openingHoursTo: Int,
+        val point: Point
+    ) : ISource {
+        enum class Type {
+            Post,
+            Cdek,
+            Boxberry,
+            OwnerAddress
+        }
+
+        class Point(val latitude: Double, val longitude: Double)
     }
 
-    enum class DeliveryType {
-        Post,
-        Cdek,
-        Boxberry,
+    sealed class Type(open val name: String) {
+        class Delivery(override val name: String, val address: Ad.Address) : Type(name)
+        class Pickup(override val name: String, val type: PickupPoint.Type) : Type(name)
     }
 }
 
-interface IMessage {
+interface IMessage : ISource {
     val dateMs: Long
     val isNew: Boolean
+    val isMy: Boolean
 }
 
 data class TextMessage(
     val text: String,
+    override val id: Long,
+    override val isNew: Boolean = true,
     override val dateMs: Long,
-    override val isNew: Boolean = true
+    override val isMy: Boolean
 ) : IMessage
 
 data class OfferMessage(
     val newPrice: Int,
     val isConsentReceived: Boolean,
+    override val id: Long,
     override val dateMs: Long,
-    override val isNew: Boolean = true
+    override val isNew: Boolean = true,
+    override val isMy: Boolean
 ) : IMessage
+
+data class MapItem(val name: String, val point: Point)
+
+// card number Номер карты
+// mm/yy Действует до
+// cvv/cvc три цифры с обратной стороны карты
+data class PaymentData(
+    val cardNumber: UpdatableState<String> = UpdatableState(""),
+    val month: UpdatableState<String> = UpdatableState(""),
+    val year: UpdatableState<String> = UpdatableState(""),
+    val cvvCvc: UpdatableState<String> = UpdatableState("")
+)
 

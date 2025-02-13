@@ -37,4 +37,7 @@
     <string name="new_messages_label">Новые сообщения: %1$s</string>
     <string name="buy_with_price">"Купить за %1$d₽"</string>
     <string name="enter_address_label">Введите адрес</string>
+    <string name="select_pickup_point">Выбрать пункт самовывоза</string>
+    <string name="pay_title">Оплатить</string>
+    <string name="pay_button">Оплатить</string>
 </resources>

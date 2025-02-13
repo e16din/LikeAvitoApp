@@ -18,7 +18,7 @@ import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 open class BaseAdContainerScreen(
-    open val parentNavigator: ScreensNavigator,
+    open val navigatorNext: ScreensNavigator,
     open val scope: CoroutineScope,
     open val sources: DataSources,
     open val state: BaseAdContainerState
@@ -46,15 +46,15 @@ open class BaseAdContainerScreen(
     fun ClickToBuyUseCase(ad: Ad) {
         recordScenarioStep()
 
-        val createOrderScreen = CreateOrderScreen(ad, parentNavigator)
+        val createOrderScreen = CreateOrderScreen(ad, navigatorNext)
         if (ad.reservedTimeMs != null) {
-            parentNavigator.startScreen(createOrderScreen)
+            navigatorNext.startScreen(createOrderScreen)
             return
         }
 
         scope.launchWithHandler {
             state.reserve.load(loading = {
-                sources.backend.cartService.reserve(adId = ad.id)
+                sources.backend.orderService.reserve(adId = ad.id)
             }, onSuccess = { isReserved ->
                 if (isReserved == true) {
                     state.reserve.data.post(true)
@@ -63,7 +63,7 @@ open class BaseAdContainerScreen(
 
                     timersMap[ad.id] = startReserveTimer(ad)
 
-                    parentNavigator.startScreen(createOrderScreen)
+                    navigatorNext.startScreen(createOrderScreen)
 
                 } else {
                     state.reserve.loadingFailed.post(true)
@@ -93,8 +93,8 @@ open class BaseAdContainerScreen(
     fun ClickToBargainingUseCase(ad: Ad) {
         recordScenarioStep(ad)
 
-        parentNavigator.startScreen(
-            ChatScreen(ad, parentNavigator)
+        navigatorNext.startScreen(
+            ChatScreen(ad, navigatorNext)
         )
     }
 

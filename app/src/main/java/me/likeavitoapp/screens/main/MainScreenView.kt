@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.className
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
@@ -46,8 +46,12 @@ import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
+import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
+import me.likeavitoapp.screens.main.order.details.OrderDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
 import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
@@ -74,15 +78,19 @@ fun MainScreenProvider(screen: MainScreen) {
     ) {
         MainScreenView(screen)
 
-        when (nextScreen.value) {
-            is AdDetailsScreen -> AdDetailsScreenProvider(nextScreen.value as AdDetailsScreen)
-            is CreateOrderScreen -> CreateOrderScreenProvider(nextScreen.value as CreateOrderScreen)
-            is EditProfileScreen -> EditProfileScreenProvider(nextScreen.value as EditProfileScreen)
+        with(nextScreen.value) {
+            when (this) {
+                is AdDetailsScreen -> AdDetailsScreenProvider(this)
+                is OrderDetailsScreen -> OrderDetailsScreenProvider(this)
+                is CreateOrderScreen -> CreateOrderScreenProvider(this)
+                is EditProfileScreen -> EditProfileScreenProvider(this)
+                is ChatScreen -> ChatScreenProvider(this)
+            }
         }
     }
 
     BackHandler {
-        screen.PressBack()
+        screen.PressBackUseCase()
     }
 }
 
@@ -288,11 +296,6 @@ private fun BoxScope.TabsView(screen: MainScreen) {
 @Composable
 fun MainScreenPreview() {
     LikeAvitoAppTheme {
-        val searchScreen = SearchScreen(
-            parentNavigator = mockScreensNavigator(),
-            scope = mockCoroutineScope(),
-            sources = mockDataSource()
-        )
         MainScreenView(
             screen = MainScreen(
                 sources = mockDataSource(),

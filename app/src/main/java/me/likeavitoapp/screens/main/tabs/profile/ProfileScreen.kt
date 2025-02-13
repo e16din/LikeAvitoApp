@@ -21,7 +21,7 @@ import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 
 class ProfileScreen(
     val scope: CoroutineScope = provideCoroutineScope(),
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val sources: DataSources = provideDataSources(),
     user: User = sources.app.user.value!!
 ) : IScreen {
@@ -32,8 +32,6 @@ class ProfileScreen(
         )
 
     val state = State(user)
-
-    lateinit var tabsNavigator: ScreensNavigator
 
     fun ClickToContactUseCase(label:String, value: String) {
         recordScenarioStep()
@@ -46,15 +44,15 @@ class ProfileScreen(
     fun ClickToEditProfileUseCase() {
         recordScenarioStep()
 
-        parentNavigator.startScreen(
-            EditProfileScreen(parentNavigator)
+        navigator.startScreen(
+            EditProfileScreen(navigator)
         )
     }
 
     fun CloseScreenUseCase() {
         recordScenarioStep()
 
-        state.user.photoUrl.free(ProfileScreen::class)
+//        state.user.photoUrl.free(ProfileScreen::class)
     }
 
     fun ClickToLogoutUseCase() {

@@ -38,7 +38,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -174,7 +174,7 @@ fun AuthScreenView(screen: AuthScreen) {
 fun PreviewAuthScreen() {
     AuthScreenView(screen = AuthScreen(
         scope = mockCoroutineScope(),
-        parentNavigator = mockScreensNavigator(),
+        navigator = mockScreensNavigator(),
         sources = mockDataSource()
     ))
 }

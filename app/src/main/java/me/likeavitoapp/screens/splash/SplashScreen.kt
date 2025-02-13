@@ -14,7 +14,7 @@ import me.likeavitoapp.screens.main.MainScreen
 
 
 class SplashScreen(
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
 ) : IScreen {
@@ -43,12 +43,12 @@ class SplashScreen(
             val delayMs = 1000 - (finishMs - startMs)
             delay(delayMs)
 
-            parentNavigator.startScreen(
+            navigator.startScreen(
                 if (sources.app.user != null)
                     MainScreen()
                 else
                     AuthScreen(
-                        parentNavigator = parentNavigator
+                        navigator = navigator
                     )
             )
         }

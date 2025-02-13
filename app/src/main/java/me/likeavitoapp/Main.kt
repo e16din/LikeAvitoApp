@@ -1,7 +1,6 @@
 package me.likeavitoapp
 
 import android.util.Log
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -16,7 +15,6 @@ import me.likeavitoapp.model.IAppPlatform
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ISource
 import me.likeavitoapp.screens.RootScreen
-import java.util.Properties
 import kotlin.reflect.KClass
 
 const val develop = true
@@ -67,7 +65,7 @@ fun isPreviewMode(): Boolean = runCatching { provideApp() }.isFailure
 
 @OptIn(DelicateCoroutinesApi::class)
 private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-    logError(throwable.message ?: "")
+    throwable.log()
     if (throwable is UnauthorizedException) {
         appModel?.onLogoutException()
     }
@@ -84,6 +82,10 @@ fun logError(text: String, tag: String = "debug") {
     if (develop) {
         Log.e(tag, "Error: $text")
     }
+}
+
+fun Throwable.log() {
+    logError(this.message ?: this.className())
 }
 
 fun checkState(condition: Boolean) {
@@ -128,12 +130,12 @@ fun IScreen.bindScenarioDataSource(key: KClass<*>, list: List<ISource>) {
     scenarioDataSourcesMap[key] = list
 }
 
-class NameAndId(val name:String, val id: Long)
+class NameAndId(val name: String, val id: Long)
 
 fun IScreen.recordScenarioStep(argument: Any? = null) {
     if (develop) {
         var end = "()"
-        if (argument != Unit) {
+        if (argument != Unit && argument != null) {
             end = "(${argument})"
         }
         val methodName = Thread.currentThread().stackTrace.first {
@@ -143,7 +145,8 @@ fun IScreen.recordScenarioStep(argument: Any? = null) {
         val delayMs = System.currentTimeMillis() - lastCallMs
         lastCallMs = System.currentTimeMillis()
 
-        val argumentValue = if(argument is ISource) NameAndId(argument.className(), argument.id) else argument
+        val argumentValue =
+            if (argument is ISource) NameAndId(argument.className(), argument.id) else argument
         scenarioSteps.add(ScenarioStep(this, methodName, delayMs, argumentValue))
         log("delay(${Math.round(delayMs / 100f) * 100})")
         log("$methodName$end")

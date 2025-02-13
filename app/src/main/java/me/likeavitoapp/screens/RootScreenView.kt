@@ -21,12 +21,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.auth.AuthScreenProvider
 import me.likeavitoapp.screens.main.MainScreen
 import me.likeavitoapp.screens.main.MainScreenProvider
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
 import me.likeavitoapp.screens.splash.SplashScreen
 import me.likeavitoapp.screens.splash.SplashScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
@@ -52,7 +60,7 @@ fun RootScreenView(rootScreen: RootScreen) {
                 val event = awaitPointerEvent()
                 // handle pointer event
 //                if (filter == null || event.type == filter) {
-                    log("PointerEvent | ${event.type}, ${event.changes.first().position}")
+                log("PointerEvent | ${event.type}, ${event.changes.first().position}")
 //                }
             }
         }
@@ -64,10 +72,12 @@ fun RootScreenView(rootScreen: RootScreen) {
                 .navigationBarsPadding()
                 .fillMaxSize()
         ) {
-            when (screen.value) {
-                is SplashScreen -> SplashScreenProvider(screen.value as SplashScreen)
-                is AuthScreen -> AuthScreenProvider(screen.value as AuthScreen)
-                is MainScreen -> MainScreenProvider(screen.value as MainScreen)
+            with(screen.value) {
+                when (this) {
+                    is SplashScreen -> SplashScreenProvider(this)
+                    is AuthScreen -> AuthScreenProvider(this)
+                    is MainScreen -> MainScreenProvider(this)
+                }
             }
         }
 

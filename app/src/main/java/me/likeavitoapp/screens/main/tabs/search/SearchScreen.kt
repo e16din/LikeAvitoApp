@@ -26,11 +26,11 @@ import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 
 
 class SearchScreen(
-    override val parentNavigator: ScreensNavigator,
+    override val navigatorNext: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(parentNavigator, scope, sources, state) {
+) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
 
     class State(
         val ads: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
@@ -96,11 +96,11 @@ class SearchScreen(
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
-        parentNavigator.startScreen(
+        navigatorNext.startScreen(
             AdDetailsScreen(
                 ad = ad,
                 scope = scope,
-                parentNavigator = parentNavigator,
+                navigatorNext = navigatorNext,
                 sources = sources
             )
         )
@@ -159,22 +159,21 @@ class SearchScreen(
 
             if (queryDebouncer == null) {
                 queryDebouncer = Debouncer(newQuery) { lastQuery ->
+                    if (lastQuery.isEmpty()) {
+                        state.searchTips.resetWith(emptyList())
+                        return@Debouncer
+                    }
+
                     scope.launchWithHandler {
-                        if (lastQuery.isEmpty()) {
-                            state.searchTips.loading.post(false)
-                            state.searchTips.data.post(emptyList())
-                            return@launchWithHandler
-                        }
-
-                        state.searchTips.loading.post(true)
-
-                        val result = sources.backend.adsService.getSearchTips(
-                            categoryId = searchSettingsPanel.state.selectedCategory.value?.id
-                                ?: 0,
-                            query = searchBar.state.query.value
-                        )
-                        state.searchTips.loading.post(false)
-                        state.searchTips.data.post(result.getOrNull() ?: emptyList())
+                        state.searchTips.load(loading = {
+                            sources.backend.adsService.getSearchTips(
+                                categoryId = searchSettingsPanel.state.selectedCategory.value?.id
+                                    ?: 0,
+                                query = searchBar.state.query.value
+                            )
+                        }, onSuccess = { data ->
+                            state.searchTips.data.post(data)
+                        })
                     }
                 }
 
@@ -197,6 +196,18 @@ class SearchScreen(
             recordScenarioStep()
 
             loadAds()
+        }
+
+        fun ClickToTipsClearUseCase() {
+            recordScenarioStep()
+
+            ChangeSearchQueryUseCase("")
+        }
+
+        fun ClickToTipsBackUseCase() {
+            recordScenarioStep()
+
+            ChangeSearchQueryUseCase("")
         }
     }
 
@@ -237,6 +248,5 @@ class SearchScreen(
 
             state.regionMenuEnabled.post(true)
         }
-
     }
 }

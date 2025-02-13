@@ -18,7 +18,7 @@ import kotlin.String
 
 
 class AuthScreen(
-    val parentNavigator: ScreensNavigator,
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = provideCoroutineScope(),
     val sources: DataSources = provideDataSources()
 ) : IScreen {
@@ -99,7 +99,7 @@ class AuthScreen(
 
                 sources.platform.appDataStore.saveId(loginData.user.id)
 
-                parentNavigator.startScreen(MainScreen())
+                navigator.startScreen(MainScreen())
 
             } else {
                 state.login.loading.post(false)

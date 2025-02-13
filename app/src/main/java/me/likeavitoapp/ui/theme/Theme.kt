@@ -1,6 +1,8 @@
 package me.likeavitoapp.ui.theme
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
@@ -253,27 +255,34 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+// Dynamic color is available on Android 12+
+val dynamicColorEnabled = false
+
 @Composable
 fun LikeAvitoAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
-  val colorScheme = when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      
-      darkTheme -> darkScheme
-      else -> lightScheme
-  }
+  val colorScheme = AppColorScheme()
 
   MaterialTheme(
     colorScheme = colorScheme,
     typography = AppTypography,
     content = content
   )
+}
+
+@SuppressLint("ObsoleteSdkInt")
+@Composable
+fun AppColorScheme(): ColorScheme {
+    val isDarkMode = isSystemInDarkTheme()
+    return when {
+        dynamicColorEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (isDarkMode) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        isDarkMode -> darkScheme
+        else -> lightScheme
+    }
 }
 

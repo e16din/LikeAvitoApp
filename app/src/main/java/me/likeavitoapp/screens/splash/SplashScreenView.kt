@@ -7,11 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import me.likeavitoapp.collectAsState
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockCoroutineScope
 import me.likeavitoapp.model.mockDataSource
 import me.likeavitoapp.model.mockScreensNavigator
@@ -54,7 +53,7 @@ fun SplashScreenPreview() {
     LikeAvitoAppTheme {
         SplashScreenView(
             screen = SplashScreen(
-                parentNavigator = mockScreensNavigator(),
+                navigator = mockScreensNavigator(),
                 scope = mockCoroutineScope(),
                 sources = mockDataSource()
             )

@@ -16,12 +16,12 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 class AdDetailsScreen(
     ad: Ad,
-    override val parentNavigator: ScreensNavigator,
+    val navigatorPrev: ScreensNavigator = ScreensNavigator(),
+    override val navigatorNext: ScreensNavigator,
     override val scope: CoroutineScope = provideCoroutineScope(),
     override val sources: DataSources = provideDataSources(),
-    override val state: State = State(ad),
-    val navigator: ScreensNavigator = ScreensNavigator()
-) : BaseAdContainerScreen(navigator, scope, sources, state) {
+    override val state: State = State(ad)
+) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
 
     class State(
         val ad: Ad,
@@ -32,31 +32,28 @@ class AdDetailsScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        parentNavigator.backToPrevious()
+        navigatorPrev.backToPrevious()
     }
 
     override fun CloseScreenUseCase() {
         super.CloseScreenUseCase()
 
-        with(AdDetailsScreen::class) {
-            state.ad.isFavorite.free(this)
-            state.ad.timerLabel.free(this)
-        }
+        state.ad.timerLabel.free(AdDetailsScreen::class)
     }
 
     fun ClickToPhotoUseCase(url: String) {
         recordScenarioStep()
 
-        navigator.startScreen(
-            PhotoScreen(url, navigator)
+        navigatorNext.startScreen(
+            PhotoScreen(url, navigatorNext)
         )
     }
 
     fun ClickToOpenChatUseCase() {
         recordScenarioStep()
 
-        navigator.startScreen(
-            ChatScreen(state.ad, navigator)
+        navigatorNext.startScreen(
+            ChatScreen(state.ad, navigatorNext)
         )
     }
 }
