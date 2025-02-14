@@ -1,7 +1,8 @@
 package me.likeavitoapp.screens.main.order.create.payment
 
-import androidx.core.text.isDigitsOnly
+
 import kotlinx.coroutines.CoroutineScope
+import me.likeavitoapp.isDigitsOnly
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.Ad
@@ -81,12 +82,21 @@ class PaymentScreen(
                 state.paymentData.cardNumber.worker().act {
                     val output = with(number.replace(" ", "")) {
                         val chunked = it.chunked(4)
-                        "${chunked[0]} ${chunked[1]} ${chunked[2]} ${chunked[3]}"
+                        var result = ""
+                        chunked.forEachIndexed { i, item ->
+                            result += if (i == 0) {
+                                chunked[i]
+                            } else {
+                                " ${chunked[i]}"
+                            }
+                        }
+                        return@with result
                     }
 
                     withTests(
                         realOutput = output,
                         testOutputs = listOf(
+                            TestCase("", false),
                             TestCase("1", false),
                             TestCase("1111", false),
                             TestCase("1111 1111 1111 1111", false),
@@ -94,7 +104,7 @@ class PaymentScreen(
                             TestCase("4026 8434 8316 8683", true),
                             TestCase("4026843483168683", false),
                             TestCase("4026 8434 83168683", false),
-                            TestCase("2730 1684 6416 1841", false),
+                            TestCase("2730 1684 6416 1841", true),
                             TestCase("1111 1111 1111 1111 2", false),
                             TestCase("1111 1111 1111 112", false),
                             TestCase("1111 1111 1111 112w", false),

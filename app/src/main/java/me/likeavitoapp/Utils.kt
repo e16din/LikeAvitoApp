@@ -3,8 +3,8 @@ package me.likeavitoapp
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.UpdatableState
+import me.likeavitoapp.model.Worker
 
 fun Any.className(): String {
     return javaClass.simpleName
@@ -28,7 +28,7 @@ suspend inline fun <reified T> Worker<*>.load(
     this.working.post(false)
 
     if (newData != null) {
-        withContext(defaultContext + Dispatchers.Main) {
+        withContext(main.defaultContext + Dispatchers.Main) {
             onSuccess(newData)
         }
 
@@ -58,4 +58,18 @@ class Debouncer<T>(var value: T, timeoutMs: Long = 390L, onTimeout: (value: T) -
 
 fun UpdatableState<Boolean>.inverse() {
     this.post(!this.value)
+}
+
+fun CharSequence.isDigitsOnly(): Boolean {
+    val len = this.length
+    var cp: Int
+    var i = 0
+    while (i < len) {
+        cp = Character.codePointAt(this, i)
+        if (!Character.isDigit(cp)) {
+            return false
+        }
+        i += Character.charCount(cp)
+    }
+    return true
 }

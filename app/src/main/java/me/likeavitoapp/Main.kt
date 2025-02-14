@@ -1,6 +1,5 @@
 package me.likeavitoapp
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -18,69 +17,77 @@ import me.likeavitoapp.screens.RootScreen
 import kotlin.reflect.KClass
 
 const val develop = true
+var main = Main()
 
-private var appModel: AppModel? = null
-private var appBackend: AppBackend? = null
-private var appPlatform: IAppPlatform? = null
-private var actualScope: CoroutineScope? = null
-private var actualDataSources: DataSources? = null
+class Main {
+    var appModel: AppModel? = null
+    var appBackend: AppBackend? = null
+    var appPlatform: IAppPlatform? = null
 
+    var actualScope: CoroutineScope? = null
+    var actualDataSources: DataSources? = null
 
-fun initApp(platform: AppPlatform, scope: CoroutineScope): AppModel {
-    if (appModel != null) {
+    fun initApp(platform: AppPlatform, scope: CoroutineScope): AppModel {
+        if (appModel != null) {
+            return appModel!!
+        }
+
+        try {
+            MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
+            MapKitFactory.initialize(platform)
+        } catch (e: RuntimeException) {
+            // NOTE: unit-tests workaround
+        }
+
+        appPlatform = platform
+        actualScope = scope
+        appBackend = AppBackend()
+        appModel = AppModel().apply {
+            rootScreen = RootScreen(
+                scope = scope,
+                sources = DataSources(
+                    app = this,
+                    platform = appPlatform!!,
+                    backend = appBackend!!,
+                ).apply {
+                    actualDataSources = this
+                }
+            )
+        }
+
         return appModel!!
     }
 
-    MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
-    MapKitFactory.initialize(platform)
-
-    appPlatform = platform
-    actualScope = scope
-    appBackend = AppBackend()
-    appModel = AppModel().apply {
-        rootScreen = RootScreen(
-            scope = scope,
-            sources = DataSources(
-                app = this,
-                platform = appPlatform!!,
-                backend = appBackend!!,
-            ).apply {
-                actualDataSources = this
-            }
-        )
+    @OptIn(DelicateCoroutinesApi::class)
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.log()
+        if (throwable is UnauthorizedException) {
+            appModel?.onLogoutException()
+        }
     }
 
-    return appModel!!
+    var defaultContext = SupervisorJob() + exceptionHandler
 }
 
 // NOTE: Use it after call initApp()
-fun provideDataSources() = actualDataSources!!
-fun provideCoroutineScope() = actualScope!!
-fun provideRootScreen() = appModel!!.rootScreen
-fun provideApp() = appModel!!
-fun provideAndroidAppContext() = appPlatform as AppPlatform
+fun provideDataSources() = main.actualDataSources!!
+fun provideCoroutineScope() = main.actualScope!!
+fun provideRootScreen() = main.appModel!!.rootScreen
+fun provideApp() = main.appModel!!
+fun provideAndroidAppContext() = main.appPlatform as AppPlatform
 
 @Composable
 fun isPreviewMode(): Boolean = runCatching { provideApp() }.isFailure
 
-@OptIn(DelicateCoroutinesApi::class)
-private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-    throwable.log()
-    if (throwable is UnauthorizedException) {
-        appModel?.onLogoutException()
-    }
-}
-val defaultContext = SupervisorJob() + exceptionHandler
-
 fun log(text: String, tag: String = "debug") {
     if (develop) {
-        Log.i(tag, text)
+        println("tag:$tag | $text")
     }
 }
 
 fun logError(text: String, tag: String = "debug", prefix: String = "Error: ") {
     if (develop) {
-        Log.e(tag, "$prefix$text")
+        println("tag:$tag | $prefix$text")
     }
 }
 

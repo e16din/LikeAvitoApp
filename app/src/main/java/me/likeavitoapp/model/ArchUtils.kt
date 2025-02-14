@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.defaultContext
+import me.likeavitoapp.main
 import me.likeavitoapp.provideCoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -36,7 +36,7 @@ class UpdatableState<T>(initial: T) {
 
     fun post(value: T, scope: CoroutineScope = provideCoroutineScope(), ifNew: Boolean = false) {
         if (!ifNew || (ifNew && _value != value)) {
-            scope.launch(defaultContext + Dispatchers.Main) {
+            scope.launch(main.defaultContext + Dispatchers.Main) {
                 _value = value
                 callbacks.keys.forEach {
                     callbacks[it]?.forEach { onChange ->
