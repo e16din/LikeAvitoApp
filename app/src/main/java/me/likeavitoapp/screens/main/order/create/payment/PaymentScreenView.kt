@@ -83,12 +83,6 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                     value = mmYY,
                     onValueChange = {
                         screen.ChangeMmYyUseCase(it)
-                        expect(
-                            "should to show month and year in format: mm/yy",
-                            "mm from 01 to 12",
-                            "yy from 00 to 99",
-                            "digits and / with spaces only"
-                        )
                     },
                     label = { Text("Действует до") }
                 )
@@ -104,11 +98,6 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                     value = cvvCvc,
                     onValueChange = {
                         screen.ChangeCvvCvcUseCase(it)
-                        expect(
-                            "should to show cvv in format: 123",
-                            "is number",
-                            "length == 3"
-                        )
                     },
                     label = { Text("три цифры с обратной стороны карты") }
                 )

@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.main.order.create.payment
 
 
 import kotlinx.coroutines.CoroutineScope
+import me.likeavitoapp.checkLuhnAlgorithm
 import me.likeavitoapp.isDigitsOnly
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
@@ -80,8 +81,8 @@ class PaymentScreen(
         useCase("Change card number", number)
             .expect("should to show card number in format: 1111 1111 1111 1111") {
                 state.paymentData.cardNumber.worker().act {
-                    val output = with(number.replace(" ", "")) {
-                        val chunked = it.chunked(4)
+                    fun format(value: String): String {
+                        val chunked = value.replace(" ", "").chunked(4)
                         var result = ""
                         chunked.forEachIndexed { i, item ->
                             result += if (i == 0) {
@@ -90,25 +91,27 @@ class PaymentScreen(
                                 " ${chunked[i]}"
                             }
                         }
-                        return@with result
+                        return result
                     }
+
+                    val output = format(number)
 
                     withTests(
                         realOutput = output,
-                        testOutputs = listOf(
-                            TestCase("", false),
-                            TestCase("1", false),
-                            TestCase("1111", false),
-                            TestCase("1111 1111 1111 1111", false),
-                            TestCase("5580 4733 7202 4733", true),
-                            TestCase("4026 8434 8316 8683", true),
-                            TestCase("4026843483168683", false),
-                            TestCase("4026 8434 83168683", false),
-                            TestCase("2730 1684 6416 1841", true),
-                            TestCase("1111 1111 1111 1111 2", false),
-                            TestCase("1111 1111 1111 112", false),
-                            TestCase("1111 1111 1111 112w", false),
-                            TestCase("1111 1111/1111 1123", false)
+                        testCases = listOf(
+                            TestCase(format(""), false),
+                            TestCase(format("abc"), false),
+                            TestCase(format("1"), false),
+                            TestCase(format("1111"), false),
+                            TestCase(format("1111111111111111"), false),
+                            TestCase(format("5580 4733 7202 4733"), true),
+                            TestCase(format("4026843483168683"), true),
+                            TestCase(format("4026 8434 83168683"), true),
+                            TestCase(format("2730 1684 6416 1841"), true),
+                            TestCase(format("1111 1111 1111 1111 2"), false),
+                            TestCase(format("1111 1111 1111 112"), false),
+                            TestCase(format("1111 1111 1111 112w"), false),
+                            TestCase(format("1111 1111/1111 1123"), false)
                         )
                     ) { output ->
                         checkList(
@@ -127,37 +130,93 @@ class PaymentScreen(
 
     fun ChangeMmYyUseCase(text: String) {
         recordScenarioStep(text)
+
+        useCase("Change MM/YY", text)
+            .expect("should to show month and year in format: mm/yy") {
+                state.paymentData.mmYy.act {
+                    fun format(value: String): String {
+                        var result = ""
+                        val chunked = value.replace("/", "").chunked(2)
+                        if (!chunked.isEmpty()) {
+                            result += chunked[0] + "/"
+                        }
+                        if (chunked.size == 2) {
+                            result += chunked[1]
+                        }
+
+                        return result
+                    }
+
+                    val output = format(text)
+
+                    withTests(
+                        realOutput = output,
+                        testCases = listOf(
+                            TestCase(format(""), false),
+                            TestCase(format("1226"), true),
+                            TestCase(format("122"), false),
+                            TestCase(format("12222"), false),
+                            TestCase(format("122"), false),
+                            TestCase(format("0122"), true),
+                            TestCase(format("0022"), false),
+                            TestCase(format("0922"), true),
+                            TestCase(format("1222"), true),
+                            TestCase(format("1200"), true),
+                            TestCase(format("1322"), false),
+                            TestCase(format("22"), false),
+                            TestCase(format("/"), false),
+                            TestCase(format("abc"), false),
+                            TestCase(format("aabb"), false)
+                        ),
+                    ) { output ->
+                        val parts = output.split("/")
+                        val mm = parts[0]
+                        val yy = parts.getOrNull(1)
+
+                        checkList(
+                            check { mm.length == 2 },
+                            check { mm.isDigitsOnly() },
+                            check {
+                                val mmInt = mm.toInt()
+                                mmInt > 0 && mmInt <= 12
+                            },
+                            check { yy?.length == 2 },
+                            check { yy?.isDigitsOnly() == true },
+                            check {
+                                val yyInt = yy!!.toInt()
+                                yyInt >= 0 && yyInt <= 99
+                            }
+                        )
+                    }
+                }
+            }
     }
 
     fun ChangeCvvCvcUseCase(text: String) {
         recordScenarioStep(text)
-    }
 
-    fun checkLuhnAlgorithm(digits: String): Boolean {
-        // Проверяем, что номер состоит только из цифр и имеет длину от 13 до 19
-        if (digits.length < 13 || digits.length > 19) {
-            return false
-        }
-
-        // Применяем алгоритм Луна
-        var sum = 0
-        val shouldDouble = digits.length % 2 == 0
-
-        for (i in digits.indices) {
-            var digit = digits[i].digitToInt()
-
-            // Удваиваем каждую вторую цифру
-            if ((i % 2 == 0 && shouldDouble) || (i % 2 != 0 && !shouldDouble)) {
-                digit *= 2
-                // Если результат больше 9, вычитаем 9
-                if (digit > 9) {
-                    digit -= 9
+        useCase("Change cvv/cvc", text)
+            .expect("should to show cvv in format: 123") {
+                state.paymentData.cvvCvc.worker().act {
+                    withTests(
+                        realOutput = text,
+                        testCases = listOf(
+                            TestCase("", false),
+                            TestCase("abc", false),
+                            TestCase("12d", false),
+                            TestCase("123", true),
+                            TestCase("12", false),
+                            TestCase("1234", false),
+                            TestCase("12%", false),
+                            TestCase(" 12", false),
+                        )
+                    ) { output ->
+                        checkList(
+                            check { output.length == 3 },
+                            check { output.isDigitsOnly() }
+                        )
+                    }
                 }
             }
-            sum += digit
-        }
-
-        // Проверяем, делится ли сумма на 10 без остатка
-        return sum % 10 == 0
     }
 }

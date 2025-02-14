@@ -27,14 +27,25 @@ inline fun <T> T.expect(
 }
 
 inline fun Any.checkList(
-    vararg checks: Boolean,
+    vararg checks: () -> Boolean,
     enabled: Boolean = true,
     onResult: (Boolean) -> Unit = {},
 ): Boolean {
-    val success = checks.all { it }
     if (enabled) {
-        onResult(success)
-        return success
+        println()
+        var log = ""
+        checks.forEachIndexed { i, check ->
+            log += "[$i]"
+            if (!check()) {
+                println(log)
+                onResult(false)
+                return false
+            }
+        }
+
+        println(log)
+        onResult(true)
+        return true
     }
 
     return true
@@ -42,7 +53,9 @@ inline fun Any.checkList(
 
 inline fun <T> withResult(value: T, crossinline case: (T) -> Boolean): Result<T> {
     val result = case(value)
-    log("Output: check($value) | Checking Result: $result")
+    println("Output: check($value) | Checking Result: $result")
+    println()
+
     return if (result) {
         Result.success(value)
     } else {
@@ -52,20 +65,20 @@ inline fun <T> withResult(value: T, crossinline case: (T) -> Boolean): Result<T>
 
 inline fun <T> withTests(
     realOutput: T,
+    testCases: List<TestCase<T>>,
     enabled: Boolean = develop,
     withAssert: Boolean = develop,
-    testOutputs: List<TestCase<T>>,
     crossinline case: (T) -> Boolean
 ): Result<T> {
     if (enabled) {
-        testOutputs.forEach {
+        testCases.forEach {
             val caseResult = case(it.value)
 
             val testResult = caseResult == it.expect
             if (testResult) {
-                log("Test Succeed: check(${it.value}) == ${it.expect}")
+                println("Test Succeed: check(${it.value}) == ${it.expect}")
             } else {
-                logError("Test Failed: check(${it.value}) != ${it.expect} ", prefix = "")
+                println("Test Failed: check(${it.value}) != ${it.expect}")
             }
             if (withAssert) {
                 assert(testResult)
@@ -76,7 +89,7 @@ inline fun <T> withTests(
     return withResult(realOutput, case)
 }
 
-inline fun check(function: () -> Boolean) = function()
+fun check(function: () -> Boolean) = function
 
 // NOTE: mocks
 

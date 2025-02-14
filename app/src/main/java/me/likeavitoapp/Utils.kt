@@ -73,3 +73,31 @@ fun CharSequence.isDigitsOnly(): Boolean {
     }
     return true
 }
+
+fun checkLuhnAlgorithm(digits: String): Boolean {
+    // Проверяем, что номер состоит только из цифр и имеет длину от 13 до 19
+    if (digits.length < 13 || digits.length > 19) {
+        return false
+    }
+
+    // Применяем алгоритм Луна
+    var sum = 0
+    val shouldDouble = digits.length % 2 == 0
+
+    for (i in digits.indices) {
+        var digit = digits[i].digitToInt()
+
+        // Удваиваем каждую вторую цифру
+        if ((i % 2 == 0 && shouldDouble) || (i % 2 != 0 && !shouldDouble)) {
+            digit *= 2
+            // Если результат больше 9, вычитаем 9
+            if (digit > 9) {
+                digit -= 9
+            }
+        }
+        sum += digit
+    }
+
+    // Проверяем, делится ли сумма на 10 без остатка
+    return sum % 10 == 0
+}

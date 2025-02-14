@@ -35,14 +35,27 @@ class PaymentTests {
 
     @Test
     fun `check ChangeCardNumberUseCase`() {
-        val screen = PaymentScreen(
-            navigatorPrev = mockScreensNavigator(),
-            navigatorNext = mockScreensNavigator(),
-            scope = mockCoroutineScope(),
-            sources = mockDataSource(),
-            ad = MockDataProvider().ads.first()
-        )
-
+        val screen = mockScreen()
         screen.ChangeCardNumberUseCase("")
     }
+
+    @Test
+    fun `check ChangeMmYyUseCase`() {
+        val screen = mockScreen()
+        screen.ChangeMmYyUseCase("")
+    }
+
+    @Test
+    fun `check ChangeCvvCvcUseCase`() {
+        val screen = mockScreen()
+        screen.ChangeCvvCvcUseCase("")
+    }
+
+    private fun mockScreen(): PaymentScreen = PaymentScreen(
+        navigatorPrev = mockScreensNavigator(),
+        navigatorNext = mockScreensNavigator(),
+        scope = mockCoroutineScope(),
+        sources = mockDataSource(),
+        ad = MockDataProvider().ads.first()
+    )
 }
