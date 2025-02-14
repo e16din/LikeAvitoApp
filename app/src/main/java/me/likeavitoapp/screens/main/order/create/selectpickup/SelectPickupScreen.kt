@@ -6,7 +6,7 @@ import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.MapItem
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
@@ -27,7 +27,7 @@ class SelectPickupScreen(
         val pickupPointType = UpdatableState(PickupPoint.Type.OwnerAddress)
         val query = UpdatableState("")
         val areaPoint = UpdatableState(Point())
-        val suggestions = Loadable<List<MapItem>>(emptyList())
+        val suggestions = Worker<List<MapItem>>(emptyList())
     }
 
     val state = State(selectedPickupPoint)
@@ -47,7 +47,7 @@ class SelectPickupScreen(
             state.suggestions.load(loading = {
                 sources.backend.mapService.getAddressesBy(query, state.areaPoint.value)
             }, onSuccess = { data ->
-                state.suggestions.data.post(data)
+                state.suggestions.output.post(data)
             })
         }
     }

@@ -78,9 +78,9 @@ fun log(text: String, tag: String = "debug") {
     }
 }
 
-fun logError(text: String, tag: String = "debug") {
+fun logError(text: String, tag: String = "debug", prefix: String = "Error: ") {
     if (develop) {
-        Log.e(tag, "Error: $text")
+        Log.e(tag, "$prefix$text")
     }
 }
 

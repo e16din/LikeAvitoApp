@@ -37,7 +37,7 @@ inline fun AdsListView(
         screen.ScrollToEndUseCase()
     }
 
-    var ads = screen.state.ads.data.collectAsState()
+    var ads = screen.state.ads.output.collectAsState()
 
     val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>() }
     LazyColumn(

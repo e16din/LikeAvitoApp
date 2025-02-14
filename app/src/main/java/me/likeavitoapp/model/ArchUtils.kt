@@ -2,15 +2,11 @@ package me.likeavitoapp.model
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.defaultContext
 import me.likeavitoapp.provideCoroutineScope
 import kotlin.coroutines.CoroutineContext
@@ -18,12 +14,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-fun expect(text: String, vararg values: Any?) {
-    // readonly
-}
-// NOTE: имеет смысл проверять только вывод,
-// так как для проверки правильности ввода используются
-// те же функции что и в коде приложения
 
 operator fun <T> UpdatableState<T>.getValue(thisRef: Any?, property: KProperty<*>): T = value
 
@@ -86,61 +76,46 @@ fun <T : R, R> UpdatableState<T>.collectAsState(
     }
 }
 
-@Composable
-fun <V, T : List<V>> UpdatableState<T>.collectAsMutableStateList(
-    key: Any,
-    context: CoroutineContext = EmptyCoroutineContext
-): State<SnapshotStateList<V>> {
-
-    return produceState(
-        (this.value as List<V>).toMutableStateList(),
-        (this.value as List<V>).toMutableStateList(),
-        context
-    ) {
-        if (context == EmptyCoroutineContext) {
-            listen(key) { value = (it as List<V>).toMutableStateList() }
-        } else withContext(context) {
-            listen(key) { value = (it as List<V>).toMutableStateList() }
-        }
-    }
-}
-
+// NOTE: У приложения всегда есть несколько источников данных.
+// как правило это: платформа/OS | сервер/backend | модель приложения
+// и они соответствуют реальным источникам: Disk | Удаленный Disk | Оперативная память
 class DataSources(
     val app: AppModel,
     val platform: IAppPlatform,
     val backend: AppBackend
 )
 
-class DataSourcesWithScreen<T : IScreen>(
-    val app: AppModel,
-    val platform: IAppPlatform,
-    val backend: AppBackend,
-    val screen: T
-)
-
-class Loadable<T>(initial: T) {
-    var data = UpdatableState<T>(initial)
-    var loading = UpdatableState(false)
-    var loadingFailed = UpdatableState(false)
+// NOTE: обратил внимание что интерфейс юнит-тестов
+// совпадает с интерфейсом обработки ошибок при загрузке данных
+// и получается по сути любая обработка данных сводится к этому интерфейсу.
+// Поэтому - Worker который выводит output :)
+class Worker<T>(initial: T) {
+    var output = UpdatableState<T>(initial)
+    var working = UpdatableState(false)
+    var fail = UpdatableState(false)
 
     fun resetWith(newData: T) {
-        data.post(newData)
-        loading.post(false, ifNew = true)
-        loadingFailed.post(false, ifNew = true)
+        output.post(newData)
+        working.post(false, ifNew = true)
+        fail.post(false, ifNew = true)
     }
+
+   fun worker() = this
+   fun data() = output.value
+   fun hasFail() = fail.value
 }
 
-class LoadableState<T>(initial: T) {
-    var data = mutableStateOf(initial)
-    var loading = mutableStateOf(false)
-    var loadingFailed = mutableStateOf(false)
+// NOTE: act - действуй!
+// (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
+fun <T> Worker<T>.act(task: () -> Result<T>) {
+    working.post(true)
+    val result = task()
+    if (result.isSuccess) {
+        fail.post(false, ifNew = true)
+        output.post(result.getOrNull()!!)
+
+    } else {
+        fail.post(true)
+    }
+    working.post(false)
 }
-
-fun mockDataSource() = DataSources(
-    app = AppModel(),
-    platform = AppPlatform(),
-    backend = AppBackend(),
-)
-
-fun mockCoroutineScope() = CoroutineScope(defaultContext)
-fun mockScreensNavigator() = ScreensNavigator()

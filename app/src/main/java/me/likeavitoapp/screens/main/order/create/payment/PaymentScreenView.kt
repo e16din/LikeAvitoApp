@@ -16,6 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
@@ -57,22 +61,28 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
         Box {
             Card {
                 // card number Номер карты
-                val cardNumber by state.paymentData.cardNumber.collectAsState()
+                val cardNumber by state.paymentData.cardNumber.output.collectAsState()
                 TextField(
                     value = cardNumber,
+                    label = { Text("Номер карты") },
+                    placeholder = { Text("1111 1111 1111 1111") },
+                    /*visualTransformation = object : VisualTransformation {
+                        override fun filter(text: AnnotatedString): TransformedText {
+                            val digits = text.text.replace(Regex("[^\\d]"), "")
+                            val formattedText = formatPhoneNumber(digits)
+
+                            return TransformedText(
+                                AnnotatedString(formattedText),
+                                OffsetMapping.Identity
+                            )
+                        }
+                    },*/
                     onValueChange = {
-                        screen.ChangeMmYyUseCase(it)
-                        expect(
-                            "should to show card number in format: 1111 1111 1111 1111",
-                            "length = 19 (numbers = 16)",
-                            "check Luhn Algorithm == true",
-                            "digits with spaces only"
-                        )
-                    },
-                    label = { Text("Номер карты") }
+                        screen.ChangeCardNumberUseCase(it)
+                    }
                 )
 
-                val mmYY by state.paymentData.mmYY.collectAsState()
+                val mmYY by state.paymentData.mmYy.output.collectAsState()
                 TextField(
                     value = mmYY,
                     onValueChange = {
@@ -93,7 +103,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                     .widthIn(0.dp, 232.dp)
             ) {
 
-                val cvvCvc by state.paymentData.cvvCvc.collectAsState()
+                val cvvCvc by state.paymentData.cvvCvc.output.collectAsState()
                 TextField(
                     value = cvvCvc,
                     onValueChange = {
@@ -113,6 +123,21 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
         }) {
             Text(stringResource(R.string.pay_button))
         }
+    }
+}
+
+fun formatPhoneNumber(digits: String): String {
+    return when {
+        digits.length >= 10 -> "(${digits.substring(0, 3)}) ${
+            digits.substring(
+                3,
+                6
+            )
+        }-${digits.substring(6, 10)}"
+
+        digits.length >= 6 -> "(${digits.substring(0, 3)}) ${digits.substring(3)}"
+        digits.length >= 3 -> "(${digits.substring(0, 3)}) ${digits.substring(3)}"
+        else -> digits
     }
 }
 

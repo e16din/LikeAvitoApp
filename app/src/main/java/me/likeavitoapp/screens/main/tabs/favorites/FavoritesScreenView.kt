@@ -61,7 +61,7 @@ fun FavoritesScreenProvider(screen: FavoritesScreen, tabsRootScreen: TabsRootScr
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreenView(screen: FavoritesScreen) {
-    val ads = screen.state.favorites.data.collectAsState()
+    val ads = screen.state.favorites.output.collectAsState()
 
     val moveToAdsEnabled by screen.state.moveToAdsEnabled.collectAsState()
 
@@ -138,7 +138,7 @@ fun FavoritesScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.favorites.data.post(MockDataProvider().getFavorites().toMutableStateList())
+        state.favorites.output.post(MockDataProvider().getFavorites().toMutableStateList())
     }
 
     LikeAvitoAppTheme {

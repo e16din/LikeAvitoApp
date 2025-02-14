@@ -6,7 +6,7 @@ import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
@@ -30,7 +30,7 @@ class AuthScreen(
         val emailErrorEnabled = UpdatableState(false)
         val loginButtonEnabled = UpdatableState(false)
 
-        val login = Loadable(Unit)
+        val login = Worker(Unit)
     }
 
     val state = State()
@@ -91,7 +91,7 @@ class AuthScreen(
 
         scope.launchWithHandler {
             state.loginButtonEnabled.post(false)
-            state.login.loading.post(true)
+            state.login.working.post(true)
             val result = sources.backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
@@ -102,8 +102,8 @@ class AuthScreen(
                 navigator.startScreen(MainScreen())
 
             } else {
-                state.login.loading.post(false)
-                state.login.loadingFailed.post(true)
+                state.login.working.post(false)
+                state.login.fail.post(true)
             }
         }
     }

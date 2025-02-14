@@ -113,7 +113,7 @@ fun SearchScreenPreview() {
         scope = mockCoroutineScope(),
         sources = mockDataSource()
     ).apply {
-        state.ads.data.post(MockDataProvider().ads.toMutableStateList())
+        state.ads.output.post(MockDataProvider().ads.toMutableStateList())
     }
 
     LikeAvitoAppTheme {

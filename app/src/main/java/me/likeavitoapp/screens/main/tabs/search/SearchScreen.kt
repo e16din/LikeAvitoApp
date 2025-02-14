@@ -13,7 +13,7 @@ import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
@@ -33,7 +33,7 @@ class SearchScreen(
 ) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
 
     class State(
-        val ads: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
+        val ads: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
         var adsPage: UpdatableState<Int> = UpdatableState(0)
     ) : BaseAdContainerState()
 
@@ -42,7 +42,7 @@ class SearchScreen(
 
     suspend fun loadAds() {
         log("loadAds")
-        state.ads.loading.repostTo(sources.app.rootScreen.state.loadingEnabled)
+        state.ads.working.repostTo(sources.app.rootScreen.state.loadingEnabled)
         state.ads.load(
             loading = {
                 return@load sources.backend.adsService.getAds(
@@ -55,7 +55,7 @@ class SearchScreen(
             },
             onSuccess = { newAds ->
                 with(newAds.toMutableStateList()) {
-                    state.ads.data.post(this)
+                    state.ads.output.post(this)
                     bindScenarioDataSource(Ad::class, this)
                 }
             }
@@ -68,7 +68,7 @@ class SearchScreen(
                 return@load sources.backend.adsService.getCategories()
             },
             onSuccess = { newCategories ->
-                categories.data.post(newCategories)
+                categories.output.post(newCategories)
             }
         )
     }
@@ -76,7 +76,7 @@ class SearchScreen(
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        val ads = state.ads.data.value
+        val ads = state.ads.output.value
         val isInited = ads.isEmpty()
         if (isInited) {
             scope.launchWithHandler {
@@ -109,7 +109,7 @@ class SearchScreen(
     fun ScrollToEndUseCase() {
         recordScenarioStep()
 
-        if (!state.ads.data.value.isEmpty()) {
+        if (!state.ads.output.value.isEmpty()) {
             scope.launchWithHandler {
                 state.adsPage.post(state.adsPage.value + 1)
                 loadAds()
@@ -133,7 +133,7 @@ class SearchScreen(
 
         inner class State(
             var query: UpdatableState<String> = UpdatableState(""),
-            val searchTips: Loadable<List<String>> = Loadable(emptyList<String>())
+            val searchTips: Worker<List<String>> = Worker(emptyList<String>())
         )
 
 
@@ -172,7 +172,7 @@ class SearchScreen(
                                 query = searchBar.state.query.value
                             )
                         }, onSuccess = { data ->
-                            state.searchTips.data.post(data)
+                            state.searchTips.output.post(data)
                         })
                     }
                 }
@@ -216,9 +216,9 @@ class SearchScreen(
 
         inner class State(
             var enabled: UpdatableState<Boolean> = UpdatableState(false),
-            val categories: Loadable<List<Category>> = Loadable(emptyList<Category>()),
+            val categories: Worker<List<Category>> = Worker(emptyList<Category>()),
             var selectedCategory: UpdatableState<Category?> = UpdatableState(null),
-            val regions: Loadable<List<Region>> = Loadable(emptyList<Region>()),
+            val regions: Worker<List<Region>> = Worker(emptyList<Region>()),
             var selectedRegion: UpdatableState<Region?> = UpdatableState(null),
             var priceRange: UpdatableState<PriceRange> = UpdatableState(PriceRange()),
             var categoryMenuEnabled: UpdatableState<Boolean> = UpdatableState(false),

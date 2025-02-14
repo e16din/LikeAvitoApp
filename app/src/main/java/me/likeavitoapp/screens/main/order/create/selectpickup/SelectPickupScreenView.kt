@@ -97,7 +97,7 @@ fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = wit
 
     Column(modifier = modifier.fillMaxSize()) {
         val addressText by screen.state.query.collectAsState()
-        val suggestions by screen.state.suggestions.data.collectAsState()
+        val suggestions by screen.state.suggestions.output.collectAsState()
 
         Column {
             TextField(

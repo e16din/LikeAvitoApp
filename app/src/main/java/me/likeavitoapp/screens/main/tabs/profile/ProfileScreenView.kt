@@ -63,7 +63,7 @@ fun ProfileScreenProvider(screen: ProfileScreen, tabsRootScreen: TabsRootScreen)
 
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
-    val logoutLoading = screen.state.logout.loading.collectAsState()
+    val logoutLoading = screen.state.logout.working.collectAsState()
     val photoUrl = screen.state.user.photoUrl.collectAsState()
 
     Column(

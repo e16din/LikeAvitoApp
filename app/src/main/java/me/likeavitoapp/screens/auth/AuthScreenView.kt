@@ -74,8 +74,8 @@ fun AuthScreenView(screen: AuthScreen) {
     val password = screen.state.password.collectAsState()
     val emailErrorEnabled = screen.state.emailErrorEnabled.collectAsState()
     val loginButtonEnabled = screen.state.loginButtonEnabled.collectAsState()
-    val loginLoading = screen.state.login.loading.collectAsState()
-    val loginLoadingFailed = screen.state.login.loadingFailed.collectAsState()
+    val loginLoading = screen.state.login.working.collectAsState()
+    val loginLoadingFailed = screen.state.login.fail.collectAsState()
 
     Box {
         Column(
@@ -162,7 +162,7 @@ fun AuthScreenView(screen: AuthScreen) {
     val errorMessage = stringResource(R.string.authorization_failed)
     LaunchedEffect(loginLoadingFailed.value) {
         if (loginLoadingFailed.value) {
-            screen.state.login.loadingFailed.post(false)
+            screen.state.login.fail.post(false)
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
     }

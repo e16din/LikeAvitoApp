@@ -1,15 +1,23 @@
 package me.likeavitoapp.screens.main.order.create.payment
 
+import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PaymentData
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.TestCase
+import me.likeavitoapp.model.act
+import me.likeavitoapp.model.check
+import me.likeavitoapp.model.checkList
+import me.likeavitoapp.model.expect
+import me.likeavitoapp.model.useCase
+import me.likeavitoapp.model.withTests
 import me.likeavitoapp.provideCoroutineScope
 import me.likeavitoapp.provideDataSources
 import me.likeavitoapp.recordScenarioStep
@@ -25,7 +33,7 @@ class PaymentScreen(
 ) : IScreen {
 
     class State() {
-        val payment = Loadable<Order?>(null)
+        val payment = Worker<Order?>(null)
         val paymentData = PaymentData()
     }
 
@@ -56,7 +64,7 @@ class PaymentScreen(
             state.payment.load(loading = {
                 return@load sources.backend.orderService.pay(ad, state.paymentData)
             }, onSuccess = { order ->
-                state.payment.data.post(order)
+                state.payment.output.post(order)
                 navigatorNext.startScreen(
                     screen = OrderDetailsScreen(order, navigatorNext),
                     clearAfterFirst = true
@@ -65,8 +73,46 @@ class PaymentScreen(
         }
     }
 
-    fun ChangeCardNumberUseCase(text: String) {
-        recordScenarioStep(text)
+    fun ChangeCardNumberUseCase(number: String) {
+        recordScenarioStep(number)
+
+        useCase("Change card number", number)
+            .expect("should to show card number in format: 1111 1111 1111 1111") {
+                state.paymentData.cardNumber.worker().act {
+                    val output = with(number.replace(" ", "")) {
+                        val chunked = it.chunked(4)
+                        "${chunked[0]} ${chunked[1]} ${chunked[2]} ${chunked[3]}"
+                    }
+
+                    withTests(
+                        realOutput = output,
+                        testOutputs = listOf(
+                            TestCase("1", false),
+                            TestCase("1111", false),
+                            TestCase("1111 1111 1111 1111", false),
+                            TestCase("5580 4733 7202 4733", true),
+                            TestCase("4026 8434 8316 8683", true),
+                            TestCase("4026843483168683", false),
+                            TestCase("4026 8434 83168683", false),
+                            TestCase("2730 1684 6416 1841", false),
+                            TestCase("1111 1111 1111 1111 2", false),
+                            TestCase("1111 1111 1111 112", false),
+                            TestCase("1111 1111 1111 112w", false),
+                            TestCase("1111 1111/1111 1123", false)
+                        )
+                    ) { output ->
+                        checkList(
+                            check { output.length == 19 },
+                            check {
+                                val digits = output.replace(" ", "")
+                                digits.length == 16
+                                        && digits.isDigitsOnly()
+                                        && checkLuhnAlgorithm(digits)
+                            }
+                        )
+                    }
+                }
+            }
     }
 
     fun ChangeMmYyUseCase(text: String) {
@@ -77,21 +123,18 @@ class PaymentScreen(
         recordScenarioStep(text)
     }
 
-    fun isValidCardNumber(cardNumber: String): Boolean {
-        // Удаляем все пробелы и дефисы из номера карты
-        val cleanedNumber = cardNumber.replace(Regex("[^\\d]"), "")
-
+    fun checkLuhnAlgorithm(digits: String): Boolean {
         // Проверяем, что номер состоит только из цифр и имеет длину от 13 до 19
-        if (cleanedNumber.length < 13 || cleanedNumber.length > 19) {
+        if (digits.length < 13 || digits.length > 19) {
             return false
         }
 
         // Применяем алгоритм Луна
         var sum = 0
-        val shouldDouble = cleanedNumber.length % 2 == 0
+        val shouldDouble = digits.length % 2 == 0
 
-        for (i in cleanedNumber.indices) {
-            var digit = cleanedNumber[i].digitToInt()
+        for (i in digits.indices) {
+            var digit = digits[i].digitToInt()
 
             // Удваиваем каждую вторую цифру
             if ((i % 2 == 0 && shouldDouble) || (i % 2 != 0 && !shouldDouble)) {

@@ -11,7 +11,7 @@ import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
@@ -25,7 +25,7 @@ open class BaseAdContainerScreen(
 ) : IScreen {
 
     open class BaseAdContainerState(
-        val reserve: Loadable<Boolean> = Loadable(false)
+        val reserve: Worker<Boolean> = Worker(false)
     )
 
     val timersMap = mutableMapOf<Long, Job>()
@@ -57,7 +57,7 @@ open class BaseAdContainerScreen(
                 sources.backend.orderService.reserve(adId = ad.id)
             }, onSuccess = { isReserved ->
                 if (isReserved == true) {
-                    state.reserve.data.post(true)
+                    state.reserve.output.post(true)
 
                     ad.reservedTimeMs = System.currentTimeMillis()
 
@@ -66,7 +66,7 @@ open class BaseAdContainerScreen(
                     navigatorNext.startScreen(createOrderScreen)
 
                 } else {
-                    state.reserve.loadingFailed.post(true)
+                    state.reserve.fail.post(true)
                 }
             })
         }

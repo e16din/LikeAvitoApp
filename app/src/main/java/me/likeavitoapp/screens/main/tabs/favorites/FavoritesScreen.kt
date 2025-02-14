@@ -9,7 +9,7 @@ import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.provideCoroutineScope
@@ -28,7 +28,7 @@ class FavoritesScreen(
 ) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
 
     class State(
-        val favorites: Loadable<SnapshotStateList<Ad>> = Loadable(mutableStateListOf<Ad>()),
+        val favorites: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
         val moveToAdsEnabled: UpdatableState<Boolean> = UpdatableState(false)
     ) : BaseAdContainerState()
 
@@ -41,7 +41,7 @@ class FavoritesScreen(
                     return@load sources.backend.adsService.getFavorites()
                 },
                 onSuccess = { newFavorites ->
-                    state.favorites.data.post(newFavorites.toMutableStateList())
+                    state.favorites.output.post(newFavorites.toMutableStateList())
                     state.moveToAdsEnabled.post(newFavorites.isEmpty())
                 }
             )
@@ -58,10 +58,10 @@ class FavoritesScreen(
                 },
                 onSuccess = { success ->
                     if (success) {
-                        val newFavorites = state.favorites.data.value.apply {
+                        val newFavorites = state.favorites.output.value.apply {
                             remove(ad)
                         }
-                        state.favorites.data.post(newFavorites)
+                        state.favorites.output.post(newFavorites)
                         state.moveToAdsEnabled.post(newFavorites.isEmpty())
                     }
                 }
@@ -103,7 +103,7 @@ class FavoritesScreen(
 //                        }
 //                    }
 
-                    state.favorites.data.post(mutableStateListOf())
+                    state.favorites.output.post(mutableStateListOf())
                     state.moveToAdsEnabled.post(true)
                 }
             )

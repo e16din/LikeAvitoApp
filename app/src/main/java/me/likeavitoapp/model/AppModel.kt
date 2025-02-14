@@ -172,8 +172,8 @@ data class OfferMessage(
 data class MapItem(val name: String, val point: Point)
 
 data class PaymentData(
-    val cardNumber: UpdatableState<String> = UpdatableState(""), //
-    val mmYY: UpdatableState<String> = UpdatableState(""), // mm/yy
-    val cvvCvc: UpdatableState<String> = UpdatableState("") // 123
+    val cardNumber: Worker<String> = Worker(""), // 1111 1111 1111 1111
+    val mmYy: Worker<String> = Worker(""), // mm/yy
+    val cvvCvc: Worker<String> = Worker("") // 123
 )
 

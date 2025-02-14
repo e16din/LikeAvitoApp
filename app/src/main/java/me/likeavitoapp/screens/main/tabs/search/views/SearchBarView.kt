@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGri
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -43,9 +42,9 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 @OptIn(ExperimentalMaterial3Api::class)
 fun SearchBarView(screen: SearchScreen) {
     val query by screen.searchBar.state.query.collectAsState()
-    val searchTips by screen.searchBar.state.searchTips.data.collectAsState()
+    val searchTips by screen.searchBar.state.searchTips.output.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
-    val categoriesSource = screen.searchSettingsPanel.state.categories.data.collectAsState()
+    val categoriesSource = screen.searchSettingsPanel.state.categories.output.collectAsState()
     val categories = remember { categoriesSource.value.toMutableStateList() }
     val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState()
 

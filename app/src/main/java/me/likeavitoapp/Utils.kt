@@ -3,7 +3,7 @@ package me.likeavitoapp
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.UpdatableState
 
 fun Any.className(): String {
@@ -16,16 +16,16 @@ suspend inline fun <T> MutableState<T>.setUi(value: T) {
     }
 }
 
-suspend inline fun <reified T> Loadable<*>.load(
+suspend inline fun <reified T> Worker<*>.load(
     loading: () -> Result<T>,
     crossinline onSuccess: (data: T) -> Unit
 ) {
-    this.loading.post(true)
+    this.working.post(true)
 
     val result = loading()
     val newData = result.getOrNull()
 
-    this.loading.post(false)
+    this.working.post(false)
 
     if (newData != null) {
         withContext(defaultContext + Dispatchers.Main) {
@@ -34,7 +34,7 @@ suspend inline fun <reified T> Loadable<*>.load(
 
     } else {
         log("!!!loadingFailed!!!")
-        this@load.loadingFailed.post(true)
+        this@load.fail.post(true)
     }
 }
 

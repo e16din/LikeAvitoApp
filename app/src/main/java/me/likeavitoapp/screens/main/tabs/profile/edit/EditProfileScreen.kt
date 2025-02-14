@@ -6,7 +6,7 @@ import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
@@ -24,7 +24,7 @@ class EditProfileScreen(
     class State(
         val user: User,
         val userPickerEnabled: UpdatableState<Boolean> = UpdatableState(false),
-        val updateUser: Loadable<User> = Loadable(user),
+        val updateUser: Worker<User> = Worker(user),
         var photo: ByteArray? = null
     )
 
@@ -66,7 +66,7 @@ class EditProfileScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        state.updateUser.loading.repostTo(
+        state.updateUser.working.repostTo(
             sources.app.rootScreen.state.loadingEnabled
         )
 

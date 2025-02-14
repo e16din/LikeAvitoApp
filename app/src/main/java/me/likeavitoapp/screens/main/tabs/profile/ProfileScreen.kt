@@ -9,7 +9,7 @@ import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
 import me.likeavitoapp.provideAndroidAppContext
@@ -28,7 +28,7 @@ class ProfileScreen(
 
     class State(
         val user: User,
-        val logout: Loadable<Unit> = Loadable(Unit)
+        val logout: Worker<Unit> = Worker(Unit)
         )
 
     val state = State(user)

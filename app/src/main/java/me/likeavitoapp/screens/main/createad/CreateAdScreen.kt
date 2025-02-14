@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
-import me.likeavitoapp.model.Loadable
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.IScreen
 
 
@@ -31,7 +31,7 @@ class CreateAdScreen(
     }
 
     class State {
-        var adCreated by mutableStateOf(Loadable(false))
+        var adCreated by mutableStateOf(Worker(false))
         var exitDialog by mutableStateOf(false)
     }
 
