@@ -18,6 +18,13 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
+fun expect(text: String, vararg values: Any?) {
+    // readonly
+}
+// NOTE: имеет смысл проверять только вывод,
+// так как для проверки правильности ввода используются
+// те же функции что и в коде приложения
+
 operator fun <T> UpdatableState<T>.getValue(thisRef: Any?, property: KProperty<*>): T = value
 
 class UpdatableState<T>(initial: T) {
@@ -37,8 +44,8 @@ class UpdatableState<T>(initial: T) {
         } ?: listOf(onChanged)
     }
 
-    fun post(value: T, scope: CoroutineScope = provideCoroutineScope(), ifNew:Boolean = false) {
-        if(!ifNew || (ifNew && _value != value)) {
+    fun post(value: T, scope: CoroutineScope = provideCoroutineScope(), ifNew: Boolean = false) {
+        if (!ifNew || (ifNew && _value != value)) {
             scope.launch(defaultContext + Dispatchers.Main) {
                 _value = value
                 callbacks.keys.forEach {
@@ -116,7 +123,7 @@ class Loadable<T>(initial: T) {
     var loading = UpdatableState(false)
     var loadingFailed = UpdatableState(false)
 
-    fun resetWith(newData: T){
+    fun resetWith(newData: T) {
         data.post(newData)
         loading.post(false, ifNew = true)
         loadingFailed.post(false, ifNew = true)

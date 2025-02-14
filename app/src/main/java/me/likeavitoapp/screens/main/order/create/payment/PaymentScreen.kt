@@ -65,4 +65,46 @@ class PaymentScreen(
         }
     }
 
+    fun ChangeCardNumberUseCase(text: String) {
+        recordScenarioStep(text)
+    }
+
+    fun ChangeMmYyUseCase(text: String) {
+        recordScenarioStep(text)
+    }
+
+    fun ChangeCvvCvcUseCase(text: String) {
+        recordScenarioStep(text)
+    }
+
+    fun isValidCardNumber(cardNumber: String): Boolean {
+        // Удаляем все пробелы и дефисы из номера карты
+        val cleanedNumber = cardNumber.replace(Regex("[^\\d]"), "")
+
+        // Проверяем, что номер состоит только из цифр и имеет длину от 13 до 19
+        if (cleanedNumber.length < 13 || cleanedNumber.length > 19) {
+            return false
+        }
+
+        // Применяем алгоритм Луна
+        var sum = 0
+        val shouldDouble = cleanedNumber.length % 2 == 0
+
+        for (i in cleanedNumber.indices) {
+            var digit = cleanedNumber[i].digitToInt()
+
+            // Удваиваем каждую вторую цифру
+            if ((i % 2 == 0 && shouldDouble) || (i % 2 != 0 && !shouldDouble)) {
+                digit *= 2
+                // Если результат больше 9, вычитаем 9
+                if (digit > 9) {
+                    digit -= 9
+                }
+            }
+            sum += digit
+        }
+
+        // Проверяем, делится ли сумма на 10 без остатка
+        return sum % 10 == 0
+    }
 }

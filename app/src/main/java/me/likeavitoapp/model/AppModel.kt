@@ -171,13 +171,9 @@ data class OfferMessage(
 
 data class MapItem(val name: String, val point: Point)
 
-// card number Номер карты
-// mm/yy Действует до
-// cvv/cvc три цифры с обратной стороны карты
 data class PaymentData(
-    val cardNumber: UpdatableState<String> = UpdatableState(""),
-    val month: UpdatableState<String> = UpdatableState(""),
-    val year: UpdatableState<String> = UpdatableState(""),
-    val cvvCvc: UpdatableState<String> = UpdatableState("")
+    val cardNumber: UpdatableState<String> = UpdatableState(""), //
+    val mmYY: UpdatableState<String> = UpdatableState(""), // mm/yy
+    val cvvCvc: UpdatableState<String> = UpdatableState("") // 123
 )
 
