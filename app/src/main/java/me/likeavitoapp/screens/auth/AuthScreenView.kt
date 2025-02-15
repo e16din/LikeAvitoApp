@@ -39,10 +39,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+
+
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.provideRootScreen
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.mockMainSet
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -54,7 +55,7 @@ fun AuthScreenProvider(screen: AuthScreen) {
         screen.StartScreenUseCase()
     }
 
-    val scenariosEnabled = provideRootScreen().state.scenariosEnabled
+    val scenariosEnabled = mainSet.provideRootScreen().state.scenariosEnabled
     if (scenariosEnabled.value) {
         val authScenarios = remember { AuthScenarios(screen) }
         LaunchedEffect(Unit) {
@@ -172,9 +173,8 @@ fun AuthScreenView(screen: AuthScreen) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewAuthScreen() {
+    mainSet = mockMainSet()
     AuthScreenView(screen = AuthScreen(
-        scope = mockCoroutineScope(),
         navigator = mockScreensNavigator(),
-        sources = mockDataSource()
     ))
 }

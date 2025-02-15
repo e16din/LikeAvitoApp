@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens
+package me.likeavitoapp.screens.root
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.develop

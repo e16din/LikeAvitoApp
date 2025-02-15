@@ -1,13 +1,14 @@
 package me.likeavitoapp.screens.main.addetails
 
 import kotlinx.coroutines.CoroutineScope
+import me.likeavitoapp.MainSet
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -16,12 +17,12 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 class AdDetailsScreen(
     ad: Ad,
-    val navigatorPrev: ScreensNavigator = ScreensNavigator(),
-    override val navigatorNext: ScreensNavigator,
-    override val scope: CoroutineScope = provideCoroutineScope(),
-    override val sources: DataSources = provideDataSources(),
+    override val navigator: ScreensNavigator,
+
+    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State(ad)
-) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, scope, sources, state) {
 
     class State(
         val ad: Ad,
@@ -32,7 +33,7 @@ class AdDetailsScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigatorPrev.backToPrevious()
+        navigator.backToPrevious()
     }
 
     override fun CloseScreenUseCase() {
@@ -44,16 +45,16 @@ class AdDetailsScreen(
     fun ClickToPhotoUseCase(url: String) {
         recordScenarioStep()
 
-        navigatorNext.startScreen(
-            PhotoScreen(url, navigatorNext)
+        navigator.startScreen(
+            PhotoScreen(url, navigator)
         )
     }
 
     fun ClickToOpenChatUseCase() {
         recordScenarioStep()
 
-        navigatorNext.startScreen(
-            ChatScreen(state.ad, navigatorNext)
+        navigator.startScreen(
+            ChatScreen(state.ad, navigator)
         )
     }
 }

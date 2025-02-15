@@ -1,136 +1,49 @@
 package me.likeavitoapp.screens.main.order.create.payment
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.model.runTests
 import me.likeavitoapp.screens.ActionTopBar
+import me.likeavitoapp.screens.SimpleTextField
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SimpleTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    readOnly: Boolean = false,
-    textStyle: TextStyle = LocalTextStyle.current,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions(),
-    singleLine: Boolean = false,
-    maxLines: Int = Int.MAX_VALUE,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    placeholder: @Composable (() -> Unit)? = null,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
-    cursorBrush: Brush = SolidColor(Color.Black),
-    colors: TextFieldColors = TextFieldDefaults.colors(),
-    shape: Shape = RoundedCornerShape(8.dp),
-) {
-    BasicTextField(modifier = modifier
-        .background(MaterialTheme.colorScheme.onSurface, shape = shape),
-        value = value,
-        onValueChange = onValueChange,
-        singleLine = singleLine,
-        maxLines = maxLines,
-        enabled = enabled,
-        readOnly = readOnly,
-        interactionSource = interactionSource,
-        textStyle = textStyle,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        onTextLayout = onTextLayout,
-        cursorBrush = cursorBrush,
-        decorationBox = { innerTextField ->
-            TextFieldDefaults.DecorationBox(
-                value = value,
-                innerTextField = {
-                    Box(
-//                        modifier = Modifier.wrapContentSize(),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        innerTextField()
-                    }
-                },
-                enabled = enabled,
-                colors = colors,
-                singleLine = singleLine,
-                visualTransformation = VisualTransformation.None,
-                interactionSource = interactionSource,
-                contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
-                    top = 0.dp,
-                    bottom = 0.dp
-                ),
-                placeholder = {
-                    if (value.isEmpty() && placeholder != null) {
-                        Box(
-//                            modifier = Modifier.fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            placeholder()
-                        }
-                    }
-                },
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon
-            )
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -261,15 +174,21 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
 @Preview
 @Composable
 fun PaymentScreenPreview() {
+    mainSet = mockMainSet()
+    val screen = PaymentScreen(
+        navigatorPrev = mockScreensNavigator(),
+        navigatorNext = mockScreensNavigator(),
+        ad = MockDataProvider().ads.first()
+    )
     LikeAvitoAppTheme {
         PaymentScreenProvider(
-            screen = PaymentScreen(
-                navigatorPrev = mockScreensNavigator(),
-                navigatorNext = mockScreensNavigator(),
-                scope = mockCoroutineScope(),
-                sources = mockDataSource(),
-                ad = MockDataProvider().ads.first()
-            )
+            screen = screen
         )
+    }
+
+    runTests {
+        screen.ChangeCardNumberUseCase("")
+        screen.ChangeMmYyUseCase("")
+        screen.ChangeCvvCvcUseCase("")
     }
 }

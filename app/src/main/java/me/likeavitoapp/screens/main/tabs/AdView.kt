@@ -33,9 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
@@ -160,11 +160,12 @@ fun AdView(
 @Preview(showBackground = true)
 @Composable
 fun AdViewPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
         val screen = BaseAdContainerScreen(
-            navigatorNext = mockScreensNavigator(),
-            scope = mockCoroutineScope(),
-            sources = mockDataSource(),
+            navigator = mockScreensNavigator(),
+            scope = mainSet.provideCoroutineScope(),
+            sources = mainSet.provideDataSources(),
             state = BaseAdContainerScreen.BaseAdContainerState()
         )
         val ad = MockDataProvider().ads[1]

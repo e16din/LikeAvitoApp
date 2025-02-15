@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens
+package me.likeavitoapp.screens.root
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,14 +27,6 @@ import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.auth.AuthScreenProvider
 import me.likeavitoapp.screens.main.MainScreen
 import me.likeavitoapp.screens.main.MainScreenProvider
-import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
-import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
-import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
-import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
 import me.likeavitoapp.screens.splash.SplashScreen
 import me.likeavitoapp.screens.splash.SplashScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography

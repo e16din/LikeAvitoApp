@@ -5,8 +5,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
+
+
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 import org.junit.After
@@ -21,10 +22,9 @@ class PaymentTests {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        main = Main().apply {
+        mainSet = mockMainSet().apply {
             defaultContext = testDispatcher
         }
-        main.initApp(AppPlatform(), mockCoroutineScope())
     }
 
     @After
@@ -54,8 +54,6 @@ class PaymentTests {
     private fun mockScreen(): PaymentScreen = PaymentScreen(
         navigatorPrev = mockScreensNavigator(),
         navigatorNext = mockScreensNavigator(),
-        scope = mockCoroutineScope(),
-        sources = mockDataSource(),
         ad = MockDataProvider().ads.first()
     )
 }

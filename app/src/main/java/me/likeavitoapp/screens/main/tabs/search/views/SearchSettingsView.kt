@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.ui.theme.AppTypography
@@ -193,12 +193,11 @@ inline fun PreferenceCustomItem(
 @Preview(showBackground = true)
 @Composable
 fun SearchSettingsViewPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
         SearchSettingsPanelView(
             panel = SearchScreen(
-                navigatorNext = mockScreensNavigator(),
-                scope = mockCoroutineScope(),
-                sources = mockDataSource()
+                navigator = mockScreensNavigator(),
             ).searchSettingsPanel,
             onFocus = {}
         )

@@ -2,25 +2,25 @@ package me.likeavitoapp.screens.auth
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.MainScreen
 import java.util.regex.Pattern
-import kotlin.String
 
 
 class AuthScreen(
     val navigator: ScreensNavigator,
-    val scope: CoroutineScope = provideCoroutineScope(),
-    val sources: DataSources = provideDataSources()
+
+    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
 
     class State {

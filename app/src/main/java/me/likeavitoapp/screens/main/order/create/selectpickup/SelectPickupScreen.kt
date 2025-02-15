@@ -2,8 +2,10 @@ package me.likeavitoapp.screens.main.order.create.selectpickup
 
 import com.yandex.mapkit.geometry.Point
 import kotlinx.coroutines.CoroutineScope
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Worker
@@ -11,16 +13,17 @@ import me.likeavitoapp.model.MapItem
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+import me.likeavitoapp.mainSet
+
 import me.likeavitoapp.recordScenarioStep
 
 
 class SelectPickupScreen(
     selectedPickupPoint: UpdatableState<PickupPoint?>,
     val navigator: ScreensNavigator,
-    val scope: CoroutineScope = provideCoroutineScope(),
-    val sources: DataSources = provideDataSources()
+
+    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
 
     class State(val selectedPickupPoint: UpdatableState<PickupPoint?>) {

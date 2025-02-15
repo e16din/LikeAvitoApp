@@ -27,9 +27,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen.OrderType
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
@@ -152,16 +153,14 @@ private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
 @Preview
 @Composable
 fun CreateOrderScreenPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
-        val scope = mockCoroutineScope()
         CreateOrderScreenProvider(
             screen = CreateOrderScreen(
                 ad = MockDataProvider().ads.first(),
                 navigatorPrev = mockScreensNavigator(),
-                scope = scope,
-                sources = mockDataSource()
             ).apply {
-                state.orderType.post(OrderType.Pickup, scope)
+                state.orderType.post(OrderType.Pickup, mainSet.provideCoroutineScope())
             }
         )
     }

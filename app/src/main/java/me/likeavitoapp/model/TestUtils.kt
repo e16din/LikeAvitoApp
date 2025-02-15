@@ -2,18 +2,25 @@ package me.likeavitoapp.model
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.AppPlatform
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.develop
-import me.likeavitoapp.main
+import me.likeavitoapp.mainSet
 
 // NOTE: Решение вопроса: "Как писать в стиле TDD/BDD, и не писать авто-тесты?
 // Чтобы и функционал и тесты можно было писать сразу в одном месте?"
 // Как плюс стало нагляднее и это можно переиспользовать в unit тестах
 // (которые есть по сути другой клиент для исполнения наших единожды написанных функций)
 
+// NOTE: однажды написанные тесты запускаются при прогоне юнит-тестов,
+// при использовании приложения (при develop == true) и
+// при обновлении Compose Preview
+
+// NOTE: Так удобнее переносить и переиспользовать
+
 
 class TestCase<T>(val input: T, val expect: Boolean)
 
-fun <T> T.asTestCase(expect: Boolean) = TestCase(input = this, expect = expect)
+fun <T> T.expect(expect: Boolean) = TestCase(input = this, expect = expect)
 
 fun <T> useCase(text: String, value: T): T {
     println("Use Case: $text")
@@ -80,14 +87,17 @@ inline fun <T> withTests(
 
             val testResult = caseResult == it.expect
             val numberInList = "${i + 1}/${testCases.size}"
-            if (testResult) {
-                println("Test $numberInList Succeed { input: \"${it.input}\", output: \"$output\", check(output) == ${it.expect} }")
-            } else {
 
-                println("Test $numberInList Failed { input: \"${it.input}\", output: \"$output\", check(output) != ${it.expect} }")
-            }
+            val logMessage =
+                if (testResult)
+                    "Test $numberInList Succeed { input: \"${it.input}\", output: \"$output\", check(output) == ${it.expect} }"
+                else
+                    "Test $numberInList Failed { input: \"${it.input}\", output: \"$output\", check(output) != ${it.expect} }"
+
+            println(logMessage)
+
             if (withAssert) {
-                assert(testResult)
+                assert(testResult) { logMessage }
             }
         }
     }
@@ -96,14 +106,12 @@ inline fun <T> withTests(
 }
 
 fun check(function: () -> Boolean) = function
+fun runTests(function: () -> Unit) = function
 
 // NOTE: mocks
 
-fun mockDataSource() = DataSources(
-    app = AppModel(),
-    platform = AppPlatform(),
-    backend = AppBackend(),
-)
-
-fun mockCoroutineScope() = CoroutineScope(main.defaultContext)
-fun mockScreensNavigator() = ScreensNavigator()
+private val emptyScreenNavigator by lazy { ScreensNavigator() }
+fun mockScreensNavigator() = emptyScreenNavigator
+fun mockMainSet() = MainSet().apply {
+    init(AppPlatform(), CoroutineScope(mainSet.defaultContext))
+}

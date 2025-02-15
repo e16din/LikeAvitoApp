@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -110,6 +112,7 @@ inline fun MinAdView(
 @Preview(showBackground = true)
 @Composable
 fun MinAdViewPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
         MinAdView(
             isFavorite = remember { mutableStateOf(true) },

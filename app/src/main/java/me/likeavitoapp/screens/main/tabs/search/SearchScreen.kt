@@ -5,11 +5,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.bindScenarioDataSource
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.log
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.DataSources
@@ -18,19 +20,19 @@ import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 
 
 class SearchScreen(
-    override val navigatorNext: ScreensNavigator,
-    override val scope: CoroutineScope = provideCoroutineScope(),
-    override val sources: DataSources = provideDataSources(),
+    override val navigator: ScreensNavigator,
+
+    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, scope, sources, state) {
 
     class State(
         val ads: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
@@ -96,11 +98,11 @@ class SearchScreen(
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
-        navigatorNext.startScreen(
+        navigator.startScreen(
             AdDetailsScreen(
                 ad = ad,
                 scope = scope,
-                navigatorNext = navigatorNext,
+                navigator = navigator,
                 sources = sources
             )
         )

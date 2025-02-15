@@ -13,21 +13,21 @@ import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IAppPlatform
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ISource
-import me.likeavitoapp.screens.RootScreen
+import me.likeavitoapp.screens.root.RootScreen
 import kotlin.reflect.KClass
 
 const val develop = true
-var main = Main()
+var mainSet = MainSet()
 
-class Main {
-    var appModel: AppModel? = null
-    var appBackend: AppBackend? = null
-    var appPlatform: IAppPlatform? = null
+class MainSet {
+    private var appModel: AppModel? = null
+    private var appBackend: AppBackend? = null
+    private var appPlatform: IAppPlatform? = null
 
-    var actualScope: CoroutineScope? = null
-    var actualDataSources: DataSources? = null
+    private var actualScope: CoroutineScope? = null
+    private var actualDataSources: DataSources? = null
 
-    fun initApp(platform: AppPlatform, scope: CoroutineScope): AppModel {
+    fun init(platform: AppPlatform, scope: CoroutineScope): AppModel {
         if (appModel != null) {
             return appModel!!
         }
@@ -67,17 +67,17 @@ class Main {
     }
 
     var defaultContext = SupervisorJob() + exceptionHandler
+
+    // NOTE: Use it after call initApp()
+    fun provideDataSources() = actualDataSources!!
+    fun provideCoroutineScope() = actualScope!!
+    fun provideRootScreen() = appModel!!.rootScreen
+    fun provideApp() = appModel!!
+    fun provideAndroidAppContext() = appPlatform as AppPlatform
 }
 
-// NOTE: Use it after call initApp()
-fun provideDataSources() = main.actualDataSources!!
-fun provideCoroutineScope() = main.actualScope!!
-fun provideRootScreen() = main.appModel!!.rootScreen
-fun provideApp() = main.appModel!!
-fun provideAndroidAppContext() = main.appPlatform as AppPlatform
-
 @Composable
-fun isPreviewMode(): Boolean = runCatching { provideApp() }.isFailure
+fun isPreviewMode(): Boolean = runCatching { mainSet.provideApp() }.isFailure
 
 fun log(text: String, tag: String = "debug") {
     if (develop) {

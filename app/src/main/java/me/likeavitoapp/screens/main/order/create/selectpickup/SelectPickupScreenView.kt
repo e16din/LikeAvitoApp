@@ -48,12 +48,13 @@ import com.yandex.mapkit.mapview.MapView
 import me.likeavitoapp.R
 import me.likeavitoapp.isPreviewMode
 import me.likeavitoapp.log
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.Order.PickupPoint.Type.*
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.Chip
@@ -289,8 +290,8 @@ class LocationTracker(context: Context) {
 @Preview
 @Composable
 fun SelectPickupScreenPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
-        val scope = mockCoroutineScope()
         SelectPickupScreenProvider(
             screen = SelectPickupScreen(
                 selectedPickupPoint = UpdatableState(
@@ -303,8 +304,6 @@ fun SelectPickupScreenPreview() {
                     )
                 ),
                 navigator = mockScreensNavigator(),
-                scope = scope,
-                sources = mockDataSource()
             )
         )
     }

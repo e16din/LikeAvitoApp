@@ -15,14 +15,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.likeavitoapp.screens.RootScreenView
+import me.likeavitoapp.screens.root.RootScreenView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 inline fun CoroutineScope.launchWithHandler(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     crossinline launch: suspend () -> Unit
 ): Job {
-    return launch(main.defaultContext + dispatcher) {
+    return launch(mainSet.defaultContext + dispatcher) {
         launch.invoke()
     }
 }
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         val vm by viewModels<AppViewModel>()
 
-        val app = main.initApp(application as AppPlatform, vm.viewModelScope)
+        val app = mainSet.init(application as AppPlatform, vm.viewModelScope)
 
         val lightTransparentStyle = SystemBarStyle.light(
             scrim = WHITE,

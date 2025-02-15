@@ -3,9 +3,11 @@ package me.likeavitoapp.screens.main.order.create.payment
 
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.checkLuhnAlgorithm
+import me.likeavitoapp.develop
 import me.likeavitoapp.isDigitsOnly
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
@@ -14,14 +16,12 @@ import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PaymentData
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.act
-import me.likeavitoapp.model.asTestCase
+import me.likeavitoapp.model.expect
 import me.likeavitoapp.model.check
 import me.likeavitoapp.model.checkList
-import me.likeavitoapp.model.expect
 import me.likeavitoapp.model.useCase
 import me.likeavitoapp.model.withTests
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
 
@@ -30,8 +30,9 @@ class PaymentScreen(
     val ad: Ad,
     val navigatorPrev: ScreensNavigator,
     val navigatorNext: ScreensNavigator,
-    val scope: CoroutineScope = provideCoroutineScope(),
-    val sources: DataSources = provideDataSources()
+
+    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
 
     class State() {
@@ -75,6 +76,7 @@ class PaymentScreen(
         }
     }
 
+    var isChangeCardNumberTested = false
     fun ChangeCardNumberUseCase(number: String) {
         recordScenarioStep(number)
 
@@ -98,31 +100,32 @@ class PaymentScreen(
                         return result
                     }
 
-                    val output = format(number)
-
                     withTests(
-                        realInput = output,
+                        enabled = develop && !isChangeCardNumberTested,
+                        realInput = format(number),
                         outputMaker = { format(it) },
                         testCases = listOf(
-                            "".asTestCase(false),
-                            "abc".asTestCase(false),
-                            "1".asTestCase(false),
-                            "1111".asTestCase(false),
-                            "1111111111111111".asTestCase(false),
-                            "5580 4733 7202 4733".asTestCase(true),
-                            "5580473372024".asTestCase(false),
-                            "558047337202".asTestCase(false),
-                            "55804733".asTestCase(false),
-                            "5580".asTestCase(false),
-                            "4026843483168683".asTestCase(true),
-                            "4026 8434 83168683".asTestCase(true),
-                            "2730 1684 6416 1841".asTestCase(true),
-                            "1111 1111 1111 1111 2".asTestCase(false),
-                            "1111 1111 1111 112".asTestCase(false),
-                            "1111 1111 1111 112w".asTestCase(false),
-                            "1111 1111/1111 1123".asTestCase(false)
+                            "".expect(false),
+                            "abc".expect(false),
+                            "1".expect(false),
+                            "1111".expect(false),
+                            "1111111111111111".expect(false),
+                            "5580 4733 7202 4733".expect(true),
+                            "5580473372024".expect(false),
+                            "558047337202".expect(false),
+                            "55804733".expect(false),
+                            "5580".expect(false),
+                            "4026843483168683".expect(true),
+                            "4026 8434 83168683".expect(true),
+                            "2730 1684 6416 1841".expect(true),
+                            "1111 1111 1111 1111 2".expect(false),
+                            "1111 1111 1111 112".expect(false),
+                            "1111 1111 1111 112w".expect(false),
+                            "1111 1111/1111 1123".expect(false)
                         )
                     ) { output ->
+                        isChangeCardNumberTested = true
+
                         checkList(
                             check { output.length == 19 },
                             check {
@@ -137,6 +140,7 @@ class PaymentScreen(
             }
     }
 
+    var isChangeMmYyTested = false
     fun ChangeMmYyUseCase(text: String) {
         recordScenarioStep(text)
 
@@ -160,29 +164,30 @@ class PaymentScreen(
                         return result
                     }
 
-                    val output = format(text)
-
                     withTests(
-                        realInput = output,
+                        enabled = develop && !isChangeMmYyTested,
+                        realInput = format(text),
                         outputMaker = { format(it) },
                         testCases = listOf(
-                            "".asTestCase(false),
-                            "1226".asTestCase(true),
-                            "122".asTestCase(false),
-                            "12222".asTestCase(false),
-                            "122".asTestCase(false),
-                            "0122".asTestCase(true),
-                            "0022".asTestCase(false),
-                            "0922".asTestCase(true),
-                            "1222".asTestCase(true),
-                            "1200".asTestCase(true),
-                            "1322".asTestCase(false),
-                            "22".asTestCase(false),
-                            "/".asTestCase(false),
-                            "abc".asTestCase(false),
-                            "aabb".asTestCase(false)
+                            "".expect(false),
+                            "1226".expect(true),
+                            "122".expect(false),
+                            "12222".expect(false),
+                            "122".expect(false),
+                            "0122".expect(true),
+                            "0022".expect(false),
+                            "0922".expect(true),
+                            "1222".expect(true),
+                            "1200".expect(true),
+                            "1322".expect(false),
+                            "22".expect(false),
+                            "/".expect(false),
+                            "abc".expect(false),
+                            "aabb".expect(false)
                         ),
                     ) { output ->
+                        isChangeMmYyTested = true
+
                         val parts = output.split("/")
                         val mm = parts[0]
                         val yy = parts.getOrNull(1)
@@ -206,6 +211,7 @@ class PaymentScreen(
             }
     }
 
+    var isChangeCvvCvcTested = false
     fun ChangeCvvCvcUseCase(text: String) {
         recordScenarioStep(text)
 
@@ -217,18 +223,21 @@ class PaymentScreen(
 
                 state.paymentData.cvvCvc.worker().act {
                     withTests(
+                        enabled = develop && !isChangeCvvCvcTested,
                         realInput = text,
                         testCases = listOf(
-                            "".asTestCase(false),
-                            "abc".asTestCase(false),
-                            "12d".asTestCase(false),
-                            "123".asTestCase(true),
-                            "12".asTestCase(false),
-                            "1234".asTestCase(false),
-                            "12%".asTestCase(false),
-                            " 12".asTestCase(false)
+                            "".expect(false),
+                            "abc".expect(false),
+                            "12d".expect(false),
+                            "123".expect(true),
+                            "12".expect(false),
+                            "1234".expect(false),
+                            "12%".expect(false),
+                            " 12".expect(false)
                         )
                     ) { output ->
+                        isChangeCvvCvcTested = true
+
                         checkList(
                             check { output.length == 3 },
                             check { output.isDigitsOnly() }

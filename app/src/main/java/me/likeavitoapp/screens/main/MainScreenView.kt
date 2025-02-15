@@ -37,11 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.className
-import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
-import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.mainSet
+import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
@@ -295,12 +294,10 @@ private fun BoxScope.TabsView(screen: MainScreen) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
         MainScreenView(
-            screen = MainScreen(
-                sources = mockDataSource(),
-                scope = mockCoroutineScope()
-            )
+            screen = MainScreen()
         )
     }
 }

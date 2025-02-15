@@ -4,7 +4,7 @@ package me.likeavitoapp.model
 import com.yandex.mapkit.geometry.Point
 import me.likeavitoapp.className
 import me.likeavitoapp.log
-import me.likeavitoapp.screens.RootScreen
+import me.likeavitoapp.screens.root.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
 import kotlin.reflect.KClass
 

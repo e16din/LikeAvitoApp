@@ -41,11 +41,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.OfferMessage
 import me.likeavitoapp.model.TextMessage
-import me.likeavitoapp.model.mockCoroutineScope
-import me.likeavitoapp.model.mockDataSource
+import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
@@ -61,7 +61,7 @@ import me.likeavitoapp.ui.theme.backgroundLight
 
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
-    val nextScreen = screen.navigatorNext.screen.collectAsState()
+    val nextScreen = screen.navigator.screen.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         AdDetailsScreenView(screen)
@@ -225,13 +225,12 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
 @Preview(showBackground = true)
 @Composable
 fun AdDetailsScreenPreview() {
+    mainSet = mockMainSet()
     LikeAvitoAppTheme {
         AdDetailsScreenView(
             AdDetailsScreen(
                 ad = MockDataProvider().ads.first(),
-                navigatorNext = mockScreensNavigator(),
-                scope = mockCoroutineScope(),
-                sources = mockDataSource()
+                navigator = mockScreensNavigator(),
             )
         )
     }

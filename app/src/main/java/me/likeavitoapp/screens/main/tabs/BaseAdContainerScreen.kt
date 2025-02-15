@@ -18,7 +18,7 @@ import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 open class BaseAdContainerScreen(
-    open val navigatorNext: ScreensNavigator,
+    open val navigator: ScreensNavigator,
     open val scope: CoroutineScope,
     open val sources: DataSources,
     open val state: BaseAdContainerState
@@ -46,9 +46,9 @@ open class BaseAdContainerScreen(
     fun ClickToBuyUseCase(ad: Ad) {
         recordScenarioStep()
 
-        val createOrderScreen = CreateOrderScreen(ad, navigatorNext)
+        val createOrderScreen = CreateOrderScreen(ad, navigator)
         if (ad.reservedTimeMs != null) {
-            navigatorNext.startScreen(createOrderScreen)
+            navigator.startScreen(createOrderScreen)
             return
         }
 
@@ -63,7 +63,7 @@ open class BaseAdContainerScreen(
 
                     timersMap[ad.id] = startReserveTimer(ad)
 
-                    navigatorNext.startScreen(createOrderScreen)
+                    navigator.startScreen(createOrderScreen)
 
                 } else {
                     state.reserve.fail.post(true)
@@ -93,8 +93,8 @@ open class BaseAdContainerScreen(
     fun ClickToBargainingUseCase(ad: Ad) {
         recordScenarioStep(ad)
 
-        navigatorNext.startScreen(
-            ChatScreen(ad, navigatorNext)
+        navigator.startScreen(
+            ChatScreen(ad, navigator)
         )
     }
 

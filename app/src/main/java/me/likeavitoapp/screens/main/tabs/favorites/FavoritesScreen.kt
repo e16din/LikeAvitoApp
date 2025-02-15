@@ -4,16 +4,17 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -21,11 +22,12 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
 class FavoritesScreen(
-    override val navigatorNext: ScreensNavigator,
-    override val scope: CoroutineScope = provideCoroutineScope(),
-    override val sources: DataSources = provideDataSources(),
+    override val navigator: ScreensNavigator,
+
+    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(navigatorNext, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, scope, sources, state) {
 
     class State(
         val favorites: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
@@ -78,11 +80,11 @@ class FavoritesScreen(
     fun ClickToAdUseCase(ad: Ad) {
         recordScenarioStep()
 
-        navigatorNext.startScreen(
+        navigator.startScreen(
             AdDetailsScreen(
                 ad = ad,
                 scope = scope,
-                navigatorNext = navigatorNext,
+                navigator = navigator,
                 sources = sources
             )
         )

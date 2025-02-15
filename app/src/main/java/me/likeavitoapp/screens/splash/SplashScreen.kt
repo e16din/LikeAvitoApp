@@ -2,21 +2,24 @@ package me.likeavitoapp.screens.splash
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import me.likeavitoapp.MainSet
 import me.likeavitoapp.launchWithHandler
+import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.provideCoroutineScope
-import me.likeavitoapp.provideDataSources
+import me.likeavitoapp.mainSet
+
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
 
 
 class SplashScreen(
     val navigator: ScreensNavigator,
-    val scope: CoroutineScope = provideCoroutineScope(),
-    val sources: DataSources = provideDataSources()
+
+    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
+    val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
 
     class State(val contentEnabled: UpdatableState<Boolean> = UpdatableState(false))
@@ -44,7 +47,7 @@ class SplashScreen(
             delay(delayMs)
 
             navigator.startScreen(
-                if (sources.app.user != null)
+                if (sources.app.user.value != null)
                     MainScreen()
                 else
                     AuthScreen(
