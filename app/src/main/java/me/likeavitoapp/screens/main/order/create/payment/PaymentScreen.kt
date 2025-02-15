@@ -105,23 +105,23 @@ class PaymentScreen(
                         realInput = format(number),
                         outputMaker = { format(it) },
                         testCases = listOf(
-                            "".expect(false),
-                            "abc".expect(false),
-                            "1".expect(false),
-                            "1111".expect(false),
-                            "1111111111111111".expect(false),
-                            "5580 4733 7202 4733".expect(true),
-                            "5580473372024".expect(false),
-                            "558047337202".expect(false),
-                            "55804733".expect(false),
-                            "5580".expect(false),
-                            "4026843483168683".expect(true),
-                            "4026 8434 83168683".expect(true),
-                            "2730 1684 6416 1841".expect(true),
-                            "1111 1111 1111 1111 2".expect(false),
-                            "1111 1111 1111 112".expect(false),
-                            "1111 1111 1111 112w".expect(false),
-                            "1111 1111/1111 1123".expect(false)
+                            "" expect false,
+                            "abc" expect false,
+                            "1" expect false,
+                            "1111" expect false,
+                            "1111111111111111" expect false,
+                            "5580 4733 7202 4733" expect true,
+                            "5580473372024" expect false,
+                            "558047337202" expect false,
+                            "55804733" expect false,
+                            "5580" expect false,
+                            "4026843483168683" expect true,
+                            "4026 8434 83168683" expect true,
+                            "2730 1684 6416 1841" expect true,
+                            "1111 1111 1111 1111 2" expect false,
+                            "1111 1111 1111 112" expect false,
+                            "1111 1111 1111 112w" expect false,
+                            "1111 1111/1111 1123" expect false
                         )
                     ) { output ->
                         isChangeCardNumberTested = true
@@ -169,21 +169,21 @@ class PaymentScreen(
                         realInput = format(text),
                         outputMaker = { format(it) },
                         testCases = listOf(
-                            "".expect(false),
-                            "1226".expect(true),
-                            "122".expect(false),
-                            "12222".expect(false),
-                            "122".expect(false),
-                            "0122".expect(true),
-                            "0022".expect(false),
-                            "0922".expect(true),
-                            "1222".expect(true),
-                            "1200".expect(true),
-                            "1322".expect(false),
-                            "22".expect(false),
-                            "/".expect(false),
-                            "abc".expect(false),
-                            "aabb".expect(false)
+                            "" expect false,
+                            "1226" expect true,
+                            "122" expect false,
+                            "12222" expect false,
+                            "122" expect false,
+                            "0122" expect true,
+                            "0022" expect false,
+                            "0922" expect true,
+                            "1222" expect true,
+                            "1200" expect true,
+                            "1322" expect false,
+                            "22" expect false,
+                            "/" expect false,
+                            "abc" expect false,
+                            "aabb" expect false
                         ),
                     ) { output ->
                         isChangeMmYyTested = true
@@ -226,14 +226,14 @@ class PaymentScreen(
                         enabled = develop && !isChangeCvvCvcTested,
                         realInput = text,
                         testCases = listOf(
-                            "".expect(false),
-                            "abc".expect(false),
-                            "12d".expect(false),
-                            "123".expect(true),
-                            "12".expect(false),
-                            "1234".expect(false),
-                            "12%".expect(false),
-                            " 12".expect(false)
+                            "" expect false,
+                            "abc" expect false,
+                            "12d" expect false,
+                            "123" expect true,
+                            "12" expect false,
+                            "1234" expect false,
+                            "12%" expect false,
+                            " 12" expect false
                         )
                     ) { output ->
                         isChangeCvvCvcTested = true

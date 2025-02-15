@@ -20,7 +20,7 @@ import me.likeavitoapp.mainSet
 
 class TestCase<T>(val input: T, val expect: Boolean)
 
-fun <T> T.expect(expect: Boolean) = TestCase(input = this, expect = expect)
+infix fun <T> T.expect(expect: Boolean) = TestCase(input = this, expect = expect)
 
 fun <T> useCase(text: String, value: T): T {
     println("Use Case: $text")
