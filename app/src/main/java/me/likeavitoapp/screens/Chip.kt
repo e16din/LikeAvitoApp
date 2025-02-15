@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 fun Chip(
     startIcon: () -> ImageVector? = { null },
     isStartIconEnabled: Boolean = false,
-    startIconTint: Color = Color.Companion.Unspecified,
+    startIconTint: Color = Color.Unspecified,
     onStartIconClicked: () -> Unit = { },
     endIcon: () -> ImageVector? = { null },
     isEndIconEnabled: Boolean = false,
-    endIconTint: Color = Color.Companion.Unspecified,
+    endIconTint: Color = Color.Unspecified,
     onEndIconClicked: () -> Unit = { },
     color: Color = MaterialTheme.colorScheme.surface,
     contentDescription: String,
@@ -31,7 +31,7 @@ fun Chip(
     onClick: () -> Unit = { }
 ) {
     Surface(
-        modifier = Modifier.Companion.clickable(
+        modifier = Modifier.clickable(
             enabled = isClickable,
             onClick = { onClick() }
         ),
@@ -40,7 +40,7 @@ fun Chip(
         shape = MaterialTheme.shapes.small,
         color = color
     ) {
-        Row(verticalAlignment = Alignment.Companion.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             val leader = startIcon()
             val trailer = endIcon()
 
@@ -49,7 +49,7 @@ fun Chip(
                     leader,
                     contentDescription = contentDescription,
                     tint = startIconTint,
-                    modifier = Modifier.Companion
+                    modifier = Modifier
                         .clickable(enabled = isStartIconEnabled, onClick = onStartIconClicked)
                         .padding(horizontal = 4.dp)
                 )
@@ -57,8 +57,8 @@ fun Chip(
 
             Text(
                 label,
-                modifier = Modifier.Companion.padding(8.dp),
-                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Companion.Black)
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black)
             )
 
             if (trailer != null) {
@@ -66,7 +66,7 @@ fun Chip(
                     trailer,
                     contentDescription = contentDescription,
                     tint = endIconTint,
-                    modifier = Modifier.Companion
+                    modifier = Modifier
                         .clickable(enabled = isEndIconEnabled, onClick = onEndIconClicked)
                         .padding(horizontal = 4.dp)
                 )

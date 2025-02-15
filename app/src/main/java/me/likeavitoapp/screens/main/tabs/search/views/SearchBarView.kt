@@ -53,7 +53,7 @@ fun SearchBarView(screen: SearchScreen) {
     fun isExpanded(): Boolean = !searchTips.isEmpty()
 
     Column(
-        modifier = Modifier.Companion
+        modifier = Modifier
     ) {
         SearchBar(
             inputField = {
@@ -94,9 +94,9 @@ fun SearchBarView(screen: SearchScreen) {
 
                         } else {
                             Icon(
-                                ImageVector.Companion.vectorResource(R.drawable.baseline_tune_24),
+                                ImageVector.vectorResource(R.drawable.baseline_tune_24),
                                 "searchbar_trailing_icon",
-                                modifier = Modifier.Companion.clickable {
+                                modifier = Modifier.clickable {
                                     screen.searchBar.ClickToFilterButtonUseCase()
                                 })
                         }
@@ -120,12 +120,12 @@ fun SearchBarView(screen: SearchScreen) {
 
         AnimatedVisibility(visible = !hasSelectedCategory()) {
             Column(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(136.dp)
             ) {
                 LazyHorizontalStaggeredGrid(
-                    modifier = Modifier.Companion.wrapContentHeight(),
+                    modifier = Modifier.wrapContentHeight(),
                     rows = StaggeredGridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalItemSpacing = 8.dp,
@@ -133,7 +133,7 @@ fun SearchBarView(screen: SearchScreen) {
                 ) {
                     items(categories.size) { index ->
                         Card(
-                            modifier = Modifier.Companion
+                            modifier = Modifier
                                 .wrapContentHeight()
                                 .clickable {
                                     screen.searchBar.ClickToCategoryUseCase(
@@ -142,7 +142,7 @@ fun SearchBarView(screen: SearchScreen) {
                                 }
                         ) {
                             Text(
-                                modifier = Modifier.Companion.padding(16.dp),
+                                modifier = Modifier.padding(16.dp),
                                 text = categories[index].name
                             )
                         }
@@ -155,8 +155,8 @@ fun SearchBarView(screen: SearchScreen) {
         AnimatedVisibility(visible = hasSelectedCategory()) {
             Text(
                 text = selectedCategory?.name ?: "",
-                modifier = Modifier.Companion
-                    .background(Color.Companion.Yellow)
+                modifier = Modifier
+                    .background(Color.Yellow)
                     .padding(vertical = 4.dp, horizontal = 16.dp)
                     .fillMaxWidth()
             )

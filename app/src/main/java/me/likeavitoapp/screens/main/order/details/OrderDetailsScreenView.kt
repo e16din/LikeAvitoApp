@@ -23,16 +23,9 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun OrderDetailsScreenProvider(screen: OrderDetailsScreen) {
-    val nextScreen = screen.navigatorNext.screen.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         OrderDetailsScreenView(screen)
-
-        with(nextScreen.value) {
-            when (this) {
-                is ChatScreen -> ChatScreenProvider(this)
-            }
-        }
     }
 
     BackHandler {
@@ -61,7 +54,7 @@ fun OrderDetailsScreenPreview() {
         OrderDetailsScreenView(
             OrderDetailsScreen(
                 order = MockDataProvider().createOrder(),
-                navigatorPrev = mockScreensNavigator(),
+                navigator = mockScreensNavigator(),
             )
         )
     }

@@ -52,8 +52,8 @@ class PaymentTests {
     }
 
     private fun mockScreen(): PaymentScreen = PaymentScreen(
-        navigatorPrev = mockScreensNavigator(),
-        navigatorNext = mockScreensNavigator(),
+        navigator = mockScreensNavigator(),
+        navigator = mockScreensNavigator(),
         ad = MockDataProvider().ads.first()
     )
 }

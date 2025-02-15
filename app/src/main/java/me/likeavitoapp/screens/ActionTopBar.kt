@@ -27,7 +27,7 @@ inline fun ActionTopBar(
     crossinline content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
-        modifier = Modifier.Companion,
+        modifier = Modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -38,7 +38,7 @@ inline fun ActionTopBar(
                     Text(
                         title,
                         maxLines = 1,
-                        overflow = TextOverflow.Companion.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {

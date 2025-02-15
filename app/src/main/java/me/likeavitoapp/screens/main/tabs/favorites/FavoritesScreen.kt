@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
@@ -23,7 +22,6 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 class FavoritesScreen(
     override val navigator: ScreensNavigator,
-
     override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
     override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State()

@@ -62,7 +62,7 @@ inline fun AdsListView(
                 AdView(
                     isFavorite = ad.isFavorite.collectAsState(),
                     timerLabel = ad.timerLabel.collectAsState(),
-                    modifier = Modifier.Companion
+                    modifier = Modifier
                         .animateItem()
                         .clickable {
                             screen.ClickToAdUseCase(ad)
@@ -73,7 +73,7 @@ inline fun AdsListView(
 
             } else {
                 MinAdView(
-                    modifier = Modifier.Companion.animateItem(),
+                    modifier = Modifier.animateItem(),
                     isFavorite = ad.isFavorite.collectAsState(),
                     ad = ad,
                     onItemClick = { ad ->

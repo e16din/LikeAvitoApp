@@ -244,7 +244,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(mockDataProvider.orders)
         }
 
-        suspend fun pay(ad: Ad, data: PaymentData): Result<Order> {
+        suspend fun pay(ad: Ad, cardNumber: String, mmYy: String, cvvCvc: String): Result<Order> {
             delay(700)
             return Result.success(
                 mockDataProvider.createOrder()

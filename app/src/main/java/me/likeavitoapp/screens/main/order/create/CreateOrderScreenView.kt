@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -42,18 +41,11 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
-    val nextScreen = screen.navigatorNext.screen.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         CreateOrderScreenView(screen)
-
-        with(nextScreen.value) {
-            when (this) {
-                is SelectPickupScreen -> SelectPickupScreenProvider(this)
-                is PaymentScreen -> PaymentScreenProvider(this)
-            }
-        }
     }
 
     BackHandler {
@@ -158,7 +150,7 @@ fun CreateOrderScreenPreview() {
         CreateOrderScreenProvider(
             screen = CreateOrderScreen(
                 ad = MockDataProvider().ads.first(),
-                navigatorPrev = mockScreensNavigator(),
+                navigator = mockScreensNavigator(),
             ).apply {
                 state.orderType.post(OrderType.Pickup, mainSet.provideCoroutineScope())
             }

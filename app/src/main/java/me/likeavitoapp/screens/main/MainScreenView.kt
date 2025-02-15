@@ -43,8 +43,14 @@ import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreenProvider
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
@@ -83,7 +89,10 @@ fun MainScreenProvider(screen: MainScreen) {
                 is OrderDetailsScreen -> OrderDetailsScreenProvider(this)
                 is CreateOrderScreen -> CreateOrderScreenProvider(this)
                 is EditProfileScreen -> EditProfileScreenProvider(this)
+                is PhotoScreen -> PhotoScreenProvider(this)
                 is ChatScreen -> ChatScreenProvider(this)
+                is SelectPickupScreen -> SelectPickupScreenProvider(this)
+                is PaymentScreen -> PaymentScreenProvider(this)
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,29 +23,31 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimpleTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.Companion.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Companion.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     singleLine: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     placeholder: @Composable (() -> Unit)? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
-    cursorBrush: Brush = SolidColor(Color.Companion.Black),
+    cursorBrush: Brush = SolidColor(Color.Black),
     colors: TextFieldColors = TextFieldDefaults.colors(),
     shape: Shape = RoundedCornerShape(8.dp),
 ) {
@@ -66,11 +69,11 @@ fun SimpleTextField(
         cursorBrush = cursorBrush,
         decorationBox = { innerTextField ->
             TextFieldDefaults.DecorationBox(
-                value = value,
+                value = value.text,
                 innerTextField = {
                     Box(
 //                        modifier = Modifier.wrapContentSize(),
-                        contentAlignment = Alignment.Companion.CenterStart
+                        contentAlignment = Alignment.CenterStart
                     ) {
                         innerTextField()
                     }
@@ -78,17 +81,17 @@ fun SimpleTextField(
                 enabled = enabled,
                 colors = colors,
                 singleLine = singleLine,
-                visualTransformation = VisualTransformation.Companion.None,
+                visualTransformation = VisualTransformation.None,
                 interactionSource = interactionSource,
                 contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
                     top = 0.dp,
                     bottom = 0.dp
                 ),
                 placeholder = {
-                    if (value.isEmpty() && placeholder != null) {
+                    if (value.text.isEmpty() && placeholder != null) {
                         Box(
 //                            modifier = Modifier.fillMaxHeight(),
-                            contentAlignment = Alignment.Companion.Center
+                            contentAlignment = Alignment.Center
                         ) {
                             placeholder()
                         }

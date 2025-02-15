@@ -27,7 +27,7 @@ fun ActualAsyncImage(modifier: Modifier = Modifier, url: String) {
             .placeholder(R.drawable.placeholder)
             .error(R.drawable.placeholder)
             .build(),
-        contentScale = ContentScale.Companion.FillWidth,
+        contentScale = ContentScale.FillWidth,
         contentDescription = "image",
         onLoading = {
         },

@@ -7,12 +7,11 @@ import kotlinx.coroutines.delay
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
@@ -34,9 +33,7 @@ open class BaseAdContainerScreen(
         recordScenarioStep(ad)
 
         scope.launchWithHandler {
-            log("ad.isFavorite: ${ad.isFavorite.value}")
             ad.isFavorite.inverse()
-            log("ad.isFavorite after: ${ad.isFavorite.value}")
 
             sources.backend.adsService.updateFavoriteState(ad)
         }
@@ -108,9 +105,5 @@ open class BaseAdContainerScreen(
 
     open fun CloseScreenUseCase() {
         recordScenarioStep()
-
-//        timersMap.values.forEach {
-//            it.cancel()
-//        }
     }
 }

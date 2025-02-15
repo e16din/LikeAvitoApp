@@ -62,12 +62,12 @@ inline fun MinAdView(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Black.copy(alpha = 0.5f))
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 maxLines = 1,
-                overflow = TextOverflow.Companion.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
 
             IconButton(
@@ -102,7 +102,7 @@ inline fun MinAdView(
                     .padding(horizontal = 24.dp, vertical = 6.dp)
                     .align(Alignment.BottomEnd),
                 maxLines = 1,
-                overflow = TextOverflow.Companion.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

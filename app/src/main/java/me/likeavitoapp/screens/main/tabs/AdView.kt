@@ -63,7 +63,7 @@ fun AdView(
                 style = AppTypography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
-                overflow = TextOverflow.Companion.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
             Box(
                 modifier = Modifier
@@ -112,11 +112,11 @@ fun AdView(
 
             Text(
                 text = ad.description,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
                 maxLines = 3,
-                overflow = TextOverflow.Companion.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
 
             Row(

@@ -21,9 +21,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -43,6 +45,9 @@ import me.likeavitoapp.model.runTests
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.SimpleTextField
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,12 +97,14 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                         "три цифры с обратной стороны карты",
                         style = MaterialTheme.typography.titleSmall
                     )
+                    var cvvCvcFieldValue by remember { mutableStateOf(TextFieldValue("")) }
                     val cvvCvc by state.paymentData.cvvCvc.output.collectAsState()
                     TextField(
                         modifier = Modifier.width(64.dp),
-                        value = cvvCvc,
+                        value = cvvCvcFieldValue,
                         onValueChange = {
-                            screen.ChangeCvvCvcUseCase(it)
+                            cvvCvcFieldValue = it
+                            screen.ChangeCvvCvcUseCase(it.text)
                         },
                         placeholder = { Text("123") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -120,12 +127,14 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                 ) {
                     Text("Номер карты", style = MaterialTheme.typography.titleSmall)
 
+                    var cardNumberFieldValue by remember { mutableStateOf(TextFieldValue("")) }
                     val cardNumber by state.paymentData.cardNumber.output.collectAsState()
                     TextField(
-                        value = cardNumber,
+                        value = cardNumberFieldValue,
                         placeholder = { Text("1111 1111 1111 1111") },
                         onValueChange = {
-                            screen.ChangeCardNumberUseCase(it)
+                            cardNumberFieldValue = it
+                            screen.ChangeCardNumberUseCase(it.text)
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
@@ -137,12 +146,30 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                         .padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
                 ) {
                     Text("Действует до", style = MaterialTheme.typography.titleSmall)
+
+                    var mmYyFieldValue by remember { mutableStateOf(TextFieldValue("")) }
                     val mmYY by state.paymentData.mmYy.output.collectAsState()
+                    LaunchedEffect(mmYY) {
+                        var cursorPosition = mmYyFieldValue.selection.end
+                        val delta =
+                            mmYY.take(cursorPosition + 1).replace("/", "").length - cursorPosition
+                        cursorPosition += delta
+
+                        mmYyFieldValue = TextFieldValue(mmYY, TextRange(cursorPosition))
+                    }
+                    val mmYyMaxLength = remember { "mm/yy".length }
                     SimpleTextField(
-                        modifier = Modifier.width(92.dp).clip(RoundedCornerShape(16)),
-                        value = mmYY,
+                        modifier = Modifier
+                            .width(92.dp)
+                            .clip(RoundedCornerShape(16)),
+                        value = mmYyFieldValue,
                         onValueChange = {
-                            screen.ChangeMmYyUseCase(it)
+                            if (it.text.length > mmYyMaxLength) {
+                                return@SimpleTextField
+                            }
+
+                            mmYyFieldValue = it
+                            screen.ChangeMmYyUseCase(it.text)
                         },
                         placeholder = { Text("mm/yy") },
                         colors = TextFieldDefaults.colors().copy(
@@ -176,8 +203,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
 fun PaymentScreenPreview() {
     mainSet = mockMainSet()
     val screen = PaymentScreen(
-        navigatorPrev = mockScreensNavigator(),
-        navigatorNext = mockScreensNavigator(),
+        navigator = mockScreensNavigator(),
         ad = MockDataProvider().ads.first()
     )
     LikeAvitoAppTheme {

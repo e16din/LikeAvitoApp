@@ -16,9 +16,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.error
+import coil3.request.placeholder
+import me.likeavitoapp.R
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -49,10 +54,15 @@ fun PhotoScreenView(screen: PhotoScreen) {
     val screenHeight = configuration.screenHeightDp.dp.value
 
     AsyncImage(
-        screen.state.url,
         contentDescription = "photo",
-        contentScale = ContentScale.Companion.Fit,
-        modifier = Modifier.Companion
+        contentScale = ContentScale.Fit,
+        model = ImageRequest
+            .Builder(LocalContext.current)
+            .data(screen.state.url)
+            .placeholder(R.drawable.placeholder)
+            .error(R.drawable.placeholder)
+            .build(),
+        modifier = Modifier
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .graphicsLayer(
                 scaleX = zoom,

@@ -14,8 +14,7 @@ import me.likeavitoapp.recordScenarioStep
 
 class OrderDetailsScreen(
     order: Order,
-    val navigatorPrev: ScreensNavigator,
-
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = mainSet.provideCoroutineScope(),
     val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
@@ -23,12 +22,11 @@ class OrderDetailsScreen(
     class State(val order: Order)
 
     val state = State(order)
-    val navigatorNext = ScreensNavigator()
 
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigatorPrev.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun CloseScreenUseCase() {

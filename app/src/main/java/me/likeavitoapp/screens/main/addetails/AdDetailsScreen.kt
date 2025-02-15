@@ -1,7 +1,6 @@
 package me.likeavitoapp.screens.main.addetails
 
 import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.DataSources
@@ -17,8 +16,7 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 class AdDetailsScreen(
     ad: Ad,
-    override val navigator: ScreensNavigator,
-
+    override val navigator: ScreensNavigator = ScreensNavigator(),
     override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
     override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State(ad)
@@ -52,7 +50,7 @@ class AdDetailsScreen(
 
     fun ClickToOpenChatUseCase() {
         recordScenarioStep()
-
+        println("!!! ClickToOpenChatUseCase")
         navigator.startScreen(
             ChatScreen(state.ad, navigator)
         )

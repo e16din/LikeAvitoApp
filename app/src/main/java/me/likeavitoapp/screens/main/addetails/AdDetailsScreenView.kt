@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
+import me.likeavitoapp.className
 import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.OfferMessage
@@ -52,6 +53,8 @@ import me.likeavitoapp.screens.ClosableMessage
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
 import me.likeavitoapp.screens.main.order.ChatView
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
@@ -61,17 +64,8 @@ import me.likeavitoapp.ui.theme.backgroundLight
 
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
-    val nextScreen = screen.navigator.screen.collectAsState()
-
     Surface(modifier = Modifier.fillMaxSize()) {
         AdDetailsScreenView(screen)
-
-        with(nextScreen.value) {
-            when (this) {
-                is PhotoScreen -> PhotoScreenProvider(this)
-                is ChatScreen -> ChatScreenProvider(this)
-            }
-        }
     }
 
     BackHandler {
@@ -94,11 +88,11 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
         Text(
             text = ad.title,
             style = AppTypography.titleLarge,
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             maxLines = 1,
-            overflow = TextOverflow.Companion.Ellipsis
+            overflow = TextOverflow.Ellipsis
         )
         Box {
             val pagerState = rememberPagerState(pageCount = {
@@ -169,11 +163,11 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
 
         Text(
             text = ad.description,
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
             maxLines = 3,
-            overflow = TextOverflow.Companion.Ellipsis
+            overflow = TextOverflow.Ellipsis
         )
 
         Row(modifier = Modifier) {

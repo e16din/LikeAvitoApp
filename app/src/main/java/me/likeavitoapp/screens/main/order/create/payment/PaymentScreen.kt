@@ -28,9 +28,7 @@ import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
 
 class PaymentScreen(
     val ad: Ad,
-    val navigatorPrev: ScreensNavigator,
-    val navigatorNext: ScreensNavigator,
-
+    val navigator: ScreensNavigator,
     val scope: CoroutineScope = mainSet.provideCoroutineScope(),
     val sources: DataSources = mainSet.provideDataSources()
 ) : IScreen {
@@ -45,19 +43,19 @@ class PaymentScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigatorPrev.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ClickToCloseUseCase() {
         recordScenarioStep()
 
-        navigatorPrev.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        navigatorPrev.backToPrevious()
+        navigator.backToPrevious()
     }
 
     fun ClickToPayUseCase() {
@@ -65,11 +63,16 @@ class PaymentScreen(
 
         scope.launchWithHandler {
             state.payment.load(loading = {
-                return@load sources.backend.orderService.pay(ad, state.paymentData)
+                return@load sources.backend.orderService.pay(
+                    ad = ad,
+                    cardNumber = state.paymentData.cardNumber.data(),
+                    mmYy = state.paymentData.mmYy.data(),
+                    cvvCvc = state.paymentData.cvvCvc.data(),
+                )
             }, onSuccess = { order ->
                 state.payment.output.post(order)
-                navigatorNext.startScreen(
-                    screen = OrderDetailsScreen(order, navigatorNext),
+                navigator.startScreen(
+                    screen = OrderDetailsScreen(order, navigator),
                     clearAfterFirst = true
                 )
             })
@@ -141,16 +144,18 @@ class PaymentScreen(
     }
 
     var isChangeMmYyTested = false
-    fun ChangeMmYyUseCase(text: String) {
-        recordScenarioStep(text)
+    fun ChangeMmYyUseCase(newText: String) {
+        recordScenarioStep(newText)
 
-        useCase("Change MM/YY", text)
+        useCase("Change MM/YY", newText)
             .expect("should to show month and year in format: mm/yy") {
-                if (text.length > "mm/yy".length) {
-                    return@expect
-                }
-
                 state.paymentData.mmYy.worker().act {
+                    val isRemoving = newText.length < state.paymentData.mmYy.data().length
+                    if(isRemoving) {
+                        // && | position == / position, remove "/"
+                    }else {
+                        // && | position == / position, | position += 1
+                    }
                     fun format(value: String): String {
                         var result = ""
                         val chunked = value.replace("/", "").chunked(2)
@@ -166,7 +171,7 @@ class PaymentScreen(
 
                     withTests(
                         enabled = develop && !isChangeMmYyTested,
-                        realInput = format(text),
+                        realInput = format(newText),
                         outputMaker = { format(it) },
                         testCases = listOf(
                             "" expect false,

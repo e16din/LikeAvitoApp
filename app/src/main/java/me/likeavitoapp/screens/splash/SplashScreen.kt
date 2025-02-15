@@ -34,11 +34,13 @@ class SplashScreen(
 
             sources.backend.token = sources.platform.appDataStore.loadToken()
             val userId = sources.platform.appDataStore.loadId()
+            var isAuthorized = false
             if (userId != null) {
                 val result = sources.backend.userService.getUser(userId)
                 val user = result.getOrNull()
                 if (user != null) {
                     sources.app.user.post(user)
+                    isAuthorized = true
                 }
             }
 
@@ -47,12 +49,10 @@ class SplashScreen(
             delay(delayMs)
 
             navigator.startScreen(
-                if (sources.app.user.value != null)
+                if (isAuthorized)
                     MainScreen()
                 else
-                    AuthScreen(
-                        navigator = navigator
-                    )
+                    AuthScreen(navigator = navigator)
             )
         }
     }
