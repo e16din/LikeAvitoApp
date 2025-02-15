@@ -13,8 +13,8 @@ import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PaymentData
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.TestCase
 import me.likeavitoapp.model.act
+import me.likeavitoapp.model.asTestCase
 import me.likeavitoapp.model.check
 import me.likeavitoapp.model.checkList
 import me.likeavitoapp.model.expect
@@ -80,6 +80,10 @@ class PaymentScreen(
 
         useCase("Change card number", number)
             .expect("should to show card number in format: 1111 1111 1111 1111") {
+                if (number.length > "1111 1111 1111 1111".length) {
+                    return@expect
+                }
+
                 state.paymentData.cardNumber.worker().act {
                     fun format(value: String): String {
                         val chunked = value.replace(" ", "").chunked(4)
@@ -97,21 +101,26 @@ class PaymentScreen(
                     val output = format(number)
 
                     withTests(
-                        realOutput = output,
+                        realInput = output,
+                        outputMaker = { format(it) },
                         testCases = listOf(
-                            TestCase(format(""), false),
-                            TestCase(format("abc"), false),
-                            TestCase(format("1"), false),
-                            TestCase(format("1111"), false),
-                            TestCase(format("1111111111111111"), false),
-                            TestCase(format("5580 4733 7202 4733"), true),
-                            TestCase(format("4026843483168683"), true),
-                            TestCase(format("4026 8434 83168683"), true),
-                            TestCase(format("2730 1684 6416 1841"), true),
-                            TestCase(format("1111 1111 1111 1111 2"), false),
-                            TestCase(format("1111 1111 1111 112"), false),
-                            TestCase(format("1111 1111 1111 112w"), false),
-                            TestCase(format("1111 1111/1111 1123"), false)
+                            "".asTestCase(false),
+                            "abc".asTestCase(false),
+                            "1".asTestCase(false),
+                            "1111".asTestCase(false),
+                            "1111111111111111".asTestCase(false),
+                            "5580 4733 7202 4733".asTestCase(true),
+                            "5580473372024".asTestCase(false),
+                            "558047337202".asTestCase(false),
+                            "55804733".asTestCase(false),
+                            "5580".asTestCase(false),
+                            "4026843483168683".asTestCase(true),
+                            "4026 8434 83168683".asTestCase(true),
+                            "2730 1684 6416 1841".asTestCase(true),
+                            "1111 1111 1111 1111 2".asTestCase(false),
+                            "1111 1111 1111 112".asTestCase(false),
+                            "1111 1111 1111 112w".asTestCase(false),
+                            "1111 1111/1111 1123".asTestCase(false)
                         )
                     ) { output ->
                         checkList(
@@ -133,7 +142,11 @@ class PaymentScreen(
 
         useCase("Change MM/YY", text)
             .expect("should to show month and year in format: mm/yy") {
-                state.paymentData.mmYy.act {
+                if (text.length > "mm/yy".length) {
+                    return@expect
+                }
+
+                state.paymentData.mmYy.worker().act {
                     fun format(value: String): String {
                         var result = ""
                         val chunked = value.replace("/", "").chunked(2)
@@ -150,23 +163,24 @@ class PaymentScreen(
                     val output = format(text)
 
                     withTests(
-                        realOutput = output,
+                        realInput = output,
+                        outputMaker = { format(it) },
                         testCases = listOf(
-                            TestCase(format(""), false),
-                            TestCase(format("1226"), true),
-                            TestCase(format("122"), false),
-                            TestCase(format("12222"), false),
-                            TestCase(format("122"), false),
-                            TestCase(format("0122"), true),
-                            TestCase(format("0022"), false),
-                            TestCase(format("0922"), true),
-                            TestCase(format("1222"), true),
-                            TestCase(format("1200"), true),
-                            TestCase(format("1322"), false),
-                            TestCase(format("22"), false),
-                            TestCase(format("/"), false),
-                            TestCase(format("abc"), false),
-                            TestCase(format("aabb"), false)
+                            "".asTestCase(false),
+                            "1226".asTestCase(true),
+                            "122".asTestCase(false),
+                            "12222".asTestCase(false),
+                            "122".asTestCase(false),
+                            "0122".asTestCase(true),
+                            "0022".asTestCase(false),
+                            "0922".asTestCase(true),
+                            "1222".asTestCase(true),
+                            "1200".asTestCase(true),
+                            "1322".asTestCase(false),
+                            "22".asTestCase(false),
+                            "/".asTestCase(false),
+                            "abc".asTestCase(false),
+                            "aabb".asTestCase(false)
                         ),
                     ) { output ->
                         val parts = output.split("/")
@@ -197,18 +211,22 @@ class PaymentScreen(
 
         useCase("Change cvv/cvc", text)
             .expect("should to show cvv in format: 123") {
+                if (text.length > "123".length) {
+                    return@expect
+                }
+
                 state.paymentData.cvvCvc.worker().act {
                     withTests(
-                        realOutput = text,
+                        realInput = text,
                         testCases = listOf(
-                            TestCase("", false),
-                            TestCase("abc", false),
-                            TestCase("12d", false),
-                            TestCase("123", true),
-                            TestCase("12", false),
-                            TestCase("1234", false),
-                            TestCase("12%", false),
-                            TestCase(" 12", false),
+                            "".asTestCase(false),
+                            "abc".asTestCase(false),
+                            "12d".asTestCase(false),
+                            "123".asTestCase(true),
+                            "12".asTestCase(false),
+                            "1234".asTestCase(false),
+                            "12%".asTestCase(false),
+                            " 12".asTestCase(false)
                         )
                     ) { output ->
                         checkList(

@@ -3,8 +3,6 @@ package me.likeavitoapp.model
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.develop
-import me.likeavitoapp.log
-import me.likeavitoapp.logError
 import me.likeavitoapp.main
 
 // NOTE: Решение вопроса: "Как писать в стиле TDD/BDD, и не писать авто-тесты?
@@ -12,9 +10,13 @@ import me.likeavitoapp.main
 // Как плюс стало нагляднее и это можно переиспользовать в unit тестах
 // (которые есть по сути другой клиент для исполнения наших единожды написанных функций)
 
-data class TestCase<T>(val value: T, val expect: Boolean)
+
+class TestCase<T>(val input: T, val expect: Boolean)
+
+fun <T> T.asTestCase(expect: Boolean) = TestCase(input = this, expect = expect)
 
 fun <T> useCase(text: String, value: T): T {
+    println("Use Case: $text")
     return value
 }
 
@@ -23,6 +25,7 @@ inline fun <T> T.expect(
     vararg values: Any?,
     crossinline function: (T) -> Unit = {}
 ) {
+    println("Expect: $text")
     function(this)
 }
 
@@ -33,17 +36,17 @@ inline fun Any.checkList(
 ): Boolean {
     if (enabled) {
         println()
-        var log = ""
+        var log = "* Checks: "
         checks.forEachIndexed { i, check ->
             log += "[$i]"
             if (!check()) {
-                println(log)
+                println("$log <-")
                 onResult(false)
                 return false
             }
         }
 
-        println(log)
+        println("$log <-")
         onResult(true)
         return true
     }
@@ -51,12 +54,11 @@ inline fun Any.checkList(
     return true
 }
 
-inline fun <T> withResult(value: T, crossinline case: (T) -> Boolean): Result<T> {
-    val result = case(value)
-    println("Output: check($value) | Checking Result: $result")
+fun <T> withResult(value: T, caseResult: Boolean): Result<T> {
+    println("Output: check($value) | Checking Result: $caseResult")
     println()
 
-    return if (result) {
+    return if (caseResult) {
         Result.success(value)
     } else {
         Result.failure(IllegalArgumentException("invalid data: $value"))
@@ -64,21 +66,25 @@ inline fun <T> withResult(value: T, crossinline case: (T) -> Boolean): Result<T>
 }
 
 inline fun <T> withTests(
-    realOutput: T,
+    realInput: T,
+    outputMaker: (input: T) -> T = { it },
     testCases: List<TestCase<T>>,
     enabled: Boolean = develop,
     withAssert: Boolean = develop,
     crossinline case: (T) -> Boolean
-): Result<T> {
+): Pair<T, Boolean> {
     if (enabled) {
-        testCases.forEach {
-            val caseResult = case(it.value)
+        testCases.forEachIndexed { i, it ->
+            val output = outputMaker(it.input)
+            val caseResult = case(output)
 
             val testResult = caseResult == it.expect
+            val numberInList = "${i + 1}/${testCases.size}"
             if (testResult) {
-                println("Test Succeed: check(${it.value}) == ${it.expect}")
+                println("Test $numberInList Succeed { input: \"${it.input}\", output: \"$output\", check(output) == ${it.expect} }")
             } else {
-                println("Test Failed: check(${it.value}) != ${it.expect}")
+
+                println("Test $numberInList Failed { input: \"${it.input}\", output: \"$output\", check(output) != ${it.expect} }")
             }
             if (withAssert) {
                 assert(testResult)
@@ -86,7 +92,7 @@ inline fun <T> withTests(
         }
     }
 
-    return withResult(realOutput, case)
+    return Pair(realInput, case(outputMaker(realInput)))
 }
 
 fun check(function: () -> Boolean) = function
