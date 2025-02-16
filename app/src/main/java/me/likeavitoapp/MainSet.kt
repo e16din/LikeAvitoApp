@@ -17,7 +17,7 @@ import me.likeavitoapp.screens.root.RootScreen
 import kotlin.reflect.KClass
 
 const val develop = true
-var mainSet = MainSet()
+var get = MainSet()
 
 class MainSet {
     private var appModel: AppModel? = null
@@ -43,16 +43,7 @@ class MainSet {
         actualScope = scope
         appBackend = AppBackend()
         appModel = AppModel().apply {
-            rootScreen = RootScreen(
-                scope = scope,
-                sources = DataSources(
-                    app = this,
-                    platform = appPlatform!!,
-                    backend = appBackend!!,
-                ).apply {
-                    actualDataSources = this
-                }
-            )
+            rootScreen = RootScreen()
         }
 
         return appModel!!
@@ -69,15 +60,14 @@ class MainSet {
     var defaultContext = SupervisorJob() + exceptionHandler
 
     // NOTE: Use it after call initApp()
-    fun provideDataSources() = actualDataSources!!
-    fun provideCoroutineScope() = actualScope!!
-    fun provideRootScreen() = appModel!!.rootScreen
-    fun provideApp() = appModel!!
-    fun provideAndroidAppContext() = appPlatform as AppPlatform
+    fun sources() = actualDataSources!!
+    fun scope() = actualScope!!
+    fun app() = appModel!!
+    fun platform() = appPlatform as AppPlatform
 }
 
 @Composable
-fun isPreviewMode(): Boolean = runCatching { mainSet.provideApp() }.isFailure
+fun isPreviewMode(): Boolean = runCatching { get.app() }.isFailure
 
 fun log(text: String, tag: String = "debug") {
     if (develop) {
@@ -112,7 +102,7 @@ private val scenarioDataSourcesMap = mutableMapOf<KClass<*>, List<ISource>>()
 
 
 fun runRecordedScenario(scope: CoroutineScope) {
-    scope.launchWithHandler {
+    get.scope().launchWithHandler {
         scenarioSteps.forEach { step ->
             step.owner::class.members.firstOrNull { it.name == step.useCase }?.apply {
                 if (step.argument == null) {

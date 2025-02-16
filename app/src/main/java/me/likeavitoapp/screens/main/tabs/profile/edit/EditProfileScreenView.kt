@@ -47,8 +47,7 @@ import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActionTopBar
@@ -266,7 +265,7 @@ fun ContactItem(label: String, value: String, screen: ProfileScreen) {
 @Preview(showBackground = true)
 @Composable
 fun EditProfileScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         EditProfileScreenView(
             EditProfileScreen(

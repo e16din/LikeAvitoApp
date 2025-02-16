@@ -12,10 +12,7 @@ import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
-class TabsRootScreen(
-    val scope: CoroutineScope,
-    val sources: DataSources
-) : IScreen {
+class TabsRootScreen() : IScreen {
 
     class State()
 

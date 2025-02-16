@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -22,7 +22,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SplashScreenProvider(screen: SplashScreen) {
     SplashScreenView(screen)
 
-    val scenariosEnabled = mainSet.provideRootScreen().state.scenariosEnabled
+    val scenariosEnabled = get.app().rootScreen.state.scenariosEnabled
     LaunchedEffect(Unit) {
         if (scenariosEnabled.value) {
             RunAppFromScratchScenario(screen)
@@ -49,7 +49,7 @@ fun SplashScreenView(screen: SplashScreen) {
 @Preview(showBackground = true)
 @Composable
 fun SplashScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         SplashScreenView(
             screen = SplashScreen(

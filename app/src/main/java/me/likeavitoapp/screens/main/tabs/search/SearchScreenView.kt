@@ -25,7 +25,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -108,7 +108,7 @@ fun SearchScreenView(screen: SearchScreen) {
 @Preview(showBackground = true)
 @Composable
 fun SearchScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     val screen = SearchScreen(
         navigator = mockScreensNavigator(),
     ).apply {

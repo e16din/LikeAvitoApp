@@ -1,9 +1,6 @@
 package me.likeavitoapp.screens.main.addetails
 
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -17,10 +14,8 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 class AdDetailsScreen(
     ad: Ad,
     override val navigator: ScreensNavigator = ScreensNavigator(),
-    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State(ad)
-) : BaseAdContainerScreen(navigator, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, state) {
 
     class State(
         val ad: Ad,

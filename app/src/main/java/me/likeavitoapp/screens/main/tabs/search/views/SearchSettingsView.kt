@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
@@ -193,7 +193,7 @@ inline fun PreferenceCustomItem(
 @Preview(showBackground = true)
 @Composable
 fun SearchSettingsViewPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         SearchSettingsPanelView(
             panel = SearchScreen(

@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -133,7 +133,7 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
 @Preview(showBackground = true)
 @Composable
 fun FavoritesScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     val screen = FavoritesScreen(
         navigator = mockScreensNavigator(),
     ).apply {

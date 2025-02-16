@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.MainSet
 import me.likeavitoapp.develop
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 
 // NOTE: Решение вопроса: "Как писать в стиле TDD/BDD, и не писать авто-тесты?
 // Чтобы и функционал и тесты можно было писать сразу в одном месте?"
@@ -113,5 +113,5 @@ fun runTests(function: () -> Unit) = function
 private val emptyScreenNavigator by lazy { ScreensNavigator() }
 fun mockScreensNavigator() = emptyScreenNavigator
 fun mockMainSet() = MainSet().apply {
-    init(AppPlatform(), CoroutineScope(mainSet.defaultContext))
+    init(AppPlatform(), CoroutineScope(get.defaultContext))
 }

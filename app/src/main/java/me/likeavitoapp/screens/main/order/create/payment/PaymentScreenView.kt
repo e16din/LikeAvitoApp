@@ -21,23 +21,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -45,10 +43,40 @@ import me.likeavitoapp.model.runTests
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.SimpleTextField
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-import androidx.compose.runtime.*
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 
+// NOTE: Я искал узкие места в разработке мобильных приложений
+// и необходимость поддерживать проект в едином стиле и единой структуре -
+// это одно из наиболее ограничивающих бутылочных горлышек
+// потому как и человек и технологии развиваются,
+// а написанный код остается прежним
+
+// NOTE: чтобы не переписывать каждый раз весь код следует позаботиться о том
+// чтобы добавляемый код был независим от существующего,
+// как бы это лучше сделать?
+
+// (есть еще вариант - уже написанный код должен сам адаптироваться под новые реалии)
+
+// SUGGEST: для успешной разработки следует пренебречь единообразием,
+// и рефакторинг производить лишь когда приложение закончено,
+// либо вообще не производить полный рефакторинг, а только точечный,
+// как если бы редактрировали отдельный модуль
+
+// NOTE: стремясь делать части независимыми мы делаем код зависимым от этого,
+// так что это не решает задачу, то что связано остается связанным,
+// только обрастает избыточными абстрациями и прослойками
+
+// SUGGEST: потому следует отказаться от лишних прослоек/посредников
+// и писать код так просто как это возможно
+
+// SUGGEST: не разделяй то что связано, если на то нет веской причины
+// (например параллельная разработка, хотя и это можно решить другими способами - git, совместное редактирование )
+
+// SUGGEST: Код следует делать антихрупким,
+// т.е. отказаться от монолитной архитектуры которая делает проект хрупким
+// у нас уже есть ограничивающие структуры в виде ЯП, ОS, UI-фреймворка, и объектной модели данных,
+// следует действовать в этих рамках и не добавлять, искусственно, новых
+
+// Лучший код - это код которого нет, а функционал выполняется
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,14 +125,18 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                         "три цифры с обратной стороны карты",
                         style = MaterialTheme.typography.titleSmall
                     )
-                    var cvvCvcFieldValue by remember { mutableStateOf(TextFieldValue("")) }
-                    val cvvCvc by state.paymentData.cvvCvc.output.collectAsState()
+                    val cvvCvc by state.cvvCvc.output.collectAsState()
                     TextField(
                         modifier = Modifier.width(64.dp),
-                        value = cvvCvcFieldValue,
+                        value = cvvCvc,
                         onValueChange = {
-                            cvvCvcFieldValue = it
-                            screen.ChangeCvvCvcUseCase(it.text)
+                            if (it.text.length > "123".length) {
+                                return@TextField
+                            }
+
+                            if (it.selection.length == 0) {
+                                screen.ChangeCvvCvcUseCase(it)
+                            }
                         },
                         placeholder = { Text("123") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -127,14 +159,18 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                 ) {
                     Text("Номер карты", style = MaterialTheme.typography.titleSmall)
 
-                    var cardNumberFieldValue by remember { mutableStateOf(TextFieldValue("")) }
-                    val cardNumber by state.paymentData.cardNumber.output.collectAsState()
+                    val cardNumber by state.cardNumber.output.collectAsState()
                     TextField(
-                        value = cardNumberFieldValue,
+                        value = cardNumber,
                         placeholder = { Text("1111 1111 1111 1111") },
                         onValueChange = {
-                            cardNumberFieldValue = it
-                            screen.ChangeCardNumberUseCase(it.text)
+                            if (it.text.length > "1111 1111 1111 1111".length) {
+                                return@TextField
+                            }
+
+                            if (it.selection.length == 0) {
+                                screen.ChangeCardNumberUseCase(it)
+                            }
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
@@ -147,29 +183,20 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                 ) {
                     Text("Действует до", style = MaterialTheme.typography.titleSmall)
 
-                    var mmYyFieldValue by remember { mutableStateOf(TextFieldValue("")) }
-                    val mmYY by state.paymentData.mmYy.output.collectAsState()
-                    LaunchedEffect(mmYY) {
-                        var cursorPosition = mmYyFieldValue.selection.end
-                        val delta =
-                            mmYY.take(cursorPosition + 1).replace("/", "").length - cursorPosition
-                        cursorPosition += delta
-
-                        mmYyFieldValue = TextFieldValue(mmYY, TextRange(cursorPosition))
-                    }
-                    val mmYyMaxLength = remember { "mm/yy".length }
+                    val mmYy by state.mmYy.output.collectAsState()
                     SimpleTextField(
                         modifier = Modifier
                             .width(92.dp)
                             .clip(RoundedCornerShape(16)),
-                        value = mmYyFieldValue,
+                        value = mmYy,
                         onValueChange = {
-                            if (it.text.length > mmYyMaxLength) {
+                            if (it.text.length > "mm/yy".length) {
                                 return@SimpleTextField
                             }
 
-                            mmYyFieldValue = it
-                            screen.ChangeMmYyUseCase(it.text)
+                            if (it.selection.length == 0) {
+                                screen.ChangeMmYyUseCase(it)
+                            }
                         },
                         placeholder = { Text("mm/yy") },
                         colors = TextFieldDefaults.colors().copy(
@@ -201,7 +228,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
 @Preview
 @Composable
 fun PaymentScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     val screen = PaymentScreen(
         navigator = mockScreensNavigator(),
         ad = MockDataProvider().ads.first()
@@ -213,8 +240,8 @@ fun PaymentScreenPreview() {
     }
 
     runTests {
-        screen.ChangeCardNumberUseCase("")
-        screen.ChangeMmYyUseCase("")
-        screen.ChangeCvvCvcUseCase("")
+        screen.ChangeCardNumberUseCase(TextFieldValue(""))
+        screen.ChangeMmYyUseCase(TextFieldValue(""))
+        screen.ChangeCvvCvcUseCase(TextFieldValue(""))
     }
 }

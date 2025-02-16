@@ -3,23 +3,20 @@ package me.likeavitoapp.screens.main.tabs.search
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
-import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
 import me.likeavitoapp.bindScenarioDataSource
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
 import me.likeavitoapp.log
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
-import me.likeavitoapp.model.DataSources
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -27,10 +24,8 @@ import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
 
 class SearchScreen(
     override val navigator: ScreensNavigator,
-    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(navigator, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, state) {
 
     class State(
         val ads: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
@@ -42,10 +37,10 @@ class SearchScreen(
 
     suspend fun loadAds() {
         log("loadAds")
-        state.ads.working.repostTo(sources.app.rootScreen.state.loadingEnabled)
+        state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
         state.ads.load(
             loading = {
-                return@load sources.backend.adsService.getAds(
+                return@load get.sources().backend.adsService.getAds(
                     page = state.adsPage.value,
                     query = searchBar.state.query.value,
                     categoryId = searchSettingsPanel.state.selectedCategory.value?.id ?: 0,
@@ -65,7 +60,7 @@ class SearchScreen(
     suspend fun loadCategories() = with(searchSettingsPanel.state) {
         categories.load(
             loading = {
-                return@load sources.backend.adsService.getCategories()
+                return@load get.sources().backend.adsService.getCategories()
             },
             onSuccess = { newCategories ->
                 categories.output.post(newCategories)
@@ -79,7 +74,7 @@ class SearchScreen(
         val ads = state.ads.output.value
         val isInited = ads.isEmpty()
         if (isInited) {
-            scope.launchWithHandler {
+            get.scope().launchWithHandler {
                 loadCategories()
                 loadAds()
             }
@@ -97,12 +92,7 @@ class SearchScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            AdDetailsScreen(
-                ad = ad,
-                scope = scope,
-                navigator = navigator,
-                sources = sources
-            )
+            AdDetailsScreen(ad, navigator)
         )
     }
 
@@ -110,7 +100,7 @@ class SearchScreen(
         recordScenarioStep()
 
         if (!state.ads.output.value.isEmpty()) {
-            scope.launchWithHandler {
+            get.scope().launchWithHandler {
                 state.adsPage.post(state.adsPage.value + 1)
                 loadAds()
             }
@@ -120,7 +110,7 @@ class SearchScreen(
     fun CloseSearchSettingsPanelUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             searchSettingsPanel.state.enabled.post(false)
             loadAds()
         }
@@ -140,7 +130,7 @@ class SearchScreen(
         fun ClickToCategoryUseCase(category: Category) {
             recordScenarioStep()
 
-            scope.launchWithHandler {
+            get.scope().launchWithHandler {
                 searchSettingsPanel.state.selectedCategory.post(category)
                 loadAds()
             }
@@ -164,9 +154,9 @@ class SearchScreen(
                         return@Debouncer
                     }
 
-                    scope.launchWithHandler {
+                    get.scope().launchWithHandler {
                         state.searchTips.load(loading = {
-                            sources.backend.adsService.getSearchTips(
+                            get.sources().backend.adsService.getSearchTips(
                                 categoryId = searchSettingsPanel.state.selectedCategory.value?.id
                                     ?: 0,
                                 query = searchBar.state.query.value

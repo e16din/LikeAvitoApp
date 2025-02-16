@@ -1,29 +1,21 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
 import com.yandex.mapkit.geometry.Point
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.MapItem
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.mainSet
-
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 
 
 class SelectPickupScreen(
     selectedPickupPoint: UpdatableState<PickupPoint?>,
-    val navigator: ScreensNavigator,
-
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources()
+    val navigator: ScreensNavigator
 ) : IScreen {
 
     class State(val selectedPickupPoint: UpdatableState<PickupPoint?>) {
@@ -46,9 +38,9 @@ class SelectPickupScreen(
 
         state.query.post(query)
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.suggestions.load(loading = {
-                sources.backend.mapService.getAddressesBy(query, state.areaPoint.value)
+                get.sources().backend.mapService.getAddressesBy(query, state.areaPoint.value)
             }, onSuccess = { data ->
                 state.suggestions.output.post(data)
             })

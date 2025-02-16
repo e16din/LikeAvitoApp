@@ -41,8 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.className
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.OfferMessage
 import me.likeavitoapp.model.TextMessage
@@ -50,13 +49,7 @@ import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
-import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
-import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
 import me.likeavitoapp.screens.main.order.ChatView
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
@@ -219,7 +212,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
 @Preview(showBackground = true)
 @Composable
 fun AdDetailsScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         AdDetailsScreenView(
             AdDetailsScreen(

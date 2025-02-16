@@ -1,27 +1,17 @@
 package me.likeavitoapp.screens.main
 
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.mainSet
-
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
+import me.likeavitoapp.screens.main.tabs.cart.CartScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
-class MainScreen(
-
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources()
-) : IScreen {
+class MainScreen() : IScreen {
 
     val state = State()
 
@@ -32,7 +22,7 @@ class MainScreen(
     val profileScreen = ProfileScreen(navigator = navigator)
     val cartScreen = CartScreen(navigator)
 
-    val tabsRootScreen = TabsRootScreen(scope, sources)
+    val tabsRootScreen = TabsRootScreen()
 
     class State {}
 

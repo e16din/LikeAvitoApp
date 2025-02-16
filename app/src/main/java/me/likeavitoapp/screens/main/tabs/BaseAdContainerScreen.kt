@@ -1,14 +1,13 @@
 package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.ui.text.intl.Locale
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.Worker
@@ -18,8 +17,6 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 open class BaseAdContainerScreen(
     open val navigator: ScreensNavigator,
-    open val scope: CoroutineScope,
-    open val sources: DataSources,
     open val state: BaseAdContainerState
 ) : IScreen {
 
@@ -32,10 +29,10 @@ open class BaseAdContainerScreen(
     open fun ClickToFavoriteUseCase(ad: Ad) {
         recordScenarioStep(ad)
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             ad.isFavorite.inverse()
 
-            sources.backend.adsService.updateFavoriteState(ad)
+            get.sources().backend.adsService.updateFavoriteState(ad)
         }
     }
 
@@ -49,9 +46,9 @@ open class BaseAdContainerScreen(
             return
         }
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.reserve.load(loading = {
-                sources.backend.orderService.reserve(adId = ad.id)
+                get.sources().backend.orderService.reserve(adId = ad.id)
             }, onSuccess = { isReserved ->
                 if (isReserved == true) {
                     state.reserve.output.post(true)
@@ -69,7 +66,7 @@ open class BaseAdContainerScreen(
         }
     }
 
-    fun startReserveTimer(ad: Ad) = scope.launchWithHandler {
+    fun startReserveTimer(ad: Ad) = get.scope().launchWithHandler {
         fun getTimeMs(): Long = 20 * 60 * 1000 - (System.currentTimeMillis() - ad.reservedTimeMs!!)
 
         var timeMs = getTimeMs()

@@ -3,18 +3,14 @@ package me.likeavitoapp.screens.main.tabs.profile
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
-import me.likeavitoapp.mainSet
 
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
@@ -22,10 +18,7 @@ import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 
 class ProfileScreen(
     val navigator: ScreensNavigator,
-
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources(),
-    user: User = sources.app.user.value!!
+    user: User = get.sources().app.user.value!!
 ) : IScreen {
 
     class State(
@@ -38,7 +31,7 @@ class ProfileScreen(
     fun ClickToContactUseCase(label:String, value: String) {
         recordScenarioStep()
 
-        val clipboard = mainSet.provideAndroidAppContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard = get.platform().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(label, value);
         clipboard.setPrimaryClip(clip);
     }
@@ -60,9 +53,9 @@ class ProfileScreen(
     fun ClickToLogoutUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.logout.load(loading = {
-                return@load sources.backend.userService.logout()
+                return@load get.sources().backend.userService.logout()
             }, onSuccess = { success ->
                 throw UnauthorizedException()
             })

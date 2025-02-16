@@ -28,7 +28,7 @@ suspend inline fun <reified T> Worker<*>.load(
     this.working.post(false)
 
     if (newData != null) {
-        withContext(mainSet.defaultContext + Dispatchers.Main) {
+        withContext(get.defaultContext + Dispatchers.Main) {
             onSuccess(newData)
         }
 

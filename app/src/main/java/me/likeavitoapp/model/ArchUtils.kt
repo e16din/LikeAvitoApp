@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.log
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -34,9 +34,9 @@ class UpdatableState<T>(initial: T) {
         } ?: listOf(onChanged)
     }
 
-    fun post(value: T, scope: CoroutineScope = mainSet.provideCoroutineScope(), ifNew: Boolean = false) {
+    fun post(value: T, scope: CoroutineScope = get.scope(), ifNew: Boolean = false) {
         if (!ifNew || (ifNew && _value != value)) {
-            scope.launch(mainSet.defaultContext + Dispatchers.Main) {
+            scope.launch(get.defaultContext + Dispatchers.Main) {
                 _value = value
                 callbacks.keys.forEach {
                     callbacks[it]?.forEach { onChange ->

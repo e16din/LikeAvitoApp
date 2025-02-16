@@ -2,7 +2,6 @@ package me.likeavitoapp.screens.main.tabs.search.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,10 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.ActualAsyncImage
-import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
@@ -112,7 +110,7 @@ inline fun MinAdView(
 @Preview(showBackground = true)
 @Composable
 fun MinAdViewPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         MinAdView(
             isFavorite = remember { mutableStateOf(true) },

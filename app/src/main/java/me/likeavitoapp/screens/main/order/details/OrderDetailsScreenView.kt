@@ -11,13 +11,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
-import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -49,7 +45,7 @@ fun OrderDetailsScreenView(screen: OrderDetailsScreen) = with(screen.state) {
 @Preview(showBackground = true)
 @Composable
 fun OrderDetailsScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         OrderDetailsScreenView(
             OrderDetailsScreen(

@@ -1,9 +1,6 @@
 package me.likeavitoapp.screens.main.order.create
 
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.mainSet
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.ScreensNavigator
@@ -16,9 +13,7 @@ import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 
 class CreateOrderScreen(
     ad: Ad,
-    val navigator: ScreensNavigator,
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources()
+    val navigator: ScreensNavigator
 ) : IScreen {
 
     enum class OrderType(val text:String) {

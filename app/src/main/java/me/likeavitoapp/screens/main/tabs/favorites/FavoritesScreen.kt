@@ -3,13 +3,11 @@ package me.likeavitoapp.screens.main.tabs.favorites
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
-import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.DataSources
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -22,10 +20,8 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 class FavoritesScreen(
     override val navigator: ScreensNavigator,
-    override val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    override val sources: DataSources = mainSet.provideDataSources(),
     override val state: State = State()
-) : BaseAdContainerScreen(navigator, scope, sources, state) {
+) : BaseAdContainerScreen(navigator, state) {
 
     class State(
         val favorites: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
@@ -35,10 +31,10 @@ class FavoritesScreen(
     lateinit var tabsNavigator: ScreensNavigator
 
     private fun loadFavorites() {
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.favorites.load(
                 loading = {
-                    return@load sources.backend.adsService.getFavorites()
+                    return@load get.sources().backend.adsService.getFavorites()
                 },
                 onSuccess = { newFavorites ->
                     state.favorites.output.post(newFavorites.toMutableStateList())
@@ -51,10 +47,10 @@ class FavoritesScreen(
     override fun ClickToFavoriteUseCase(ad: Ad) {
         ad.isFavorite.inverse()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.favorites.load(
                 loading = {
-                    return@load sources.backend.adsService.updateFavoriteState(ad)
+                    return@load get.sources().backend.adsService.updateFavoriteState(ad)
                 },
                 onSuccess = { success ->
                     if (success) {
@@ -81,9 +77,7 @@ class FavoritesScreen(
         navigator.startScreen(
             AdDetailsScreen(
                 ad = ad,
-                scope = scope,
-                navigator = navigator,
-                sources = sources
+                navigator = navigator
             )
         )
     }
@@ -91,14 +85,14 @@ class FavoritesScreen(
     fun ClickToClearAllUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.favorites.load(
                 loading = {
-                    return@load sources.backend.adsService.deleteAllFavorites()
+                    return@load get.sources().backend.adsService.deleteAllFavorites()
                 },
                 onSuccess = { data ->
 //                    state.favorites.data.value.forEach { favorite ->
-//                        sources.app.ads.firstOrNull { it.id == favorite.id }?.apply {
+//                        mainSet.sources().app.ads.firstOrNull { it.id == favorite.id }?.apply {
 //                            isFavorite.post(false)
 //                        }
 //                    }

@@ -42,7 +42,7 @@ import me.likeavitoapp.model.collectAsState
 
 
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 
 
@@ -55,7 +55,7 @@ fun AuthScreenProvider(screen: AuthScreen) {
         screen.StartScreenUseCase()
     }
 
-    val scenariosEnabled = mainSet.provideRootScreen().state.scenariosEnabled
+    val scenariosEnabled = get.app().rootScreen.state.scenariosEnabled
     if (scenariosEnabled.value) {
         val authScenarios = remember { AuthScenarios(screen) }
         LaunchedEffect(Unit) {
@@ -173,7 +173,7 @@ fun AuthScreenView(screen: AuthScreen) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewAuthScreen() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     AuthScreenView(screen = AuthScreen(
         navigator = mockScreensNavigator(),
     ))

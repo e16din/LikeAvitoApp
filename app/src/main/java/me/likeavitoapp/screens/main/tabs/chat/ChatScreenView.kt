@@ -21,11 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.OfferMessage
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -117,7 +116,7 @@ fun OfferMessageView(message: OfferMessage) {
 @Preview
 @Composable
 fun ChatScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     val screen = ChatScreen(
         ad = MockDataProvider().ads.first(),
         navigator = mockScreensNavigator(),

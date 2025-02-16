@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.className
 import me.likeavitoapp.log
-import me.likeavitoapp.mainSet
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
@@ -303,7 +303,7 @@ private fun BoxScope.TabsView(screen: MainScreen) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    mainSet = mockMainSet()
+    get = mockMainSet()
     LikeAvitoAppTheme {
         MainScreenView(
             screen = MainScreen()

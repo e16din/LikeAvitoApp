@@ -1,26 +1,19 @@
 package me.likeavitoapp.screens.main.tabs.profile.edit
 
 import android.util.Base64
-import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
-import me.likeavitoapp.mainSet
 import me.likeavitoapp.recordScenarioStep
 
 class EditProfileScreen(
     val navigator: ScreensNavigator,
-
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources(),
-    user: User = sources.app.user.value!!
+    user: User = get.sources().app.user.value!!
 ) : IScreen {
 
     class State(
@@ -42,7 +35,7 @@ class EditProfileScreen(
     fun ClickToEditPhotoUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.userPickerEnabled.post(true)
         }
     }
@@ -69,15 +62,15 @@ class EditProfileScreen(
         recordScenarioStep()
 
         state.updateUser.working.repostTo(
-            sources.app.rootScreen.state.loadingEnabled
+            get.sources().app.rootScreen.state.loadingEnabled
         )
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.updateUser.load(loading = {
                 val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
-                sources.backend.userService.postPhoto(photoBase64)
+                get.sources().backend.userService.postPhoto(photoBase64)
 
-                return@load sources.backend.userService.updateUser(
+                return@load get.sources().backend.userService.updateUser(
                     name = state.user.name,
                     phone = state.user.contacts.phone,
                     telegram = state.user.contacts.telegram,
@@ -86,7 +79,7 @@ class EditProfileScreen(
                 )
 
             }, onSuccess = { newUser ->
-                sources.app.user.post(newUser)
+                get.sources().app.user.post(newUser)
             })
         }
     }

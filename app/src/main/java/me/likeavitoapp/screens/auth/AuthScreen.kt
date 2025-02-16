@@ -1,12 +1,9 @@
 package me.likeavitoapp.screens.auth
 
-import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.Debouncer
-import me.likeavitoapp.MainSet
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.mainSet
-import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -16,12 +13,7 @@ import me.likeavitoapp.screens.main.MainScreen
 import java.util.regex.Pattern
 
 
-class AuthScreen(
-    val navigator: ScreensNavigator,
-
-    val scope: CoroutineScope = mainSet.provideCoroutineScope(),
-    val sources: DataSources = mainSet.provideDataSources()
-) : IScreen {
+class AuthScreen(val navigator: ScreensNavigator) : IScreen {
 
     class State {
         val email = UpdatableState("")
@@ -42,7 +34,7 @@ class AuthScreen(
         recordScenarioStep()
 
         emailDebouncer = Debouncer<String>("") { lastEmail ->
-            scope.launchWithHandler {
+            get.scope().launchWithHandler {
                 var isEmailValid = false
                 if (lastEmail.isNotBlank()) {
                     fun checkEmail(email: String): Boolean {
@@ -77,7 +69,7 @@ class AuthScreen(
     fun ChangePasswordUseCase(newPassword: String) {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.password.post(newPassword)
             val isEmailValid = !state.emailErrorEnabled.value
             state.loginButtonEnabled.post(
@@ -89,15 +81,15 @@ class AuthScreen(
     fun ClickToLoginUseCase() {
         recordScenarioStep()
 
-        scope.launchWithHandler {
+        get.scope().launchWithHandler {
             state.loginButtonEnabled.post(false)
             state.login.working.post(true)
-            val result = sources.backend.userService.login(state.email.value, state.password.value)
+            val result = get.sources().backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
-                sources.app.user.post(loginData.user)
+                get.sources().app.user.post(loginData.user)
 
-                sources.platform.appDataStore.saveId(loginData.user.id)
+                get.sources().platform.appDataStore.saveId(loginData.user.id)
 
                 navigator.startScreen(MainScreen())
 

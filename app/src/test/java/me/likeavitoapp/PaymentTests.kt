@@ -22,7 +22,7 @@ class PaymentTests {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        mainSet = mockMainSet().apply {
+        get = mockMainSet().apply {
             defaultContext = testDispatcher
         }
     }

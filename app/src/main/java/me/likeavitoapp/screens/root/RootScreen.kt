@@ -1,9 +1,8 @@
 package me.likeavitoapp.screens.root
 
-import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.develop
 import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.model.DataSources
+import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -11,10 +10,7 @@ import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.splash.SplashScreen
 
-class RootScreen(
-    val scope: CoroutineScope,
-    val sources: DataSources
-) : IScreen {
+class RootScreen() : IScreen {
 
     class State(
         var isStarted: Boolean = false,
@@ -44,16 +40,12 @@ class RootScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            screen = AuthScreen(
-                scope = scope,
-                navigator = navigator,
-                sources = sources
-            ),
+            screen = AuthScreen(navigator),
             clearAll = true
         )
 
-        scope.launchWithHandler {
-            sources.platform.appDataStore.clear()
+        get.scope().launchWithHandler {
+            get.sources().platform.appDataStore.clear()
         }
     }
 

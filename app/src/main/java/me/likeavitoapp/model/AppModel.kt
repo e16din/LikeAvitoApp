@@ -171,9 +171,4 @@ data class OfferMessage(
 
 data class MapItem(val name: String, val point: Point)
 
-data class PaymentData(
-    val cardNumber: Worker<String> = Worker(""), // 1111 1111 1111 1111
-    val mmYy: Worker<String> = Worker(""), // mm/yy
-    val cvvCvc: Worker<String> = Worker("") // 123
-)
 

@@ -22,7 +22,7 @@ inline fun CoroutineScope.launchWithHandler(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     crossinline launch: suspend () -> Unit
 ): Job {
-    return launch(mainSet.defaultContext + dispatcher) {
+    return launch(get.defaultContext + dispatcher) {
         launch.invoke()
     }
 }
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         val vm by viewModels<AppViewModel>()
 
-        val app = mainSet.init(application as AppPlatform, vm.viewModelScope)
+        val app = get.init(application as AppPlatform, vm.viewModelScope)
 
         val lightTransparentStyle = SystemBarStyle.light(
             scrim = WHITE,
