@@ -19,9 +19,10 @@ import me.likeavitoapp.log
 // NOTE: Так удобнее переносить и переиспользовать
 
 
-class TestCase<T>(val input: T, val expect: Boolean)
+class TestCase<T>(val input: T, val expectOutput: T? = null, val expectIsValid: Boolean? = null)
 
-infix fun <T> T.expect(expect: Boolean) = TestCase(input = this, expect = expect)
+infix fun <T> T.expectIsValid(expect: Boolean) = TestCase(input = this, expectIsValid = expect)
+infix fun <T> T.expectOutput(output: T) = TestCase(input = this, expectOutput = output)
 
 inline fun Any.checkList(
     vararg checks: () -> Boolean,
@@ -54,22 +55,31 @@ inline fun <T> withTests(
     testsEnabled: Boolean = develop,
     testCases: List<TestCase<T>>,
     withAssert: Boolean = develop,
-    crossinline validator: (T) -> Boolean, // валидируем каждый инпут (реальный и тестовые) (обычно мы это чекаем в if/else)
-    crossinline onDone: (T) -> Unit // в конце выдаем аутпут из реального инпута
+    crossinline validator: (T) -> Boolean = { true }, // валидируем каждый инпут (реальный и тестовые) (обычно мы это чекаем в if/else)
+    crossinline onDone: (T) -> Unit = {} // в конце выдаем аутпут из реального инпута
 ): Pair<T, Boolean> {
     if (testsEnabled) {
+        var succeedCount = 0
+
         testCases.forEachIndexed { i, it ->
             val output = outputMaker(it.input)
             val caseResult = validator(output)
 
-            val testResult = caseResult == it.expect
+            val testResult = if (it.expectIsValid != null)
+                caseResult == it.expectIsValid
+            else
+                output == it.expectOutput
             val numberInList = "${i + 1}/${testCases.size}"
 
+
             val logMessage =
-                if (testResult)
-                    "Test $numberInList Succeed { input: \"${it.input}\", output: \"$output\", check(output) == ${it.expect} }"
-                else
-                    "Test $numberInList Failed { input: \"${it.input}\", output: \"$output\", check(output) != ${it.expect} }"
+                if (it.expectIsValid != null) {
+                    if (testResult) succeedCount += 1
+                    "Test $numberInList ${if (testResult) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", check(output) ${if (testResult) "==" else "!="} ${it.expectIsValid} }"
+                } else {
+                    if (output == it.expectOutput) succeedCount += 1
+                    "Test $numberInList ${if (output == it.expectOutput) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", $output ${if (output == it.expectOutput) "==" else "!="} ${it.expectOutput} }"
+                }
 
             log(logMessage, tag = "")
 
@@ -77,6 +87,8 @@ inline fun <T> withTests(
                 assert(testResult) { logMessage }
             }
         }
+        println()
+        log("Result: $succeedCount of ${testCases.size} is succeed!", tag = "")
     }
 
     val output = outputMaker(realInput)

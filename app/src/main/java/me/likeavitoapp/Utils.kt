@@ -7,6 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.model.check
+
+import me.likeavitoapp.model.withTests
 
 fun Any.className(): String {
     return javaClass.simpleName
@@ -115,8 +118,11 @@ fun format(
     stringBuilder.clear()
 
     var source = text.fetchDigits(withChars = listOf(cursor))
+    if (source.isEmpty()) {
+        return "$cursor"
+    }
     val cursorIndex = source.indexOf(cursor)
-    if (removeOneChar) {
+    if (cursorIndex > 0 && removeOneChar) {
         source = source.removeRange(cursorIndex - 1, cursorIndex)
     }
     if (source.replace("$cursor", "").isEmpty()) {
@@ -153,10 +159,8 @@ fun format(
     }
 
     return if (dropCount == 0) {
-        log("result: $result")
         result.toString()
     } else {
-        log("result: $result")
         result.toString().dropLast(dropCount)
     }
 }
@@ -167,21 +171,5 @@ private fun String.fetchDigits(withChars: List<Char> = emptyList()): String {
 
 // NOTE: for debug
 fun main() {
-    val stringBuilder = StringBuilder()
-    fun test(value: TextFieldValue): TextFieldValue {
-        var result = me.likeavitoapp.format(
-            text = stringBuilder.append(value.text).insert(value.selection.start, "|").toString(),
-            mask = "##/##",
-            delimiter = '/',
-            stringBuilder = stringBuilder,
-            removeOneChar = false
-        )
-        stringBuilder.clear()
-        var newPosition = result.indexOf('|')
-        result = result.replace("|", "")
 
-        return TextFieldValue(result, TextRange(newPosition))
-    }
-
-    log(test(TextFieldValue("1234", TextRange(4))))
 }

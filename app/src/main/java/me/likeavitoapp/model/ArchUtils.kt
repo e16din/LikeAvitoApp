@@ -7,8 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.log
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -100,9 +100,9 @@ class Worker<T>(initial: T) {
         fail.post(false, ifNew = true)
     }
 
-   fun worker() = this
-   fun data() = output.value
-   fun hasFail() = fail.value
+    fun worker() = this
+    fun data() = output.value
+    fun hasFail() = fail.value
 }
 
 // NOTE: act - действуй!
@@ -110,6 +110,7 @@ class Worker<T>(initial: T) {
 fun <T> Worker<T>.act(task: () -> Pair<T, Boolean>) {
     working.post(true)
     val result = task()
+
     log("act: $result")
     output.post(result.first)
     if (result.second) {

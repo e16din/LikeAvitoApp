@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -99,7 +98,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                             "три цифры с обратной стороны карты",
                             style = MaterialTheme.typography.titleSmall
                         )
-                        val cvvCvc by state.cvvCvc.collectAsState()
+                        val cvvCvc by state.cvvCvc.output.collectAsState()
                         SimpleTextField(
                             modifier = Modifier
                                 .padding(top = 4.dp, bottom = 8.dp)
@@ -162,7 +161,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                         ) {
                             Text("Номер карты", style = MaterialTheme.typography.titleSmall)
 
-                            val cardNumber by state.cardNumber.collectAsState()
+                            val cardNumber by state.cardNumber.output.collectAsState()
                             SimpleTextField(
                                 modifier = Modifier
                                     .padding(top = 4.dp)
@@ -200,7 +199,7 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                         ) {
                             Text("Действует до", style = MaterialTheme.typography.titleSmall)
 
-                            val mmYy by state.mmYy.collectAsState()
+                            val mmYy by state.mmYy.output.collectAsState()
 
                             SimpleTextField(
                                 modifier = Modifier
