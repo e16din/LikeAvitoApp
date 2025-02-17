@@ -89,13 +89,13 @@ inline fun CoroutineScope.launchWithHandler(
 @Composable
 fun isPreviewMode(): Boolean = runCatching { get.app() }.isFailure
 
-fun log(text: String, tag: String = "debug") {
+fun log(text: Any, tag: String = "debug: ") {
     if (develop) {
-        println("tag:$tag | $text")
+        println("$tag$text")
     }
 }
 
-fun logError(text: String, tag: String = "debug", prefix: String = "Error: ") {
+fun logError(text: Any, tag: String = "debug: ", prefix: String = "Error: ") {
     if (develop) {
         println("tag:$tag | $prefix$text")
     }

@@ -109,70 +109,14 @@ fun format(
     maskChar: Char = '#',
     cursor: Char = '|',
     delimiter: Char = ' ',
-    stringBuilder: StringBuilder = StringBuilder()
-): String {
-    stringBuilder.clear()
-    val source = text.replace("$delimiter", "")
-    if (source.isEmpty()) {
-        return ""
-    }
-
-    var builder = stringBuilder.append(mask)
-    var deltaIndex = 0
-    var i = 0
-    while (i < source.length) {
-        if (builder[i] == delimiter) {
-            deltaIndex += 1
-        }
-
-        if (i + deltaIndex < builder.length) {
-            builder[i + deltaIndex] = source[i]
-        } else {
-            builder.append(source[i])
-        }
-
-        if (source[i] == cursor) {
-            if (i + 1 < source.length) {
-                builder.insert(i + deltaIndex + 1, source[i + 1])
-                i += 1
-            } else {
-                if (i - 1 > 0 && builder[i - 1] == delimiter) {
-                    // = cursor
-                }
-            }
-        }
-
-        i += 1
-    }
-
-    var dropCount = 0
-    i = builder.length - 1
-    while (builder[i] == maskChar || builder[i] == delimiter) {
-        dropCount += 1
-        i -= 1
-    }
-
-    return if (dropCount == 0) {
-        builder.toString()
-    } else {
-        builder.toString().dropLast(dropCount)
-    }
-}
-
-fun format2(
-    text: String,
-    mask: String,
-    maskChar: Char = '#',
-    cursor: Char = '|',
-    delimiter: Char = ' ',
     removeOneChar: Boolean = false,
     stringBuilder: StringBuilder = StringBuilder()
 ): String {
     stringBuilder.clear()
 
-    var source = text.replace("$delimiter", "")
+    var source = text.fetchDigits(withChars = listOf(cursor))
     val cursorIndex = source.indexOf(cursor)
-    if(removeOneChar){
+    if (removeOneChar) {
         source = source.removeRange(cursorIndex - 1, cursorIndex)
     }
     if (source.replace("$cursor", "").isEmpty()) {
@@ -184,9 +128,8 @@ fun format2(
     var i = 0
     while (sourceIndex < source.length) {
 
-        if(i < result.length) {
+        if (i < result.length) {
             if (result[i] != delimiter) {
-                println("${result[i]}, ${source[sourceIndex]}")
 
                 result[i] = source[sourceIndex]
                 if (result[i] == cursor) {
@@ -210,24 +153,28 @@ fun format2(
     }
 
     return if (dropCount == 0) {
-        println("result: $result")
+        log("result: $result")
         result.toString()
     } else {
-        println("result: $result")
+        log("result: $result")
         result.toString().dropLast(dropCount)
     }
+}
+
+private fun String.fetchDigits(withChars: List<Char> = emptyList()): String {
+    return this.filter { it.isDigit() || withChars.contains(it) }
 }
 
 // NOTE: for debug
 fun main() {
     val stringBuilder = StringBuilder()
-    fun format(value: TextFieldValue): TextFieldValue {
-        var result = me.likeavitoapp.format2(
+    fun test(value: TextFieldValue): TextFieldValue {
+        var result = me.likeavitoapp.format(
             text = stringBuilder.append(value.text).insert(value.selection.start, "|").toString(),
             mask = "##/##",
             delimiter = '/',
             stringBuilder = stringBuilder,
-            removeOneChar = true
+            removeOneChar = false
         )
         stringBuilder.clear()
         var newPosition = result.indexOf('|')
@@ -236,12 +183,5 @@ fun main() {
         return TextFieldValue(result, TextRange(newPosition))
     }
 
-//    var result = me.likeavitoapp.format(
-//        text = stringBuilder.append("1234").insert(1, "|").toString(),
-//        mask = "##/##",
-//        delimiter = '/',
-//        stringBuilder = stringBuilder
-//    )
-//    println(result)
-    println(format(TextFieldValue("1234", TextRange(4))))
+    log(test(TextFieldValue("1234", TextRange(4))))
 }

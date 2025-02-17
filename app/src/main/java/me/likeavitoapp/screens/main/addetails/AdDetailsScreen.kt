@@ -45,7 +45,7 @@ class AdDetailsScreen(
 
     fun ClickToOpenChatUseCase() {
         recordScenarioStep()
-        println("!!! ClickToOpenChatUseCase")
+
         navigator.startScreen(
             ChatScreen(state.ad, navigator)
         )

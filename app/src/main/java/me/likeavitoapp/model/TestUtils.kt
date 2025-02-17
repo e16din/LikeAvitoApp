@@ -5,6 +5,7 @@ import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.MainSet
 import me.likeavitoapp.develop
 import me.likeavitoapp.get
+import me.likeavitoapp.log
 
 // NOTE: Решение вопроса: "Как писать в стиле TDD/BDD, и не писать авто-тесты?
 // Чтобы и функционал и тесты можно было писать сразу в одном месте?"
@@ -33,13 +34,13 @@ inline fun Any.checkList(
         checks.forEachIndexed { i, check ->
             log += "[$i]"
             if (!check()) {
-                println("$log <-")
+                log("$log <-", tag = "")
                 onResult(false)
                 return false
             }
         }
 
-        println("$log <-")
+        log("$log <-", tag = "")
         onResult(true)
         return true
     }
@@ -70,7 +71,7 @@ inline fun <T> withTests(
                 else
                     "Test $numberInList Failed { input: \"${it.input}\", output: \"$output\", check(output) != ${it.expect} }"
 
-            println(logMessage)
+            log(logMessage, tag = "")
 
             if (withAssert) {
                 assert(testResult) { logMessage }

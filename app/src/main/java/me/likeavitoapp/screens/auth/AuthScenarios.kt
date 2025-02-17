@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.auth
 
 import kotlinx.coroutines.delay
 import me.likeavitoapp.checkState
+import me.likeavitoapp.log
 import kotlin.math.roundToInt
 
 class AuthScenarios(val screen: AuthScreen) {
@@ -28,7 +29,7 @@ class AuthScenarios(val screen: AuthScreen) {
 
         val currentMs = System.currentTimeMillis()
         val timeS = ((currentMs - startMs) / 1000f).roundToInt()
-        println("Auth Scenarios successful finished in ${timeS}s")
+        log("Auth Scenarios successful finished in ${timeS}s")
     }
 
 

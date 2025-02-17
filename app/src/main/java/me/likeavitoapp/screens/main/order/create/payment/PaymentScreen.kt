@@ -86,7 +86,7 @@ class PaymentScreen(
         fun format(value: TextFieldValue): TextFieldValue {
             val cursor = '|'
             val delimiter = ' '
-            var result = me.likeavitoapp.format2(
+            var result = me.likeavitoapp.format(
                 text = stringBuilder.append(value.text).insert(value.selection.start, cursor)
                     .toString(),
                 mask = "#### #### #### ####",
@@ -156,7 +156,7 @@ class PaymentScreen(
         fun format(value: TextFieldValue): TextFieldValue {
             val cursor = '|'
             val delimiter = '/'
-            var result = me.likeavitoapp.format2(
+            var result = me.likeavitoapp.format(
                 text = stringBuilder.append(value.text).insert(value.selection.start, cursor)
                     .toString(),
                 mask = "##/##",
