@@ -18,14 +18,6 @@ import kotlinx.coroutines.launch
 import me.likeavitoapp.screens.root.RootScreenView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
-inline fun CoroutineScope.launchWithHandler(
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    crossinline launch: suspend () -> Unit
-): Job {
-    return launch(get.defaultContext + dispatcher) {
-        launch.invoke()
-    }
-}
 
 class AppViewModel() : ViewModel()
 

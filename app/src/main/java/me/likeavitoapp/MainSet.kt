@@ -2,11 +2,15 @@ package me.likeavitoapp
 
 import androidx.compose.runtime.Composable
 import com.yandex.mapkit.MapKitFactory
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.likeavitoapp.model.AppBackend
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.DataSources
@@ -45,6 +49,11 @@ class MainSet {
         appModel = AppModel().apply {
             rootScreen = RootScreen()
         }
+        actualDataSources = DataSources(
+            app = appModel!!,
+            platform = appPlatform!!,
+            backend = appBackend!!
+        )
 
         return appModel!!
     }
@@ -54,6 +63,8 @@ class MainSet {
         throwable.log()
         if (throwable is UnauthorizedException) {
             appModel?.onLogoutException()
+        } else {
+            throw throwable
         }
     }
 
@@ -64,6 +75,15 @@ class MainSet {
     fun scope() = actualScope!!
     fun app() = appModel!!
     fun platform() = appPlatform as AppPlatform
+}
+
+inline fun CoroutineScope.launchWithHandler(
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    crossinline launch: suspend () -> Unit
+): Job {
+    return launch(get.defaultContext + dispatcher) {
+        launch.invoke()
+    }
 }
 
 @Composable

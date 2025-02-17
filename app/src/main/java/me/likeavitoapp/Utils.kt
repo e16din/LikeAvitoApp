@@ -1,6 +1,8 @@
 package me.likeavitoapp
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
@@ -17,8 +19,7 @@ suspend inline fun <T> MutableState<T>.setUi(value: T) {
 }
 
 suspend inline fun <reified T> Worker<*>.load(
-    loading: () -> Result<T>,
-    crossinline onSuccess: (data: T) -> Unit
+    loading: () -> Result<T>, crossinline onSuccess: (data: T) -> Unit
 ) {
     this.working.post(true)
 
@@ -100,4 +101,147 @@ fun checkLuhnAlgorithm(digits: String): Boolean {
 
     // Проверяем, делится ли сумма на 10 без остатка
     return sum % 10 == 0
+}
+
+fun format(
+    text: String,
+    mask: String,
+    maskChar: Char = '#',
+    cursor: Char = '|',
+    delimiter: Char = ' ',
+    stringBuilder: StringBuilder = StringBuilder()
+): String {
+    stringBuilder.clear()
+    val source = text.replace("$delimiter", "")
+    if (source.isEmpty()) {
+        return ""
+    }
+
+    var builder = stringBuilder.append(mask)
+    var deltaIndex = 0
+    var i = 0
+    while (i < source.length) {
+        if (builder[i] == delimiter) {
+            deltaIndex += 1
+        }
+
+        if (i + deltaIndex < builder.length) {
+            builder[i + deltaIndex] = source[i]
+        } else {
+            builder.append(source[i])
+        }
+
+        if (source[i] == cursor) {
+            if (i + 1 < source.length) {
+                builder.insert(i + deltaIndex + 1, source[i + 1])
+                i += 1
+            } else {
+                if (i - 1 > 0 && builder[i - 1] == delimiter) {
+                    // = cursor
+                }
+            }
+        }
+
+        i += 1
+    }
+
+    var dropCount = 0
+    i = builder.length - 1
+    while (builder[i] == maskChar || builder[i] == delimiter) {
+        dropCount += 1
+        i -= 1
+    }
+
+    return if (dropCount == 0) {
+        builder.toString()
+    } else {
+        builder.toString().dropLast(dropCount)
+    }
+}
+
+fun format2(
+    text: String,
+    mask: String,
+    maskChar: Char = '#',
+    cursor: Char = '|',
+    delimiter: Char = ' ',
+    removeOneChar: Boolean = false,
+    stringBuilder: StringBuilder = StringBuilder()
+): String {
+    stringBuilder.clear()
+
+    var source = text.replace("$delimiter", "")
+    val cursorIndex = source.indexOf(cursor)
+    if(removeOneChar){
+        source = source.removeRange(cursorIndex - 1, cursorIndex)
+    }
+    if (source.replace("$cursor", "").isEmpty()) {
+        return "$cursor"
+    }
+
+    val result = stringBuilder.append(mask)
+    var sourceIndex = 0
+    var i = 0
+    while (sourceIndex < source.length) {
+
+        if(i < result.length) {
+            if (result[i] != delimiter) {
+                println("${result[i]}, ${source[sourceIndex]}")
+
+                result[i] = source[sourceIndex]
+                if (result[i] == cursor) {
+                    result.insert(i + 1, maskChar)
+                }
+                sourceIndex += 1
+            }
+        } else {
+            result.append(source[sourceIndex])
+            sourceIndex += 1
+        }
+
+        i += 1
+    }
+
+    var dropCount = 0
+    i = result.length - 1
+    while (result[i] == maskChar || result[i] == delimiter) {
+        dropCount += 1
+        i -= 1
+    }
+
+    return if (dropCount == 0) {
+        println("result: $result")
+        result.toString()
+    } else {
+        println("result: $result")
+        result.toString().dropLast(dropCount)
+    }
+}
+
+// NOTE: for debug
+fun main() {
+    val stringBuilder = StringBuilder()
+    fun format(value: TextFieldValue): TextFieldValue {
+        var result = me.likeavitoapp.format2(
+            text = stringBuilder.append(value.text).insert(value.selection.start, "|").toString(),
+            mask = "##/##",
+            delimiter = '/',
+            stringBuilder = stringBuilder,
+            removeOneChar = true
+        )
+        stringBuilder.clear()
+        var newPosition = result.indexOf('|')
+        result = result.replace("|", "")
+
+        return TextFieldValue(result, TextRange(newPosition))
+    }
+
+//    var result = me.likeavitoapp.format(
+//        text = stringBuilder.append("1234").insert(1, "|").toString(),
+//        mask = "##/##",
+//        delimiter = '/',
+//        stringBuilder = stringBuilder
+//    )
+//    println(result)
+    println(format(TextFieldValue("1234", TextRange(4))))
 }

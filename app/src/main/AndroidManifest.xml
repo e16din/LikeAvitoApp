@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LikeAvitoApp"
         android:name=".AppPlatform"
-        tools:targetApi="31"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="33"
         >
 
         <activity

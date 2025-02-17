@@ -22,20 +22,6 @@ class TestCase<T>(val input: T, val expect: Boolean)
 
 infix fun <T> T.expect(expect: Boolean) = TestCase(input = this, expect = expect)
 
-fun <T> useCase(text: String, value: T): T {
-    println("Use Case: $text")
-    return value
-}
-
-inline fun <T> T.expect(
-    text: String,
-    vararg values: Any?,
-    crossinline function: (T) -> Unit = {}
-) {
-    println("Expect: $text")
-    function(this)
-}
-
 inline fun Any.checkList(
     vararg checks: () -> Boolean,
     enabled: Boolean = true,
@@ -61,29 +47,19 @@ inline fun Any.checkList(
     return true
 }
 
-fun <T> withResult(value: T, caseResult: Boolean): Result<T> {
-    println("Output: check($value) | Checking Result: $caseResult")
-    println()
-
-    return if (caseResult) {
-        Result.success(value)
-    } else {
-        Result.failure(IllegalArgumentException("invalid data: $value"))
-    }
-}
-
 inline fun <T> withTests(
     realInput: T,
-    outputMaker: (input: T) -> T = { it },
+    crossinline outputMaker: (input: T) -> T = { it }, // делаем из инпута аутпут
+    testsEnabled: Boolean = develop,
     testCases: List<TestCase<T>>,
-    enabled: Boolean = develop,
     withAssert: Boolean = develop,
-    crossinline case: (T) -> Boolean
+    crossinline validator: (T) -> Boolean, // валидируем каждый инпут (реальный и тестовые) (обычно мы это чекаем в if/else)
+    crossinline onDone: (T) -> Unit // в конце выдаем аутпут из реального инпута
 ): Pair<T, Boolean> {
-    if (enabled) {
+    if (testsEnabled) {
         testCases.forEachIndexed { i, it ->
             val output = outputMaker(it.input)
-            val caseResult = case(output)
+            val caseResult = validator(output)
 
             val testResult = caseResult == it.expect
             val numberInList = "${i + 1}/${testCases.size}"
@@ -102,7 +78,9 @@ inline fun <T> withTests(
         }
     }
 
-    return Pair(realInput, case(outputMaker(realInput)))
+    val output = outputMaker(realInput)
+    onDone(output)
+    return Pair(realInput, validator(output))
 }
 
 fun check(function: () -> Boolean) = function

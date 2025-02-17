@@ -45,12 +45,12 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
                         return checkEmailPattern.matcher(email).matches()
                     }
 
-                    isEmailValid = checkEmail(lastEmail)
                     state.emailErrorEnabled.inverse()
+                    isEmailValid = checkEmail(lastEmail)
 
                 } else {
-                    isEmailValid = true
                     state.emailErrorEnabled.post(false)
+                    isEmailValid = true
                 }
 
                 state.loginButtonEnabled.post(
