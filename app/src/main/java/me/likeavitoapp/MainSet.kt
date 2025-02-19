@@ -31,14 +31,14 @@ class MainSet {
     private var actualScope: CoroutineScope? = null
     private var actualDataSources: DataSources? = null
 
-    fun init(platform: AppPlatform, scope: CoroutineScope): AppModel {
+    fun init(platform: IAppPlatform, scope: CoroutineScope): AppModel {
         if (appModel != null) {
             return appModel!!
         }
 
         try {
             MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
-            MapKitFactory.initialize(platform)
+            MapKitFactory.initialize(platform as AppPlatform)
         } catch (e: RuntimeException) {
             // NOTE: unit-tests workaround
         }

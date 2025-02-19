@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -96,18 +97,21 @@ fun AuthScreenView(screen: AuthScreen) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
+                modifier = Modifier.fillMaxWidth(),
                 value = email.value,
                 onValueChange = { value ->
                     screen.ChangeEmailUseCase(value)
                 },
                 label = { Text(stringResource(R.string.email_field)) },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
                 keyboardActions = KeyboardActions(
                     onNext = {
                         localFocusManager.moveFocus(FocusDirection.Down)
                     }
                 ),
-                modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 isError = emailErrorEnabled.value,
                 supportingText = {
@@ -174,7 +178,9 @@ fun AuthScreenView(screen: AuthScreen) {
 @Composable
 fun PreviewAuthScreen() {
     get = mockMainSet()
-    AuthScreenView(screen = AuthScreen(
-        navigator = mockScreensNavigator(),
-    ))
+    AuthScreenView(
+        screen = AuthScreen(
+            navigator = mockScreensNavigator(),
+        )
+    )
 }

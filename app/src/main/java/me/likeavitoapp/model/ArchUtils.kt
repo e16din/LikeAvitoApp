@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.get
+import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.log
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -107,17 +108,19 @@ class Worker<T>(initial: T) {
 
 // NOTE: act - действуй!
 // (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
-fun <T> Worker<T>.act(task: () -> Pair<T, Boolean>) {
+inline fun <T> Worker<T>.act(crossinline task: suspend () -> Pair<T, Boolean>) {
     working.post(true)
-    val result = task()
+    get.scope().launchWithHandler {
+        val result = task()
 
-    log("act: $result")
-    output.post(result.first)
-    if (result.second) {
-        fail.post(false, ifNew = true)
+        log("act: $result")
+        output.post(result.first)
+        if (result.second) {
+            fail.post(false, ifNew = true)
 
-    } else {
-        fail.post(true)
+        } else {
+            fail.post(true)
+        }
     }
     working.post(false)
 }

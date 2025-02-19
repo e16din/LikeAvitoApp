@@ -2,8 +2,10 @@ package me.likeavitoapp.screens.main.order.create.payment
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,34 +14,48 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
+import me.likeavitoapp.measureTextWidth
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -72,8 +88,11 @@ fun PaymentScreenProvider(screen: PaymentScreen) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) {
+    val validationEnabled by state.validationEnabled.collectAsState()
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -84,46 +103,23 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
             Box {
                 Card(
                     modifier = Modifier
-                        .padding(start = 32.dp, top = 96.dp)
+                        .padding(start = 32.dp, top = 114.dp)
                         .height(210.dp)
                         .widthIn(0.dp, 320.dp)
                 ) {
                     Spacer(Modifier.weight(1f))
-                    Column(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 24.dp, bottom = 8.dp)
                     ) {
-                        Text(
-                            "три цифры с обратной стороны карты",
-                            style = MaterialTheme.typography.titleSmall
-                        )
                         val cvvCvc by state.cvvCvc.output.collectAsState()
-                        SimpleTextField(
-                            modifier = Modifier
-                                .padding(top = 4.dp, bottom = 8.dp)
-                                .width(112.dp)
-                                .clip(RoundedCornerShape(16)),
+                        val cvvCvcHasFail by state.cvvCvc.fail.collectAsState()
+                        PaymentTextField(
+                            screen = screen,
+                            validationEnabled = validationEnabled,
                             value = cvvCvc,
-                            onValueChange = {
-                                if (it.text.length > "123".length) {
-                                    return@SimpleTextField
-                                }
-
-                                if (it.selection.length == 0) {
-                                    screen.ChangeCvvCvcUseCase(it)
-                                }
-                            },
-                            placeholder = { Text("123") },
-                            colors = TextFieldDefaults.colors().copy(
-                                focusedContainerColor = Color.Transparent,
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black.copy(alpha = 0.6f),
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                            hasFail = cvvCvcHasFail
                         )
                     }
                 }
@@ -162,6 +158,14 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                             Text("Номер карты", style = MaterialTheme.typography.titleSmall)
 
                             val cardNumber by state.cardNumber.output.collectAsState()
+                            val cardNumberHasFail by state.cardNumber.fail.collectAsState()
+
+                            PaymentTextField(
+                                screen = screen,
+                                validationEnabled = validationEnabled,
+                                value = cardNumber,
+                                hasFail = cardNumberHasFail
+                            )
                             SimpleTextField(
                                 modifier = Modifier
                                     .padding(top = 4.dp)
@@ -248,11 +252,141 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
     }
 }
 
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun PaymentTextField(
+    screen: PaymentScreen,
+    validationEnabled: Boolean,
+    value: TextFieldValue,
+    hasFail: Boolean,
+) = with(screen) {
+    val localFocusManager = LocalFocusManager.current
+
+    var failsCount by remember { mutableIntStateOf(0) }
+    LaunchedEffect(hasFail) {
+        failsCount += 1
+    }
+
+    val fieldTextStyle = TextStyle.Default
+
+    BasicTextField(
+        modifier = Modifier
+            .padding(top = 4.dp, bottom = 0.dp)
+            .fillMaxWidth(),
+        value = value,
+        textStyle = fieldTextStyle,
+        onValueChange = {
+            if (it.text.length > "123".length) {
+                return@BasicTextField
+            }
+
+            if (it.selection.length == 0) {
+                screen.ChangeCvvCvcUseCase(it)
+            }
+        },
+        decorationBox = { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                value = "value.text",
+                innerTextField = {
+                    Spacer(Modifier.padding(8.dp))
+                    Box(Modifier) {
+                        Box(
+                            Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(
+                                    horizontal = 16.dp,
+                                    vertical = 6.dp
+                                )
+                                .width(
+                                    measureTextWidth(
+                                        "123",
+                                        fieldTextStyle
+                                    )
+                                ),
+
+                            ) {
+                            Box(Modifier.align(Alignment.Center)) {
+                                innerTextField()
+                            }
+                        }
+                    }
+                },
+                enabled = true,
+                colors = TextFieldDefaults.colors().copy(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = Color.Black,// MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = Color.Black,//MaterialTheme.colorScheme.outline,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
+                    top = 0.dp,
+                    bottom = 0.dp,
+                    start = 0.dp,
+                    end = 0.dp,
+                ),
+                label = {
+                    if (validationEnabled && hasFail) {
+                        Row(Modifier.padding(bottom = 4.dp)) {
+                            Icon(
+                                Icons.Default.Info,
+                                "error",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(start = 4.dp),
+                                text = "Ожидается число вида \"123\"",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+
+                    } else {
+                        if (failsCount == 0) {
+                            Text(
+                                modifier = Modifier.padding(bottom = 4.dp),
+                                text = stringResource(R.string.cvv_label),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Info,
+                                "error",
+                                tint = Color.Green
+                            )
+                            Text(
+                                color = Color.Green,
+                                modifier = Modifier.padding(start = 4.dp),
+                                text = stringResource(R.string.valid_label),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    }
+                },
+                interactionSource = remember { MutableInteractionSource() }
+            )
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                localFocusManager.moveFocus(FocusDirection.Down)
+            }
+        )
+    )
+}
+
 private fun isRemove(
     mmYy: TextFieldValue,
     value: TextFieldValue
 ): Boolean = mmYy.text.length - value.text.length == 1
-            && mmYy.selection.end - value.selection.end == 1
+        && mmYy.selection.end - value.selection.end == 1
 
 @Preview
 @Composable

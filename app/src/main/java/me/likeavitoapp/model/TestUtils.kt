@@ -104,5 +104,25 @@ fun runTests(function: () -> Unit) = function
 private val emptyScreenNavigator by lazy { ScreensNavigator() }
 fun mockScreensNavigator() = emptyScreenNavigator
 fun mockMainSet() = MainSet().apply {
-    init(AppPlatform(), CoroutineScope(get.defaultContext))
+    init(object : IAppPlatform{
+        override val appDataStore: IAppPlatform.IAppDataStore
+            get() = object : IAppPlatform.IAppDataStore {
+                override suspend fun loadId(): Long? {
+                    return null
+                }
+
+                override suspend fun saveId(userId: Long) {
+                }
+
+                override suspend fun loadToken(): String? {
+                    return null
+                }
+
+                override suspend fun saveToken(token: String) {
+                }
+
+                override suspend fun clear() {
+                }
+            }
+    }, CoroutineScope(get.defaultContext))
 }

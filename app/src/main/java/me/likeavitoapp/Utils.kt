@@ -1,8 +1,13 @@
 package me.likeavitoapp
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
@@ -21,6 +26,7 @@ suspend inline fun <T> MutableState<T>.setUi(value: T) {
     }
 }
 
+@Deprecated("Use Worker<*>.act { } instead")
 suspend inline fun <reified T> Worker<*>.load(
     loading: () -> Result<T>, crossinline onSuccess: (data: T) -> Unit
 ) {
@@ -167,6 +173,13 @@ fun format(
 
 private fun String.fetchDigits(withChars: List<Char> = emptyList()): String {
     return this.filter { it.isDigit() || withChars.contains(it) }
+}
+
+@Composable
+fun measureTextWidth(text: String, style: TextStyle = TextStyle.Default): Dp {
+    val textMeasurer = rememberTextMeasurer()
+    val widthInPixels = textMeasurer.measure(text, style).size.width
+    return with(LocalDensity.current) { widthInPixels.toDp() }
 }
 
 // NOTE: for debug

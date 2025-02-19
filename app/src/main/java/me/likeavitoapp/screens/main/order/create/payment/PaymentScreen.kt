@@ -3,25 +3,31 @@ package me.likeavitoapp.screens.main.order.create.payment
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import me.likeavitoapp.AppPlatform
+import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.checkLuhnAlgorithm
 import me.likeavitoapp.develop
 import me.likeavitoapp.format
-import me.likeavitoapp.isDigitsOnly
-import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
-import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.isDigitsOnly
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.act
 import me.likeavitoapp.model.check
 import me.likeavitoapp.model.checkList
 import me.likeavitoapp.model.expectIsValid
+import me.likeavitoapp.model.mockMainSet
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.model.withTests
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
+import me.likeavitoapp.ui.theme.outlineDark
 
 
 class PaymentScreen(
@@ -31,6 +37,7 @@ class PaymentScreen(
 
     class State() {
         val payment = Worker(Unit)
+        val validationEnabled = UpdatableState(false)
         val cardNumber = Worker(TextFieldValue("")) // 1111 1111 1111 1111
         val mmYy = Worker(TextFieldValue("")) // mm/yy
         val cvvCvc = Worker(TextFieldValue("")) // 123
@@ -59,21 +66,31 @@ class PaymentScreen(
     fun ClickToPayUseCase() {
         recordScenarioStep()
 
-        get.scope().launchWithHandler {
-            state.payment.load(loading = {
-                return@load get.sources().backend.orderService.pay(
-                    ad = ad,
-                    cardNumber = state.cardNumber.data().text,
-                    mmYy = state.mmYy.data().text,
-                    cvvCvc = state.cvvCvc.data().text,
-                )
-            }, onSuccess = { order ->
-                state.payment.output.post(Unit)
-                navigator.startScreen(
-                    screen = OrderDetailsScreen(order, navigator),
-                    clearAfterFirst = true
-                )
-            })
+        if (state.cardNumber.hasFail() || state.cvvCvc.hasFail() || state.mmYy.hasFail()) {
+            state.validationEnabled.post(true)
+            return
+        }
+
+        state.validationEnabled.post(false)
+
+        state.payment.worker().act {
+            val result = get.sources().backend.orderService.pay(
+                ad = ad,
+                cardNumber = state.cardNumber.data().text,
+                mmYy = state.mmYy.data().text,
+                cvvCvc = state.cvvCvc.data().text,
+            )
+
+            val order = result.getOrNull()
+            val isSuccess = order != null
+            return@act Pair(Unit, isSuccess).also {
+                if (isSuccess) {
+                    navigator.startScreen(
+                        screen = OrderDetailsScreen(order, navigator),
+                        clearAfterFirst = true
+                    )
+                }
+            }
         }
     }
 
@@ -231,8 +248,26 @@ class PaymentScreen(
         log("should to show cvv in format: 123")
 
         state.cvvCvc.worker().act {
+
+            fun reformat(value: TextFieldValue): TextFieldValue {
+                val cursor = '|'
+                val delimiter = '/'
+                var result = format(
+                    text = value.text,
+                    mask = "###",
+                    delimiter = delimiter,
+                    cursor = cursor,
+                    stringBuilder = stringBuilder
+                )
+                stringBuilder.clear()
+                result = result.replace("|", "")
+
+                return TextFieldValue(result, value.selection)
+            }
+
             withTests(
                 realInput = value,
+                outputMaker = { reformat(it)},
                 testsEnabled = develop && !isChangeCvvCvcTested,
                 testCases = listOf(
                     TextFieldValue("") expectIsValid false,

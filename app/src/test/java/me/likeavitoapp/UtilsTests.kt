@@ -31,6 +31,9 @@ class UtilsTests {
             testsEnabled = true,
             withAssert = true,
             testCases = listOf(
+                " " expectOutput "|",
+                " ,-1234|" expectOutput "12/3|",
+                ",- ." expectOutput "|",
                 "" expectOutput "|",
                 "|" expectOutput "|",
                 "1234|" expectOutput "12/34|",
@@ -73,6 +76,9 @@ class UtilsTests {
             testsEnabled = true,
             withAssert = true,
             testCases = listOf(
+                " " expectOutput "|",
+                " ,-1234|" expectOutput "12/3|",
+                ",- ." expectOutput "|",
                 "" expectOutput "|",
                 "|" expectOutput "|",
                 "1234|" expectOutput "12/3|",

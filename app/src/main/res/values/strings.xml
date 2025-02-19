@@ -40,4 +40,6 @@
     <string name="select_pickup_point">Выбрать пункт самовывоза</string>
     <string name="pay_title">Оплатить</string>
     <string name="pay_button">Оплатить</string>
+    <string name="cvv_label">три цифры с обратной стороны карты</string>
+    <string name="valid_label">Верно</string>
 </resources>

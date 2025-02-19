@@ -30,8 +30,7 @@ class PaymentTests {
 
     @After
     fun tearDown() {
-        Dispatchers.resetMain() // сбросьте диспетчер после теста
-//        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
     }
 
     @Test
