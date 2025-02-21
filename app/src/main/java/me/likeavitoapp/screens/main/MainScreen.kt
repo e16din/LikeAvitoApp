@@ -1,28 +1,31 @@
 package me.likeavitoapp.screens.main
 
+import me.likeavitoapp.className
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
-class MainScreen() : IScreen {
+class MainScreen : IScreen {
 
     val state = State()
 
-    val navigator = ScreensNavigator(tag = javaClass.simpleName)
+    val navigator = ScreensNavigator(tag = className())
 
     val searchScreen = SearchScreen(navigator)
     val favoritesScreen = FavoritesScreen(navigator)
     val profileScreen = ProfileScreen(navigator = navigator)
-    val cartScreen = CartScreen(navigator)
+    val ordersScreen = OrdersScreen(navigator)
 
     val tabsRootScreen = TabsRootScreen()
+
+    var initialTabScreen: IScreen = searchScreen
 
     class State {}
 
@@ -31,7 +34,7 @@ class MainScreen() : IScreen {
 
     fun StartScreenUseCase() {
         if (!tabsRootScreen.navigator.hasScreen()) {
-            tabsRootScreen.navigator.startScreen(searchScreen)
+            tabsRootScreen.navigator.startScreen(initialTabScreen)
         }
     }
 
@@ -48,7 +51,7 @@ class MainScreen() : IScreen {
     }
 
     fun ClickToCartUseCase() {
-        tabsRootScreen.navigator.startScreen(cartScreen)
+        tabsRootScreen.navigator.startScreen(ordersScreen)
     }
 
     fun ClickToProfileUseCase() {

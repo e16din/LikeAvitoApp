@@ -26,11 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.get
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.screens.main.tabs.search.views.AdsListView
 import me.likeavitoapp.screens.main.tabs.search.views.SearchBarView
 import me.likeavitoapp.screens.main.tabs.search.views.SearchSettingsPanelView
@@ -40,7 +40,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 @Composable
 fun SearchScreenProvider(
     screen: SearchScreen,
-    tabsRootScreen: TabsRootScreen,
+    tabsNavigator: ScreensNavigator,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(Unit) {
@@ -52,7 +52,7 @@ fun SearchScreenProvider(
             SearchScreenView(screen)
         }
 
-        NextTabProvider(screen, tabsRootScreen)
+        NextTabProvider(screen, tabsNavigator)
     }
 }
 

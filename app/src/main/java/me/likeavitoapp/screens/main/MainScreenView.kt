@@ -54,7 +54,7 @@ import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
 import me.likeavitoapp.screens.main.order.details.OrderDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.cart.CartScreen
+import me.likeavitoapp.screens.main.tabs.cart.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
@@ -110,7 +110,7 @@ fun MainScreenView(screen: MainScreen) {
         modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.padding(bottom = tabBarHeight)) {
-            NextTabProvider(screen, screen.tabsRootScreen)
+            NextTabProvider(screen, screen.tabsRootScreen.navigator)
         }
 
         Box(
@@ -238,7 +238,7 @@ private fun BoxScope.TabsView(screen: MainScreen) {
             modifier = Modifier
                 .weight(0.45f)
                 .background(
-                    if (tabScreen.value is CartScreen)
+                    if (tabScreen.value is OrdersScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .height(tabBarHeight)
@@ -249,7 +249,7 @@ private fun BoxScope.TabsView(screen: MainScreen) {
             modifier = modifier
                 .weight(1f)
                 .background(
-                    if (tabScreen.value is CartScreen)
+                    if (tabScreen.value is OrdersScreen)
                         primaryLight else secondaryContainerLight
                 )
                 .clickable {

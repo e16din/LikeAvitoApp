@@ -20,7 +20,7 @@ import me.likeavitoapp.model.check
 import me.likeavitoapp.model.expectIsValid
 import me.likeavitoapp.model.testAll
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
+import me.likeavitoapp.screens.main.MainScreen
 
 
 class PaymentScreen(
@@ -61,10 +61,7 @@ class PaymentScreen(
         recordScenarioStep()
 
         val hasInvalidValue = listOf(state.cardNumber, state.cvvCvc, state.mmYy)
-            .any {
-                println("it.data().text: ${it.data().text}")
-                it.data().text.isEmpty() || it.hasFail()
-            }
+            .any { it.data().text.isEmpty() || it.hasFail() }
         if (hasInvalidValue) {
             state.validationEnabled.post(true)
             return
@@ -85,16 +82,23 @@ class PaymentScreen(
             val isSuccess = order != null
             return@act Pair(Unit, isSuccess).also {
                 if (isSuccess) {
-                    navigator.startScreen(
-                        screen = OrderDetailsScreen(order, navigator),
-                        clearAfterFirst = true
+                    get.sources().app.rootScreen.navigator.startScreen(
+                        screen = MainScreen().apply {
+                            initialTabScreen = ordersScreen
+                        },
+                        clearAll = true
                     )
                 }
             }
         }
     }
 
-    fun reformat(value: TextFieldValue, mask: String, delimiter:Char = ' ', removeOneChar: Boolean): TextFieldValue {
+    fun reformat(
+        value: TextFieldValue,
+        mask: String,
+        delimiter: Char = ' ',
+        removeOneChar: Boolean
+    ): TextFieldValue {
         val cursor = '|'
         var result = format(
             text = stringBuilder.append(value.text).insert(value.selection.start, cursor)

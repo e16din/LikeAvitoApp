@@ -624,7 +624,7 @@ class MockDataProvider {
         val order = Order(
             ad = ads.first { it.id == adId },
             type = type,
-            state = Order.State.Edit
+            state = Order.State.Init
         )
         orders.add(order)
         return order

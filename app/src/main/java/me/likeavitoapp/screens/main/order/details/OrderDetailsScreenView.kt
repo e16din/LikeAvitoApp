@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.get
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -49,7 +50,7 @@ fun OrderDetailsScreenPreview() {
     LikeAvitoAppTheme {
         OrderDetailsScreenView(
             OrderDetailsScreen(
-                order = MockDataProvider().createOrder(),
+                order = MockDataProvider().createOrder(0, Order.Type.Delivery),
                 navigator = mockScreensNavigator(),
             )
         )

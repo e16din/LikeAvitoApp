@@ -34,17 +34,17 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.AdView
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun FavoritesScreenProvider(screen: FavoritesScreen, tabsRootScreen: TabsRootScreen) {
+fun FavoritesScreenProvider(screen: FavoritesScreen, tabsNavigator: ScreensNavigator) {
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
     }
@@ -54,7 +54,7 @@ fun FavoritesScreenProvider(screen: FavoritesScreen, tabsRootScreen: TabsRootScr
             FavoritesScreenView(screen)
         }
 
-        NextTabProvider(screen, tabsRootScreen)
+        NextTabProvider(screen, tabsNavigator)
     }
 }
 

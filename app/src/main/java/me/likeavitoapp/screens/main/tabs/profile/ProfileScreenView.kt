@@ -33,25 +33,25 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
 @Composable
-fun ProfileScreenProvider(screen: ProfileScreen, tabsRootScreen: TabsRootScreen) {
+fun ProfileScreenProvider(screen: ProfileScreen, tabsNavigator: ScreensNavigator) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(modifier = Modifier.fillMaxSize()) {
             ProfileScreenView(screen)
         }
 
-        NextTabProvider(screen, tabsRootScreen)
+        NextTabProvider(screen, tabsNavigator)
     }
 
     DisposableEffect(Unit) {

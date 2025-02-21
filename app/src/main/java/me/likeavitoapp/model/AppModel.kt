@@ -43,7 +43,7 @@ class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = 
                 screens.add(first)
             }
 
-            log("$tag.startScreen: ${screen.javaClass.simpleName}")
+            log("$tag.startScreen: ${screen.className()}")
             screens.add(screen)
             this@ScreensNavigator.screen.post(screen)
         }
@@ -123,7 +123,7 @@ data class Order(val ad: Ad, val type: Type, val state: State) {
     }
 
     enum class State {
-        Edit,
+        Init,
         Active,
         Archived
     }

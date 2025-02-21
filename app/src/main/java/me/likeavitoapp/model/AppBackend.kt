@@ -245,9 +245,16 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             )
         }
 
-        suspend fun getOrders(userId: Long): Result<List<Order>> {
+        suspend fun getActiveOrders(): Result<List<Order>> {
             delay(300)
-            return Result.success(mockDataProvider.orders)
+            val orders = mockDataProvider.orders.filter { it.state == Order.State.Active }
+            return Result.success(orders)
+        }
+
+        suspend fun getArchivedOrders(): Result<List<Order>> {
+            delay(900)
+            val orders = mockDataProvider.orders.filter { it.state == Order.State.Archived }
+            return Result.success(orders)
         }
 
     }
