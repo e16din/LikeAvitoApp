@@ -117,6 +117,11 @@ data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
 
 data class Order(val ad: Ad, val type: Type, val state: State) {
+    enum class Type {
+        Pickup,
+        Delivery
+    }
+
     enum class State {
         Edit,
         Active,
@@ -140,10 +145,7 @@ data class Order(val ad: Ad, val type: Type, val state: State) {
         class Point(val latitude: Double, val longitude: Double)
     }
 
-    sealed class Type(open val name: String) {
-        class Delivery(override val name: String, val address: Ad.Address) : Type(name)
-        class Pickup(override val name: String, val type: PickupPoint.Type) : Type(name)
-    }
+    data class Delivery(val address: Ad.Address)
 }
 
 interface IMessage : ISource {

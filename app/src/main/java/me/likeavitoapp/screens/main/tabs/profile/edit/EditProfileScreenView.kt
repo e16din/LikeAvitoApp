@@ -75,6 +75,10 @@ fun EditProfileScreenProvider(screen: EditProfileScreen) {
         }
     }
 
+//    PickImageHandler { bytes ->
+//        screen.ChangeUserPhotoUseCase(bytes)
+//    }
+
     BackHandler {
         screen.PressBackUseCase()
     }
@@ -93,7 +97,8 @@ fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
     val pickMedia = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
         uri?.let {
             try {
-                val bytes = (activity as MainActivity).contentResolver.openInputStream(uri)?.readBytes()
+                val bytes =
+                    (activity as MainActivity).contentResolver.openInputStream(uri)?.readBytes()
                 screen.ChangeUserPhotoUseCase(bytes)
 
             } catch (error: IOException) {
@@ -106,50 +111,11 @@ fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
     val userPickerEnabled = screen.state.userPickerEnabled.collectAsState()
     val photoUrl = screen.state.user.photoUrl.collectAsState()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        stringResource(R.string.edit_profile_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        screen.ClickToCloseUseCase()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "close"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        screen.ClickToDoneUseCase()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            ContentView(screen, photoUrl)
+    Box(modifier = modifier) {
+        ContentView(screen, photoUrl)
 
-            if (userPickerEnabled.value) {
-                pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
-            }
+        if (userPickerEnabled.value) {
+            pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
     }
 }
@@ -209,7 +175,6 @@ private fun ContentView(
                     onValueChange = {
 
                     })
-//                ContactItem(label = stringResource(R.string.phone_title), value = it, screen = screen)
             }
             screen.state.user.contacts.email?.let {
                 TextField(
@@ -218,7 +183,6 @@ private fun ContentView(
                     onValueChange = {
 
                     })
-//                ContactItem(label = stringResource(R.string.email_title), value = it, screen = screen)
             }
             screen.state.user.contacts.whatsapp?.let {
                 TextField(
@@ -227,7 +191,6 @@ private fun ContentView(
                     onValueChange = {
 
                     })
-//                ContactItem(label = stringResource(R.string.whatsapp_title), value = it, screen = screen)
             }
             screen.state.user.contacts.telegram?.let {
                 TextField(
@@ -236,7 +199,6 @@ private fun ContentView(
                     onValueChange = {
 
                     })
-//                ContactItem(label = stringResource(R.string.telegram_title), value = it, screen = screen)
             }
         }
     }

@@ -3,18 +3,13 @@ package me.likeavitoapp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
-import me.likeavitoapp.model.check
-
-import me.likeavitoapp.model.withTests
 
 fun Any.className(): String {
     return javaClass.simpleName

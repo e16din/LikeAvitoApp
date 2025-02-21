@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -28,15 +30,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
@@ -44,6 +45,9 @@ import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.TextToolbar
+import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -51,17 +55,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.measureTextWidth
+import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.model.runTests
 import me.likeavitoapp.screens.ActionTopBar
-import me.likeavitoapp.screens.SimpleTextField
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -71,6 +77,7 @@ fun PaymentScreenProvider(screen: PaymentScreen) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ActionTopBar(
+            withDoneButton = false,
             title = stringResource(R.string.pay_title),
             onClose = {
                 screen.ClickToCloseUseCase()
@@ -113,13 +120,16 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                             .fillMaxWidth()
                             .padding(start = 24.dp, bottom = 8.dp)
                     ) {
-                        val cvvCvc by state.cvvCvc.output.collectAsState()
-                        val cvvCvcHasFail by state.cvvCvc.fail.collectAsState()
                         PaymentTextField(
-                            screen = screen,
+                            updatableState = state.cvvCvc,
                             validationEnabled = validationEnabled,
-                            value = cvvCvc,
-                            hasFail = cvvCvcHasFail
+                            label = stringResource(R.string.cvv_label),
+                            example = "123",
+                            error = stringResource(R.string.incorrect_cvv_number_label),
+                            onValueChange = { prevValue, newValue ->
+                                screen.ChangeCvvCvcUseCase(newValue)
+                            },
+                            isLastField = true
                         )
                     }
                 }
@@ -155,84 +165,44 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
                                 .width(320.dp)
                                 .padding(horizontal = 24.dp)
                         ) {
-                            Text("Номер карты", style = MaterialTheme.typography.titleSmall)
-
-                            val cardNumber by state.cardNumber.output.collectAsState()
-                            val cardNumberHasFail by state.cardNumber.fail.collectAsState()
 
                             PaymentTextField(
-                                screen = screen,
+                                updatableState = state.cardNumber,
                                 validationEnabled = validationEnabled,
-                                value = cardNumber,
-                                hasFail = cardNumberHasFail
-                            )
-                            SimpleTextField(
-                                modifier = Modifier
-                                    .padding(top = 4.dp)
-                                    .widthIn(0.dp, 320.dp)
-                                    .clip(RoundedCornerShape(16)),
-                                value = cardNumber,
-                                placeholder = { Text("1111 1111 1111 1111") },
-                                onValueChange = {
-                                    if (it.text.length > "1111 1111 1111 1111".length) {
-                                        return@SimpleTextField
-                                    }
 
-                                    val removeOneChar = isRemove(cardNumber, it)
-                                    if (removeOneChar) {
-                                        screen.ChangeCardNumberUseCase(cardNumber, removeOneChar)
-                                    } else {
-                                        screen.ChangeCardNumberUseCase(it, false)
-                                    }
+                                label = stringResource(R.string.card_number_label),
+                                example = "1111 1111 1111 1111",
+                                error = stringResource(R.string.incorrect_card_number_label),
+                                onValueChange = { prevValue, newValue ->
+                                    val removeOneChar = isRemove(prevValue, newValue)
+                                    screen.ChangeCardNumberUseCase(
+                                        value = if (removeOneChar) prevValue else newValue,
+                                        removeOneChar = removeOneChar
+                                    )
                                 },
-                                colors = TextFieldDefaults.colors().copy(
-                                    focusedContainerColor = Color.Transparent,
-                                    focusedTextColor = Color.Black,
-                                    unfocusedTextColor = Color.Black.copy(alpha = 0.6f),
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent
-                                ),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                                requiredWidth = 240.dp
                             )
                         }
+
                         Spacer(Modifier.weight(1f))
+
                         Column(
                             modifier = Modifier
                                 .padding(start = 24.dp, bottom = 8.dp)
                         ) {
-                            Text("Действует до", style = MaterialTheme.typography.titleSmall)
-
-                            val mmYy by state.mmYy.output.collectAsState()
-
-                            SimpleTextField(
-                                modifier = Modifier
-                                    .padding(top = 4.dp, bottom = 8.dp)
-                                    .width(144.dp)
-                                    .clip(RoundedCornerShape(16)),
-                                value = mmYy,
-                                onValueChange = {
-                                    if (it.text.length > "mm/yy".length) {
-                                        return@SimpleTextField
-                                    }
-
-                                    val removeOneChar = isRemove(mmYy, it)
-                                    if (removeOneChar) {
-                                        screen.ChangeMmYyUseCase(mmYy, removeOneChar)
-                                    } else {
-                                        screen.ChangeMmYyUseCase(it, false)
-                                    }
-                                },
-                                placeholder = { Text("mm/yy") },
-                                colors = TextFieldDefaults.colors().copy(
-                                    focusedContainerColor = Color.Transparent,
-                                    focusedTextColor = Color.Black,
-                                    unfocusedTextColor = Color.Black.copy(alpha = 0.6f),
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent
-                                ),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                            PaymentTextField(
+                                updatableState = state.mmYy,
+                                validationEnabled = validationEnabled,
+                                label = stringResource(R.string.mm_yy_label),
+                                example = "mm/yy",
+                                error = stringResource(R.string.incorrect_mm_yy_label),
+                                onValueChange = { prevValue, newValue ->
+                                    val removeOneChar = isRemove(prevValue, newValue)
+                                    screen.ChangeMmYyUseCase(
+                                        value = if (removeOneChar) prevValue else newValue,
+                                        removeOneChar = removeOneChar
+                                    )
+                                }
                             )
                         }
                     }
@@ -252,134 +222,147 @@ fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) 
     }
 }
 
+//TODO: set visual transformation
+// https://stackoverflow.com/a/69064274/6445611
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PaymentTextField(
-    screen: PaymentScreen,
+    updatableState: Worker<TextFieldValue>,
     validationEnabled: Boolean,
-    value: TextFieldValue,
-    hasFail: Boolean,
-) = with(screen) {
-    val localFocusManager = LocalFocusManager.current
+    label: String,
+    example: String,
+    error: String,
+    onValueChange: (prev: TextFieldValue, new: TextFieldValue) -> Unit,
+    requiredWidth: Dp? = null,
+    isLastField: Boolean = false
+) {
+    val value by updatableState.output.collectAsState()
+    val valueHasFail by updatableState.fail.collectAsState()
 
-    var failsCount by remember { mutableIntStateOf(0) }
-    LaunchedEffect(hasFail) {
-        failsCount += 1
-    }
+    val localFocusManager = LocalFocusManager.current
 
     val fieldTextStyle = TextStyle.Default
 
-    BasicTextField(
-        modifier = Modifier
-            .padding(top = 4.dp, bottom = 0.dp)
-            .fillMaxWidth(),
-        value = value,
-        textStyle = fieldTextStyle,
-        onValueChange = {
-            if (it.text.length > "123".length) {
-                return@BasicTextField
+    Column {
+        if (validationEnabled) {
+            Row {
+                val isError = valueHasFail || value.text.isEmpty()
+                val color = if (isError) MaterialTheme.colorScheme.error else Color.Green
+                val text = if (isError) error else stringResource(R.string.valid_label)
+                Icon(
+                    Icons.Default.Info,
+                    "error",
+                    tint = color,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    color = color,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .align(Alignment.CenterVertically),
+                    text = text,
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
+        } else {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
+//        val colors = TextFieldDefaults.colors()
+//        CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
+        CompositionLocalProvider(LocalTextToolbar provides EmptyTextToolbar) {
+        BasicTextField(
+            modifier = Modifier
+                .padding(top = 4.dp, bottom = 0.dp)
+                .fillMaxWidth(),
+            value = value,
+            textStyle = fieldTextStyle,
+            onValueChange = { newValue ->
+                if (newValue.text.length > example.length) {
+                    return@BasicTextField
+                }
 
-            if (it.selection.length == 0) {
-                screen.ChangeCvvCvcUseCase(it)
-            }
-        },
-        decorationBox = { innerTextField ->
-            TextFieldDefaults.DecorationBox(
-                value = "value.text",
-                innerTextField = {
-                    Spacer(Modifier.padding(8.dp))
-                    Box(Modifier) {
-                        Box(
-                            Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(
-                                    horizontal = 16.dp,
-                                    vertical = 6.dp
-                                )
-                                .width(
-                                    measureTextWidth(
-                                        "123",
-                                        fieldTextStyle
+                if (newValue.selection.length == 0) {
+                    onValueChange(updatableState.output.value, newValue)
+                }
+            },
+            decorationBox = { innerTextField ->
+                TextFieldDefaults.DecorationBox(
+                    value = value.text,
+                    innerTextField = {
+                        Spacer(Modifier.padding(8.dp))
+                        Box(Modifier) {
+                            Box(
+                                Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(
+                                        horizontal = 16.dp,
+                                        vertical = 6.dp
                                     )
-                                ),
+                                    .width(
+                                        requiredWidth
+                                            ?: measureTextWidth(example, fieldTextStyle)
+                                    ),
 
-                            ) {
-                            Box(Modifier.align(Alignment.Center)) {
-                                innerTextField()
+                                ) {
+                                Box(Modifier.align(Alignment.Center)) {
+                                    innerTextField()
+                                }
                             }
                         }
-                    }
-                },
-                enabled = true,
-                colors = TextFieldDefaults.colors().copy(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.Black,// MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = Color.Black,//MaterialTheme.colorScheme.outline,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                singleLine = true,
-                visualTransformation = VisualTransformation.None,
-                contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
-                    top = 0.dp,
-                    bottom = 0.dp,
-                    start = 0.dp,
-                    end = 0.dp,
-                ),
-                label = {
-                    if (validationEnabled && hasFail) {
-                        Row(Modifier.padding(bottom = 4.dp)) {
-                            Icon(
-                                Icons.Default.Info,
-                                "error",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Text(
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = "Ожидается число вида \"123\"",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-
-                    } else {
-                        if (failsCount == 0) {
-                            Text(
-                                modifier = Modifier.padding(bottom = 4.dp),
-                                text = stringResource(R.string.cvv_label),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.Info,
-                                "error",
-                                tint = Color.Green
-                            )
-                            Text(
-                                color = Color.Green,
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = stringResource(R.string.valid_label),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
-                },
-                interactionSource = remember { MutableInteractionSource() }
+                    },
+                    enabled = true,
+                    colors = TextFieldDefaults.colors().copy(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedTextColor = Color.Black,// MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = Color.Black,//MaterialTheme.colorScheme.outline,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
+                        top = 0.dp,
+                        bottom = 0.dp,
+                        start = 0.dp,
+                        end = 0.dp,
+                    ),
+                    interactionSource = remember { MutableInteractionSource() }
+                )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = if (isLastField) ImeAction.Done else ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    localFocusManager.moveFocus(FocusDirection.Down)
+                }
             )
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Next
-        ),
-        keyboardActions = KeyboardActions(
-            onNext = {
-                localFocusManager.moveFocus(FocusDirection.Down)
-            }
         )
-    )
+    }
+//    }
+  }
+}
+
+// TODO: create custom TextToolbar
+object EmptyTextToolbar : TextToolbar {
+    override val status: TextToolbarStatus = TextToolbarStatus.Hidden
+
+    override fun hide() {}
+
+    override fun showMenu(
+        rect: Rect,
+        onCopyRequested: (() -> Unit)?,
+        onPasteRequested: (() -> Unit)?,
+        onCutRequested: (() -> Unit)?,
+        onSelectAllRequested: (() -> Unit)?,
+    ) {
+    }
 }
 
 private fun isRemove(
@@ -394,7 +377,8 @@ fun PaymentScreenPreview() {
     get = mockMainSet()
     val screen = PaymentScreen(
         navigator = mockScreensNavigator(),
-        ad = MockDataProvider().ads.first()
+        ad = MockDataProvider().ads.first(),
+        orderType = Order.Type.Pickup
     )
     LikeAvitoAppTheme {
         PaymentScreenProvider(
@@ -442,3 +426,5 @@ fun PaymentScreenPreview() {
 // следует действовать в этих рамках и не добавлять, искусственно, новых
 
 // Лучший код - это код которого нет, а функционал выполняется
+
+

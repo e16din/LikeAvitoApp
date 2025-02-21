@@ -1,7 +1,6 @@
 package me.likeavitoapp.model
 
 import kotlinx.coroutines.CoroutineScope
-import me.likeavitoapp.AppPlatform
 import me.likeavitoapp.MainSet
 import me.likeavitoapp.develop
 import me.likeavitoapp.get
@@ -24,79 +23,55 @@ class TestCase<T>(val input: T, val expectOutput: T? = null, val expectIsValid: 
 infix fun <T> T.expectIsValid(expect: Boolean) = TestCase(input = this, expectIsValid = expect)
 infix fun <T> T.expectOutput(output: T) = TestCase(input = this, expectOutput = output)
 
-inline fun Any.checkList(
-    vararg checks: () -> Boolean,
-    enabled: Boolean = true,
-    onResult: (Boolean) -> Unit = {},
-): Boolean {
-    if (enabled) {
-        println()
-        var log = "* Checks: "
-        checks.forEachIndexed { i, check ->
-            log += "[$i]"
-            if (!check()) {
-                log("$log <-", tag = "")
-                onResult(false)
-                return false
-            }
-        }
-
-        log("$log <-", tag = "")
-        onResult(true)
-        return true
-    }
-
-    return true
-}
-
-inline fun <T> withTests(
-    realInput: T,
+inline fun <T> testAll(
     crossinline outputMaker: (input: T) -> T = { it }, // делаем из инпута аутпут
-    testsEnabled: Boolean = develop,
     testCases: List<TestCase<T>>,
-    withAssert: Boolean = develop,
+    withAssert: Boolean = true,
     crossinline validator: (T) -> Boolean = { true }, // валидируем каждый инпут (реальный и тестовые) (обычно мы это чекаем в if/else)
-    crossinline onDone: (T) -> Unit = {} // в конце выдаем аутпут из реального инпута
-): Pair<T, Boolean> {
-    if (testsEnabled) {
-        var succeedCount = 0
+): Boolean {
+    var succeedCount = 0
 
-        testCases.forEachIndexed { i, it ->
-            val output = outputMaker(it.input)
-            val caseResult = validator(output)
+    testCases.forEachIndexed { i, it ->
+        val output = outputMaker(it.input)
+        val caseResult = validator(output)
 
-            val testResult = if (it.expectIsValid != null)
-                caseResult == it.expectIsValid
-            else
-                output == it.expectOutput
-            val numberInList = "${i + 1}/${testCases.size}"
+        val testResult = if (it.expectIsValid != null)
+            caseResult == it.expectIsValid
+        else
+            output == it.expectOutput
+        val numberInList = "${i + 1}/${testCases.size}"
 
 
-            val logMessage =
-                if (it.expectIsValid != null) {
-                    if (testResult) succeedCount += 1
-                    "Test $numberInList ${if (testResult) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", check(output) ${if (testResult) "==" else "!="} ${it.expectIsValid} }"
-                } else {
-                    if (output == it.expectOutput) succeedCount += 1
-                    "Test $numberInList ${if (output == it.expectOutput) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", $output ${if (output == it.expectOutput) "==" else "!="} ${it.expectOutput} }"
-                }
-
-            log(logMessage, tag = "")
-
-            if (withAssert) {
-                assert(testResult) { logMessage }
+        val logMessage =
+            if (it.expectIsValid != null) {
+                if (testResult) succeedCount += 1
+                "Test $numberInList ${if (testResult) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", check(output) ${if (testResult) "==" else "!="} ${it.expectIsValid} }"
+            } else {
+                if (output == it.expectOutput) succeedCount += 1
+                "Test $numberInList ${if (output == it.expectOutput) "Succeed" else "Failed"} { input: \"${it.input}\", output: \"$output\", $output ${if (output == it.expectOutput) "==" else "!="} ${it.expectOutput} }"
             }
-        }
-        println()
-        log("Result: $succeedCount of ${testCases.size} is succeed!", tag = "")
-    }
 
-    val output = outputMaker(realInput)
-    onDone(output)
-    return Pair(realInput, validator(output))
+        log(logMessage, tag = "")
+
+        if (withAssert) {
+            assert(testResult) { logMessage }
+        }
+    }
+    println()
+    log("Result: $succeedCount of ${testCases.size} is succeed!", tag = "")
+
+    return succeedCount == testCases.size
 }
 
-fun check(function: () -> Boolean) = function
+inline fun check(tag:Any? = null, function: () -> Boolean): Boolean {
+    val result = function()
+
+    tag?.let {
+        log("[ $tag => $result ]")
+    }
+
+    return result
+}
 fun runTests(function: () -> Unit) = function
 
 // NOTE: mocks
@@ -104,7 +79,7 @@ fun runTests(function: () -> Unit) = function
 private val emptyScreenNavigator by lazy { ScreensNavigator() }
 fun mockScreensNavigator() = emptyScreenNavigator
 fun mockMainSet() = MainSet().apply {
-    init(object : IAppPlatform{
+    init(object : IAppPlatform {
         override val appDataStore: IAppPlatform.IAppDataStore
             get() = object : IAppPlatform.IAppDataStore {
                 override suspend fun loadId(): Long? {

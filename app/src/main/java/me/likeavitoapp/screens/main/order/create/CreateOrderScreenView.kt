@@ -28,10 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.MockDataProvider
 import me.likeavitoapp.get
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
-import me.likeavitoapp.screens.main.order.create.CreateOrderScreen.OrderType
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -53,8 +53,14 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
 fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
     val selectedOrderType = state.orderType.collectAsState()
 
+    fun getTextBy(type: Order.Type): String {
+        return when(type) {
+            Order.Type.Pickup -> "Самовывоз"
+            Order.Type.Delivery -> "Доставка"
+        }
+    }
     Column(Modifier.selectableGroup()) {
-        listOf(OrderType.Delivery, OrderType.Pickup).forEach { orderType ->
+        Order.Type.entries.forEach { orderType ->
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -72,18 +78,18 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
                     onClick = null // null recommended for accessibility with screen readers
                 )
                 Text(
-                    text = orderType.text,
+                    text = getTextBy(orderType),
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
         }
 
         when (selectedOrderType.value) {
-            OrderType.Delivery -> {
+            Order.Type.Delivery -> {
                 DeliveryModeView(screen)
             }
 
-            OrderType.Pickup -> {
+            Order.Type.Pickup -> {
                 PickupModeView(screen)
             }
         }
@@ -115,7 +121,7 @@ private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
 
     val selectedPickupPoint = state.selectedPickupPoint.collectAsState()
 
-    if (state.ad.isPickupEnabled) {
+    if (ad.isPickupEnabled) {
         Box(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -148,7 +154,7 @@ fun CreateOrderScreenPreview() {
                 ad = MockDataProvider().ads.first(),
                 navigator = mockScreensNavigator(),
             ).apply {
-                state.orderType.post(OrderType.Pickup, get.scope())
+                state.orderType.post(Order.Type.Pickup, get.scope())
             }
         )
     }

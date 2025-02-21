@@ -27,6 +27,8 @@ import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.auth.AuthScreenProvider
 import me.likeavitoapp.screens.main.MainScreen
 import me.likeavitoapp.screens.main.MainScreenProvider
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
 import me.likeavitoapp.screens.splash.SplashScreen
 import me.likeavitoapp.screens.splash.SplashScreenProvider
 import me.likeavitoapp.ui.theme.AppTypography

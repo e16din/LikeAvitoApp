@@ -620,15 +620,14 @@ class MockDataProvider {
         PickupPoint(30, "Улица Станиславского, 30", 11, 20, PickupPoint.Point(55.7539, 37.6208))
     )
 
-    fun createOrder(): Order {
-        return Order(
-            ad = ads.first(),
-            type = Order.Type.Delivery(name = "Почта России", address =
-                Ad.Address(
-                    address = "Какой-то адрес"
-                )),
+    fun createOrder(adId:Long, type: Order.Type): Order {
+        val order = Order(
+            ad = ads.first { it.id == adId },
+            type = type,
             state = Order.State.Edit
         )
+        orders.add(order)
+        return order
     }
 
 }

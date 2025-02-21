@@ -234,21 +234,20 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun order(
             adId: Long,
-            type: Order.Type
-        ): Result<Boolean> {
-            TODO("Not yet implemented")
+            type: Order.Type,
+            cardNumber: String,
+            mmYy: String,
+            cvvCvc: String
+        ): Result<Order> {
+            delay(700)
+            return Result.success(
+                mockDataProvider.createOrder(adId, type)
+            )
         }
 
         suspend fun getOrders(userId: Long): Result<List<Order>> {
             delay(300)
             return Result.success(mockDataProvider.orders)
-        }
-
-        suspend fun pay(ad: Ad, cardNumber: String, mmYy: String, cvvCvc: String): Result<Order> {
-            delay(700)
-            return Result.success(
-                mockDataProvider.createOrder()
-            )
         }
 
     }

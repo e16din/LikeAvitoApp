@@ -22,6 +22,7 @@ import me.likeavitoapp.R
 @OptIn(ExperimentalMaterial3Api::class)
 inline fun ActionTopBar(
     title:String,
+    withDoneButton:Boolean = true,
     crossinline onClose: () -> Unit,
     crossinline onDone: () -> Unit,
     crossinline content: @Composable (PaddingValues) -> Unit
@@ -53,14 +54,16 @@ inline fun ActionTopBar(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        onDone()
+                    if(withDoneButton) {
+                        IconButton(onClick = {
+                            onDone()
 
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Localized description"
-                        )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Localized description"
+                            )
+                        }
                     }
                 },
             )

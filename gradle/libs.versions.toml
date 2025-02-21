@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.35.0-alpha"
-agp = "8.10.0-alpha04"
+agp = "8.10.0-alpha05"
 coilCompose = "3.0.4"
 coilNetworkKtor3 = "3.0.4"
 datastorePreferences = "1.1.2"
@@ -9,22 +9,16 @@ coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-appcompat = "1.7.0"
 kotlinxCoroutinesTest = "1.6.0"
 mapsMobile = "4.10.1-full"
 material = "1.12.0"
-constraintlayout = "2.2.0"
-navigationFragmentKtx = "2.8.6"
-navigationUiKtx = "2.8.6"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
-composeBom = "2025.01.01"
-navigationCompose = "2.8.6"
+composeBom = "2025.02.00"
 ktor = "3.0.3"
-lottie = "5.0.3"
 playServicesLocation = "21.3.0"
 serialization = "2.1.0"
-uiTextGoogleFonts = "1.7.7"
+uiTextGoogleFonts = "1.7.8"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -33,18 +27,13 @@ androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-f
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil3-coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 yandex-maps-mobile = { module = "com.yandex.android:maps.mobile", version.ref = "mapsMobile" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
-androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -55,7 +44,6 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]

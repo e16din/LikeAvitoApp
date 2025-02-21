@@ -1,7 +1,7 @@
 package me.likeavitoapp
 
 import me.likeavitoapp.model.expectOutput
-import me.likeavitoapp.model.withTests
+import me.likeavitoapp.model.testAll
 import org.junit.Test
 
 
@@ -25,10 +25,8 @@ class UtilsTests {
             return result
         }
 
-        withTests(
-            realInput = "1234|",
+        testAll(
             outputMaker = { test(it) },
-            testsEnabled = true,
             withAssert = true,
             testCases = listOf(
                 " " expectOutput "|",
@@ -70,10 +68,8 @@ class UtilsTests {
             return result
         }
 
-        withTests(
-            realInput = "1234|",
+        testAll(
             outputMaker = { test(it) },
-            testsEnabled = true,
             withAssert = true,
             testCases = listOf(
                 " " expectOutput "|",

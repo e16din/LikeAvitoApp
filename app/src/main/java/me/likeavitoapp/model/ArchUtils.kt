@@ -95,13 +95,22 @@ class Worker<T>(initial: T) {
     var working = UpdatableState(false)
     var fail = UpdatableState(false)
 
+    var isDoOnceCalled = false
+
     fun resetWith(newData: T) {
         output.post(newData)
         working.post(false, ifNew = true)
         fail.post(false, ifNew = true)
     }
 
-    fun worker() = this
+    inline fun worker(doOnce: () -> Unit = {}): Worker<T> {
+        if (!isDoOnceCalled) {
+            doOnce()
+            isDoOnceCalled = true
+        }
+        return this
+    }
+
     fun data() = output.value
     fun hasFail() = fail.value
 }

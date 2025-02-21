@@ -41,5 +41,10 @@
     <string name="pay_title">Оплатить</string>
     <string name="pay_button">Оплатить</string>
     <string name="cvv_label">три цифры с обратной стороны карты</string>
+    <string name="card_number_label">Номер карты</string>
     <string name="valid_label">Верно</string>
+    <string name="incorrect_cvv_number_label">Ожидается число вида: \"123\"</string>
+    <string name="incorrect_card_number_label">Ожидается номер карты вида: \n\"1111 1111 1111 1111\"</string>
+    <string name="incorrect_mm_yy_label">Ожидается строка вида: \"12/34\"</string>
+    <string name="mm_yy_label">Действует до</string>
 </resources>
