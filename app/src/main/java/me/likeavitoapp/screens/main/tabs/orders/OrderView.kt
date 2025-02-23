@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -144,6 +145,7 @@ fun OrderView(
                 )
             }
 
+            val context = LocalContext.current
             Row(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
                 IconButton(
                     onClick = {
@@ -151,7 +153,7 @@ fun OrderView(
                             order.pickupPoint.address
                         else
                             order.ad.address?.data ?: ""
-                        screen.ClickToAddressUseCase(address)
+                        screen.ClickToAddressUseCase(address, context)
                     },
                     modifier = Modifier.background(MaterialTheme.colorScheme.primary)
                 ) {

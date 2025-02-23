@@ -4,8 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,14 +22,18 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,7 +62,7 @@ fun SearchBarView(screen: SearchScreen) {
     fun isExpanded(): Boolean = !searchTips.isEmpty()
 
     Column(
-        modifier = Modifier
+        modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         SearchBar(
             inputField = {
@@ -123,7 +130,7 @@ fun SearchBarView(screen: SearchScreen) {
         AnimatedVisibility(!hasSelectedCategory()) {
             LazyHorizontalStaggeredGrid(
                 modifier = Modifier
-                    .padding(vertical = 16.dp)
+                    .padding(top = 16.dp)
                     .height(136.dp)
                     .fillMaxWidth(),
                 rows = StaggeredGridCells.Fixed(2),
@@ -133,6 +140,7 @@ fun SearchBarView(screen: SearchScreen) {
             ) {
                 items(categories.toMutableStateList()) { category ->
                     Card(
+                        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.primary),
                         modifier = Modifier
                             .clickable {
                                 screen.searchBar.ClickToCategoryUseCase(category)
@@ -140,21 +148,43 @@ fun SearchBarView(screen: SearchScreen) {
                     ) {
                         Text(
                             modifier = Modifier.padding(16.dp),
-                            text = category.name
+                            text = category.name,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
             }
         }
 
-        AnimatedVisibility(visible = hasSelectedCategory()) {
-            Text(
-                text = selectedCategory?.name ?: "",
-                modifier = Modifier
-                    .background(Color.Yellow)
-                    .padding(vertical = 4.dp, horizontal = 16.dp)
-                    .fillMaxWidth()
-            )
+        AnimatedVisibility(hasSelectedCategory()) {
+            Box(Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)) {
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = {
+                        screen.searchBar.ClickToSelectedCategoryUseCase()
+                    }) {
+
+                    Text(
+                        text = selectedCategory?.name ?: "",
+                        modifier = Modifier
+                            .padding(vertical = 4.dp, horizontal = 16.dp)
+                    )
+                }
+
+                Icon(
+                    Icons.Default.Close,
+                    "clear",
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .height(24.dp)
+                )
+
+            }
         }
     }
 }

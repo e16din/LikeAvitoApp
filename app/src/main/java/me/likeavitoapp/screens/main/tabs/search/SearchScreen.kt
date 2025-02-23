@@ -208,6 +208,12 @@ class SearchScreen(
 
             ChangeSearchQueryUseCase("")
         }
+
+        fun ClickToSelectedCategoryUseCase() {
+            recordScenarioStep()
+
+            searchSettingsPanel.state.selectedCategory.post(null)
+        }
     }
 
     inner class SearchSettingsPanel {

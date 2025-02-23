@@ -1,6 +1,7 @@
 package me.likeavitoapp
 
 import android.content.Context
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
@@ -173,15 +174,18 @@ fun measureTextWidth(text: String, style: TextStyle = TextStyle.Default): Dp {
     return with(LocalDensity.current) { widthInPixels.toDp() }
 }
 
-fun Context.launchCustomTabs(url: String, useIncognito: Boolean? = false) {
-    CustomTabsIntent.Builder().build().apply {
-        if (useIncognito == true) {
-            intent.putExtra(
-                "com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB",
-                true
-            )
-        }
-    }.launchUrl(this, url.toUri())
+fun Context.launchCustomTabs(
+    url: String,
+    colors: CustomTabColorSchemeParams = CustomTabColorSchemeParams.Builder().build()
+) {
+    with(
+        CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(colors)
+            .build()
+    ) {
+        intent.setPackage("com.android.chrome")
+        launchUrl(this@launchCustomTabs, url.toUri())
+    }
 }
 
 // NOTE: for debug

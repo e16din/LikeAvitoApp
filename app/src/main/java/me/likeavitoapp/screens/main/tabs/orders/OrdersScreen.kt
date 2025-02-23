@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.main.tabs.orders
 
+import android.content.Context
 import me.likeavitoapp.get
 import me.likeavitoapp.launchCustomTabs
 import me.likeavitoapp.model.IScreen
@@ -48,10 +49,10 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         }
     }
 
-    fun ClickToAddressUseCase(address: String) {
+    fun ClickToAddressUseCase(address: String, context: Context) {
         recordScenarioStep(address)
 
-        get.appContext().launchCustomTabs("https://yandex.ru/maps/?text=$address")
+        context.launchCustomTabs("https://yandex.ru/maps/?text=$address")
     }
 
     fun ClickToAdUseCase(order: Order) {
