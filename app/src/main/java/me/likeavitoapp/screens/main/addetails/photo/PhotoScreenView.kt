@@ -2,7 +2,6 @@ package me.likeavitoapp.screens.main.addetails.photo
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Surface
@@ -28,8 +27,6 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
-import kotlin.ranges.coerceIn
-import kotlin.ranges.rangeTo
 
 @Composable
 fun PhotoScreenProvider(screen: PhotoScreen) {

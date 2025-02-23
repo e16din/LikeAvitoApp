@@ -2,17 +2,15 @@ package me.likeavitoapp.screens.main.tabs.profile
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import me.likeavitoapp.UnauthorizedException
+import me.likeavitoapp.get
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.User
-
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 
@@ -33,8 +31,8 @@ class ProfileScreen(
         recordScenarioStep()
 
         val clipboard = get.appContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText(label, value);
-        clipboard.setPrimaryClip(clip);
+        val clip = ClipData.newPlainText(label, value)
+        clipboard.setPrimaryClip(clip)
     }
 
     fun ClickToEditProfileUseCase() {

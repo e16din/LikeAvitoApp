@@ -13,10 +13,7 @@ import me.likeavitoapp.log
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
-
-operator fun <T> UpdatableState<T>.getValue(thisRef: Any?, property: KProperty<*>): T = value
 
 class UpdatableState<T>(initial: T) {
 
@@ -48,18 +45,14 @@ class UpdatableState<T>(initial: T) {
         }
     }
 
-    fun free(key: Any) {
-        callbacks.remove(key)
-    }
-
     fun repostTo(state: UpdatableState<T>, key: Any = Unit) {
         listen(key) { value ->
             state.post(value)
         }
     }
 
-    fun freeAll() {
-        callbacks.clear()
+    fun free(key: Any) {
+        callbacks.remove(key)
     }
 }
 

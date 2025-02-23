@@ -20,7 +20,6 @@ import me.likeavitoapp.model.check
 import me.likeavitoapp.model.expectIsValid
 import me.likeavitoapp.model.testAll
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.MainScreen
 
 
 class PaymentScreen(
@@ -80,10 +79,8 @@ class PaymentScreen(
 
             val order = result.getOrNull()
             val isSuccess = order != null
-            log("isSucess = $isSuccess")
             return@act Pair(Unit, isSuccess).also {
                 if (isSuccess) {
-                    log("also = $isSuccess")
                     get.sources().app.mainScreen.returnToOrdersTab()
                 }
             }
@@ -116,7 +113,7 @@ class PaymentScreen(
     fun ChangeCardNumberUseCase(value: TextFieldValue, removeOneChar: Boolean) {
         recordScenarioStep(value.text)
 
-        log("Change card number use case: ${value}")
+        log("Change card number use case: $value")
         log("should to show card number in format: 1111 1111 1111 1111")
 
         fun formatCardNumber(value: TextFieldValue): TextFieldValue {

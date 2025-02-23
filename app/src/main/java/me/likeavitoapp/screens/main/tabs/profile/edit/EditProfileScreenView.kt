@@ -17,20 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -38,21 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.io.IOException
 import me.likeavitoapp.MainActivity
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
-import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.log
+import me.likeavitoapp.mocks.MockDataProvider
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.ActualAsyncImage
-import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
@@ -201,26 +192,6 @@ private fun ContentView(
                     })
             }
         }
-    }
-}
-
-@Composable
-fun ContactItem(label: String, value: String, screen: ProfileScreen) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                screen.ClickToContactUseCase(label, value)
-            }) {
-        Text(
-            text = label,
-            style = AppTypography.labelMedium,
-        )
-        Text(
-            text = value,
-            style = AppTypography.bodyMedium,
-        )
-        Spacer(Modifier.size(16.dp))
     }
 }
 

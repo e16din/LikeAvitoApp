@@ -1,28 +1,20 @@
 package me.likeavitoapp
 
 import android.content.Context
-import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
-import androidx.core.net.toUri
 
 fun Any.className(): String {
     return javaClass.simpleName
-}
-
-suspend inline fun <T> MutableState<T>.setUi(value: T) {
-    withContext(Dispatchers.Main) {
-        this@setUi.value = value
-    }
 }
 
 @Deprecated("Use Worker<*>.act { } instead")

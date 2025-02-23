@@ -19,7 +19,6 @@ class CreateOrderScreen(
     class State {
         val orderType = UpdatableState(Order.Type.Delivery)
         var selectedPickupPoint = UpdatableState<PickupPoint?>(null)
-        var hasPayment = UpdatableState(false)
     }
 
     val state = State()

@@ -1,15 +1,14 @@
 package me.likeavitoapp.screens.main
 
 import me.likeavitoapp.className
-import me.likeavitoapp.log
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.InitialScreen
+import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
-import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -57,10 +56,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.measureTextWidth
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.collectAsState

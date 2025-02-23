@@ -91,7 +91,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
             val pagerState = rememberPagerState(pageCount = {
                 ad.photoUrls.size
             })
-            Box() {
+            Box {
                 HorizontalPager(state = pagerState) { page ->
 
                     val url = ad.photoUrls[page]
