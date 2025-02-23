@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,7 +54,6 @@ fun OrdersScreenProvider(screen: OrdersScreen, tabsNavigator: ScreensNavigator) 
 fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val activeOrders by state.activeOrders.output.collectAsState()
     val archivedOrders by state.archivedOrders.output.collectAsState()
-    val newMessagesCount = state.newMessagesCount.output.collectAsState()
     val tabIndex by state.tabIndex.collectAsState()
 
 
@@ -72,11 +72,11 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
         }
         when (tabIndex) {
             0 -> LazyColumn {
-                items(activeOrders.toMutableStateList()) {
+                items(activeOrders.toMutableStateList()) { order ->
                     OrderView(
                         screen = screen,
-                        order = it,
-                        newMessagesCount = newMessagesCount
+                        order = order,
+                        newMessagesCount = order.ad.newMessagesCount.output.collectAsState()
                     )
                 }
             }
@@ -85,13 +85,12 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
                     OrderView(
                         screen = screen,
                         order = it,
-                        newMessagesCount = newMessagesCount
+                        newMessagesCount = remember { mutableIntStateOf(0) }
                     )
                 }
             }
         }
     }
-
 }
 
 @Preview

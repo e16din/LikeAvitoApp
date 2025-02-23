@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -23,22 +24,34 @@ class AppPlatform : IAppPlatform, Application() {
 
     inner class AuthDataStore() : IAppPlatform.IAppDataStore {
         private val USER_ID_KEY = longPreferencesKey("user_id")
+        private val CATEGORY_ID_KEY = intPreferencesKey("category_id")
         private val TOKEN_KEY = stringPreferencesKey("token")
 
-        override suspend fun loadId(): Long? {
+        override suspend fun loadUserId(): Long? {
             val prefs = dataStore.data.first()
             return prefs[USER_ID_KEY]
         }
 
-        override suspend fun saveId(userId: Long) {
+        override suspend fun saveUserId(id: Long) {
             dataStore.edit { settings ->
-                settings[USER_ID_KEY] = userId
+                settings[USER_ID_KEY] = id
             }
         }
 
         override suspend fun loadToken(): String? {
             val prefs = dataStore.data.first()
             return prefs[TOKEN_KEY]
+        }
+
+        override suspend fun saveCategoryId(id: Int) {
+            dataStore.edit { settings ->
+                settings[CATEGORY_ID_KEY] = id
+            }
+        }
+
+        override suspend fun loadCategoryId(): Int? {
+            val prefs = dataStore.data.first()
+            return prefs[CATEGORY_ID_KEY]
         }
 
         override suspend fun saveToken(token: String) {

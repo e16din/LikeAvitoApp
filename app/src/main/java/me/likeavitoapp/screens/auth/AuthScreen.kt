@@ -89,7 +89,7 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
             if (loginData?.user != null) {
                 get.sources().app.user.post(loginData.user)
 
-                get.sources().platform.appDataStore.saveId(loginData.user.id)
+                get.sources().platform.appDataStore.saveUserId(loginData.user.id)
 
                 val mainScreen = MainScreen()
                 get.sources().app.mainScreen = mainScreen

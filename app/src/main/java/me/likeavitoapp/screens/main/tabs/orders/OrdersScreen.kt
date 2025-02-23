@@ -17,7 +17,6 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
 
     class State {
         val activeOrders = Worker<List<Order>>(emptyList())
-        val newMessagesCount = Worker<Int>(0)
         val tabIndex = UpdatableState<Int>(0)
         val archivedOrders = Worker<List<Order>>(emptyList())
     }
@@ -29,12 +28,23 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
 
         state.activeOrders.act {
             val result = get.sources().backend.orderService.getActiveOrders()
+
+            result.getOrNull()?.let { orders ->
+                orders.forEach { order ->
+                    order.ad.newMessagesCount.act {
+                        val result = get.sources().backend.adsService.getNewMessagesCount()
+                        return@act Pair(result.getOrNull() ?: 0, result.isSuccess)
+                    }
+                }
+            }
+
+
             return@act Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
         }
 
-        state.newMessagesCount.act {
-            val result = get.sources().backend.adsService.getNewMessagesCount()
-            return@act Pair(result.getOrNull() ?: 0, result.isSuccess)
+        state.archivedOrders.act {
+            val result = get.sources().backend.orderService.getArchivedOrders()
+            return@act Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
         }
     }
 

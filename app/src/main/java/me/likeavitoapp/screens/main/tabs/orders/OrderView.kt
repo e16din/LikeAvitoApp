@@ -193,31 +193,33 @@ fun OrderView(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(start = 16.dp, end = 8.dp, bottom = 12.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                    .clickable {
-                        screen.ClickToMessagesUseCase(order)
-                    }
-            ) {
-                Text(
-                    text = if (newMessagesCount.value > 0)
-                        stringResource(R.string.new_messages_label, newMessagesCount.value)
-                    else
-                        stringResource(R.string.move_to_chat_label),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier,
-                )
-                Icon(
-                    modifier = Modifier.padding(start = 12.dp),
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "messageIcon",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            if (order.state == Order.State.Active) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(start = 16.dp, end = 8.dp, bottom = 12.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clickable {
+                            screen.ClickToMessagesUseCase(order)
+                        }
+                ) {
+                    Text(
+                        text = if (newMessagesCount.value > 0)
+                            stringResource(R.string.new_messages_label, newMessagesCount.value)
+                        else
+                            stringResource(R.string.move_to_chat_label),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier,
+                    )
+                    Icon(
+                        modifier = Modifier.padding(start = 12.dp),
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "messageIcon",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     }

@@ -17,6 +17,7 @@ import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.model.act
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -57,23 +58,28 @@ class SearchScreen(
         )
     }
 
-    suspend fun loadCategories() = with(searchSettingsPanel.state) {
-        categories.load(
-            loading = {
-                return@load get.sources().backend.adsService.getCategories()
-            },
-            onSuccess = { newCategories ->
-                categories.output.post(newCategories)
+    suspend fun loadCategories() = with(searchSettingsPanel) {
+        state.categories.act {
+            val result = get.sources().backend.adsService.getCategories()
+            val categories = result.getOrNull() ?: emptyList()
+
+            val selectedCategoryId = get.sources().platform.appDataStore.loadCategoryId()
+            selectedCategoryId?.let { selected ->
+                categories.firstOrNull { it.id == selected }?.let {
+                    searchSettingsPanel.state.selectedCategory.post(it)
+                }
             }
-        )
+
+            return@act Pair(categories, result.isSuccess)
+        }
     }
 
     fun StartScreenUseCase() {
         recordScenarioStep()
 
         val ads = state.ads.output.value
-        val isInited = ads.isEmpty()
-        if (isInited) {
+        val needToInit = ads.isEmpty()
+        if (needToInit) {
             get.scope().launchWithHandler {
                 loadCategories()
                 loadAds()
@@ -84,7 +90,6 @@ class SearchScreen(
                     timersMap[it.id] = startReserveTimer(it)
                 }
             }
-
         }
     }
 
@@ -131,6 +136,10 @@ class SearchScreen(
             recordScenarioStep()
 
             get.scope().launchWithHandler {
+                with(get.sources()) {
+                    platform.appDataStore.saveCategoryId(category.id)
+                }
+
                 searchSettingsPanel.state.selectedCategory.post(category)
                 loadAds()
             }

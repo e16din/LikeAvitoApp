@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -33,10 +34,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
+import me.likeavitoapp.get
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.model.mockMainSet
+import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreenView
+import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,12 +52,9 @@ fun SearchBarView(screen: SearchScreen) {
     val query by screen.searchBar.state.query.collectAsState()
     val searchTips by screen.searchBar.state.searchTips.output.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
-    val categoriesSource = screen.searchSettingsPanel.state.categories.output.collectAsState()
-    val categories = remember { categoriesSource.value.toMutableStateList() }
-    val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState()
+    val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
 
-
-    fun hasSelectedCategory(): Boolean = selectedCategory?.id != 0
+    fun hasSelectedCategory(): Boolean = selectedCategory != null
     fun isExpanded(): Boolean = !searchTips.isEmpty()
 
     Column(
@@ -113,43 +118,36 @@ fun SearchBarView(screen: SearchScreen) {
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(searchTips) {
-
+                    Text(it)
                 }
             }
         }
 
-        AnimatedVisibility(visible = !hasSelectedCategory()) {
-            Column(
+        AnimatedVisibility(!hasSelectedCategory()) {
+            LazyHorizontalStaggeredGrid(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
                     .height(136.dp)
+                    .fillMaxWidth(),
+                rows = StaggeredGridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalItemSpacing = 8.dp,
+                contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                LazyHorizontalStaggeredGrid(
-                    modifier = Modifier.wrapContentHeight(),
-                    rows = StaggeredGridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalItemSpacing = 8.dp,
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    items(categories.size) { index ->
-                        Card(
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .clickable {
-                                    screen.searchBar.ClickToCategoryUseCase(
-                                        categories[index]
-                                    )
-                                }
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(16.dp),
-                                text = categories[index].name
-                            )
-                        }
+                items(categories.toMutableStateList()) { category ->
+                    Card(
+                        modifier = Modifier
+                            .clickable {
+                                screen.searchBar.ClickToCategoryUseCase(category)
+                            }
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = category.name
+                        )
                     }
                 }
             }
-
         }
 
         AnimatedVisibility(visible = hasSelectedCategory()) {
@@ -161,5 +159,20 @@ fun SearchBarView(screen: SearchScreen) {
                     .fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchBarPreview() {
+    get = mockMainSet()
+    val screen = SearchScreen(
+        navigator = mockScreensNavigator(),
+    ).apply {
+        searchSettingsPanel.state.categories.output.post(MockDataProvider().categories.toMutableStateList())
+    }
+
+    LikeAvitoAppTheme {
+        SearchBarView(screen)
     }
 }

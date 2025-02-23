@@ -79,17 +79,25 @@ fun runTests(function: () -> Unit) = function
 private val emptyScreenNavigator by lazy { ScreensNavigator() }
 fun mockScreensNavigator() = emptyScreenNavigator
 fun mockMainSet() = MainSet().apply {
+    appBackend = AppBackend() // NOTE: you may change it for any test
     init(object : IAppPlatform {
         override val appDataStore: IAppPlatform.IAppDataStore
             get() = object : IAppPlatform.IAppDataStore {
-                override suspend fun loadId(): Long? {
+                override suspend fun loadUserId(): Long? {
                     return null
                 }
 
-                override suspend fun saveId(userId: Long) {
+                override suspend fun saveUserId(id: Long) {
                 }
 
                 override suspend fun loadToken(): String? {
+                    return null
+                }
+
+                override suspend fun saveCategoryId(id: Int) {
+                }
+
+                override suspend fun loadCategoryId(): Int? {
                     return null
                 }
 

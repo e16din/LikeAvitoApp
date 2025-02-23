@@ -25,9 +25,9 @@ const val develop = true
 var get = MainSet()
 
 class MainSet {
-    private var appModel: AppModel? = null
-    private var appBackend: AppBackend? = null
-    private var appPlatform: IAppPlatform? = null
+    var appModel: AppModel? = null
+    var appBackend: AppBackend? = null
+    var appPlatform: IAppPlatform? = null
 
     private var actualScope: CoroutineScope? = null
     private var actualDataSources: DataSources? = null

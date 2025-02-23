@@ -108,7 +108,8 @@ data class Ad(
     val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     val timerLabel: UpdatableState<String> = UpdatableState(""),
     var reservedTimeMs: Long?,
-    var isOrdered: Boolean = false
+    var isOrdered: Boolean = false,
+    var newMessagesCount : Worker<Int> = Worker<Int>(0)
 ) : ISource {
     data class Address(val data: String)
     data class Owner(

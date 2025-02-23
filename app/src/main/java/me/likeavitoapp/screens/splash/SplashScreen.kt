@@ -24,7 +24,7 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
             state.contentEnabled.post(true)
 
             get.sources().backend.token = get.sources().platform.appDataStore.loadToken()
-            val userId = get.sources().platform.appDataStore.loadId()
+            val userId = get.sources().platform.appDataStore.loadUserId()
             var isAuthorized = false
             if (userId != null) {
                 val result = get.sources().backend.userService.getUser(userId)

@@ -116,8 +116,6 @@ fun SearchScreenPreview() {
     }
 
     LikeAvitoAppTheme {
-        SearchScreenView(
-            screen
-        )
+        SearchScreenView(screen)
     }
 }
