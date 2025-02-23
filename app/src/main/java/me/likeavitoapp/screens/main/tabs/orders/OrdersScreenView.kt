@@ -2,18 +2,27 @@ package me.likeavitoapp.screens.main.tabs.orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import me.likeavitoapp.R
 import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
 import me.likeavitoapp.model.Order
@@ -43,16 +52,46 @@ fun OrdersScreenProvider(screen: OrdersScreen, tabsNavigator: ScreensNavigator) 
 @Composable
 fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val activeOrders by state.activeOrders.output.collectAsState()
+    val archivedOrders by state.archivedOrders.output.collectAsState()
     val newMessagesCount = state.newMessagesCount.output.collectAsState()
-    LazyColumn {
-        items(activeOrders.toMutableStateList()) {
-            OrderView(
-                screen = screen,
-                order = it,
-                newMessagesCount = newMessagesCount
-            )
+    val tabIndex by state.tabIndex.collectAsState()
+
+
+    val tabs = listOf(stringResource(R.string.active_tab), stringResource(R.string.archived_tab))
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TabRow(selectedTabIndex = tabIndex) {
+            tabs.forEachIndexed { index, title ->
+                Tab(text = { Text(title) },
+                    selected = tabIndex == index,
+                    onClick = {
+                        screen.ClickToTabUseCase(index)
+                    }
+                )
+            }
+        }
+        when (tabIndex) {
+            0 -> LazyColumn {
+                items(activeOrders.toMutableStateList()) {
+                    OrderView(
+                        screen = screen,
+                        order = it,
+                        newMessagesCount = newMessagesCount
+                    )
+                }
+            }
+            1 -> LazyColumn {
+                items(archivedOrders.toMutableStateList()) {
+                    OrderView(
+                        screen = screen,
+                        order = it,
+                        newMessagesCount = newMessagesCount
+                    )
+                }
+            }
         }
     }
+
 }
 
 @Preview

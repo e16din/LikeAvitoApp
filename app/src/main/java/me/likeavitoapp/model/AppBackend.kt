@@ -17,6 +17,7 @@ import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.mocks.MockDataProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.random.Random
 
 
 class AppBackend(val client: HttpClient = HttpClient()) {
@@ -203,7 +204,13 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(mockDataProvider.getFavorites())
         }
 
-        fun deleteAllFavorites(): Result<Boolean> {
+        suspend fun getNewMessagesCount(): Result<Int> {
+            delay(200)
+            val count = Random(5).nextInt()
+            return Result.success(count)
+        }
+
+        suspend fun deleteAllFavorites(): Result<Boolean> {
             mockDataProvider.ads = mockDataProvider.ads.apply {
                 forEach { it.isFavorite.post(false) }
             }

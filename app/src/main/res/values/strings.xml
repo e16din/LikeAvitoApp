@@ -54,4 +54,8 @@
     <string name="delivary_address_label">Заказ доставят по адресу:</string>
     <string name="pickup_point_address_label">Заказ доставят в пункт выдачи:</string>
     <string name="order_in_place_label">Заказ пришел на пункт выдачи</string>
+    <string name="active_tab">Активные</string>
+    <string name="archived_tab">Выполненные</string>
+    <string name="order_active_state_label">Активен</string>
+    <string name="done_order_status_label">Выполнен</string>
 </resources>

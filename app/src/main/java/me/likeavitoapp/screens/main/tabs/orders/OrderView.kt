@@ -52,11 +52,12 @@ fun OrderView(
     order: Order,
     newMessagesCount: State<Int>
 ) {
+    @Composable
     fun getOrderState(state: Order.State): String {
         return when (state) {
             Order.State.Init -> throw IllegalArgumentException("Use .Active or .Archived here")
-            Order.State.Active -> "Активен"
-            Order.State.Archived -> "Выполнен"
+            Order.State.Active -> stringResource(R.string.order_active_state_label)
+            Order.State.Archived -> stringResource(R.string.done_order_status_label)
         }
     }
     Card(modifier = Modifier) {
