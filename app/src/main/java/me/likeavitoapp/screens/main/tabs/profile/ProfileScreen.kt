@@ -2,6 +2,7 @@ package me.likeavitoapp.screens.main.tabs.profile
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.launchWithHandler
@@ -31,7 +32,7 @@ class ProfileScreen(
     fun ClickToContactUseCase(label:String, value: String) {
         recordScenarioStep()
 
-        val clipboard = get.platform().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard = get.appContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(label, value);
         clipboard.setPrimaryClip(clip);
     }

@@ -59,6 +59,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.browser)
     debugImplementation(libs.leakcanary.android)
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)

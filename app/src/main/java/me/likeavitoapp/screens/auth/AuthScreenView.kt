@@ -56,7 +56,7 @@ fun AuthScreenProvider(screen: AuthScreen) {
         screen.StartScreenUseCase()
     }
 
-    val scenariosEnabled = get.app().rootScreen.state.scenariosEnabled
+    val scenariosEnabled = get.sources().app.rootScreen.state.scenariosEnabled
     if (scenariosEnabled.value) {
         val authScenarios = remember { AuthScenarios(screen) }
         LaunchedEffect(Unit) {

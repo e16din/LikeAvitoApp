@@ -1,6 +1,8 @@
 package me.likeavitoapp.screens.main.tabs.orders
 
+import android.content.Context
 import me.likeavitoapp.get
+import me.likeavitoapp.launchCustomTabs
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.ScreensNavigator
@@ -37,14 +39,15 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
 
     fun ClickToAddressUseCase(address: String) {
         recordScenarioStep(address)
-        TODO("Not yet implemented")
+
+        get.appContext().launchCustomTabs("https://yandex.ru/maps/?text=$address")
     }
 
     fun ClickToAdUseCase(order: Order) {
         recordScenarioStep(order)
 
         navigator.startScreen(
-            AdDetailsScreen(order.ad)
+            AdDetailsScreen(order.ad, navigator)
         )
     }
 

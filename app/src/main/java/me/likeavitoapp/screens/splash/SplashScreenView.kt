@@ -22,7 +22,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SplashScreenProvider(screen: SplashScreen) {
     SplashScreenView(screen)
 
-    val scenariosEnabled = get.app().rootScreen.state.scenariosEnabled
+    val scenariosEnabled = get.sources().app.rootScreen.state.scenariosEnabled
     LaunchedEffect(Unit) {
         if (scenariosEnabled.value) {
             RunAppFromScratchScenario(screen)

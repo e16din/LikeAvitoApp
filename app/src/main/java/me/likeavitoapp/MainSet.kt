@@ -1,5 +1,6 @@
 package me.likeavitoapp
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.CoroutineDispatcher
@@ -72,9 +73,8 @@ class MainSet {
 
     // NOTE: Use it after call initApp()
     fun sources() = actualDataSources!!
+    fun appContext() = sources().platform as Context
     fun scope() = actualScope!!
-    fun app() = appModel!!
-    fun platform() = appPlatform as AppPlatform
 }
 
 inline fun CoroutineScope.launchWithHandler(
@@ -87,7 +87,7 @@ inline fun CoroutineScope.launchWithHandler(
 }
 
 @Composable
-fun isPreviewMode(): Boolean = runCatching { get.app() }.isFailure
+fun isPreviewMode(): Boolean = runCatching { get.sources().app }.isFailure
 
 fun log(text: Any, tag: String = "debug: ") {
     if (develop) {

@@ -13,7 +13,7 @@ import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 
 class AdDetailsScreen(
     ad: Ad,
-    override val navigator: ScreensNavigator = ScreensNavigator(),
+    override val navigator: ScreensNavigator,
     override val state: State = State(ad)
 ) : BaseAdContainerScreen(navigator, state) {
 

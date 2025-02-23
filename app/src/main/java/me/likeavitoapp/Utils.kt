@@ -1,5 +1,8 @@
 package me.likeavitoapp
 
+import android.content.Context
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalDensity
@@ -10,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
+import androidx.core.net.toUri
 
 fun Any.className(): String {
     return javaClass.simpleName
@@ -175,6 +179,17 @@ fun measureTextWidth(text: String, style: TextStyle = TextStyle.Default): Dp {
     val textMeasurer = rememberTextMeasurer()
     val widthInPixels = textMeasurer.measure(text, style).size.width
     return with(LocalDensity.current) { widthInPixels.toDp() }
+}
+
+fun Context.launchCustomTabs(url: String, useIncognito: Boolean? = false) {
+    CustomTabsIntent.Builder().build().apply {
+        if (useIncognito == true) {
+            intent.putExtra(
+                "com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB",
+                true
+            )
+        }
+    }.launchUrl(this, url.toUri())
 }
 
 // NOTE: for debug
