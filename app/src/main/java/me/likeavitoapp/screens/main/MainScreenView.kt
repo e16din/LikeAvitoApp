@@ -51,10 +51,8 @@ import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreenProvider
-import me.likeavitoapp.screens.main.order.details.OrderDetailsScreen
-import me.likeavitoapp.screens.main.order.details.OrderDetailsScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.cart.OrdersScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
@@ -86,7 +84,6 @@ fun MainScreenProvider(screen: MainScreen) {
         with(nextScreen.value) {
             when (this) {
                 is AdDetailsScreen -> AdDetailsScreenProvider(this)
-                is OrderDetailsScreen -> OrderDetailsScreenProvider(this)
                 is CreateOrderScreen -> CreateOrderScreenProvider(this)
                 is EditProfileScreen -> EditProfileScreenProvider(this)
                 is PhotoScreen -> PhotoScreenProvider(this)

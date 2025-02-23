@@ -91,7 +91,9 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
 
                 get.sources().platform.appDataStore.saveId(loginData.user.id)
 
-                navigator.startScreen(MainScreen())
+                val mainScreen = MainScreen()
+                get.sources().app.mainScreen = mainScreen
+                navigator.startScreen(mainScreen)
 
             } else {
                 state.login.working.post(false)

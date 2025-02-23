@@ -14,7 +14,7 @@ import com.yandex.runtime.Error
 import io.ktor.client.*
 import kotlinx.coroutines.delay
 import me.likeavitoapp.UnauthorizedException
-import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mocks.MockDataProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -241,7 +241,9 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         ): Result<Order> {
             delay(700)
             return Result.success(
-                mockDataProvider.createOrder(adId, type)
+                mockDataProvider.createOrder(adId, type).also {
+                    mockDataProvider.orders.add(it)
+                }
             )
         }
 

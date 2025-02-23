@@ -24,7 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState

@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.debugImplementation
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -58,6 +59,7 @@ android {
 }
 
 dependencies {
+    debugImplementation(libs.leakcanary.android)
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
     implementation(libs.yandex.maps.mobile)

@@ -80,14 +80,11 @@ class PaymentScreen(
 
             val order = result.getOrNull()
             val isSuccess = order != null
+            log("isSucess = $isSuccess")
             return@act Pair(Unit, isSuccess).also {
                 if (isSuccess) {
-                    get.sources().app.rootScreen.navigator.startScreen(
-                        screen = MainScreen().apply {
-                            initialTabScreen = ordersScreen
-                        },
-                        clearAll = true
-                    )
+                    log("also = $isSuccess")
+                    get.sources().app.mainScreen.returnToOrdersTab()
                 }
             }
         }

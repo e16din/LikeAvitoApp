@@ -8,6 +8,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import me.likeavitoapp.mocks.MockDataProvider
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
@@ -53,7 +55,8 @@ class PaymentTests {
 
     private fun mockScreen(): PaymentScreen = PaymentScreen(
         navigator = mockScreensNavigator(),
-        ad = MockDataProvider().ads.first()
+        ad = MockDataProvider().ads.first(),
+        orderType = Order.Type.Pickup
     )
 
 }

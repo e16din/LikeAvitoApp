@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.tabs.cart
+package me.likeavitoapp.screens.main.tabs.orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,9 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -41,11 +43,14 @@ fun OrdersScreenProvider(screen: OrdersScreen, tabsNavigator: ScreensNavigator) 
 @Composable
 fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val activeOrders by state.activeOrders.output.collectAsState()
-    Box(modifier = Modifier.fillMaxSize().background(Color.Blue)) {
-        LazyColumn {
-            items(activeOrders.toMutableStateList()) {
-                Text(it.ad.title)
-            }
+    val newMessagesCount = state.newMessagesCount.output.collectAsState()
+    LazyColumn {
+        items(activeOrders.toMutableStateList()) {
+            OrderView(
+                screen = screen,
+                order = it,
+                newMessagesCount = newMessagesCount
+            )
         }
     }
 }
@@ -56,7 +61,11 @@ fun OrdersScreenPreview() {
     get = mockMainSet()
     val screen = OrdersScreen(
         navigator = mockScreensNavigator(),
-    )
+    ).apply {
+        state.activeOrders.output.post(
+            listOf(MockDataProvider().createOrder(0, Order.Type.Delivery))
+        )
+    }
     LikeAvitoAppTheme {
         OrdersScreenProvider(
             screen = screen,

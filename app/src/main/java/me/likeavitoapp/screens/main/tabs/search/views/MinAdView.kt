@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.ActualAsyncImage

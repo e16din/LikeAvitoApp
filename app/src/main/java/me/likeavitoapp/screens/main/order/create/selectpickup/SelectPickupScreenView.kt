@@ -299,7 +299,8 @@ fun SelectPickupScreenPreview() {
                         address = "г.Москва, пр-т.Ленина, д.48",
                         openingHoursFrom = 8,
                         openingHoursTo = 21,
-                        point = PickupPoint.Point(0.0, 0.0)
+                        point = PickupPoint.Point(0.0, 0.0),
+                        isInPlace = true
                     )
                 ),
                 navigator = mockScreensNavigator(),

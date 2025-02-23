@@ -41,7 +41,9 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
 
             navigator.startScreen(
                 if (isAuthorized)
-                    MainScreen()
+                    MainScreen().also {
+                        get.sources().app.mainScreen = it
+                    }
                 else
                     AuthScreen(navigator = navigator)
             )

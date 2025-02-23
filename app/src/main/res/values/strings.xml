@@ -34,7 +34,6 @@
     <string name="clear">Очистить</string>
     <string name="moe_to_ads_button">Перейти к объявлениям</string>
     <string name="move_to_chat_button">Перейти в чат</string>
-    <string name="new_messages_label">Новые сообщения: %1$s</string>
     <string name="buy_with_price">"Купить за %1$d₽"</string>
     <string name="enter_address_label">Введите адрес</string>
     <string name="select_pickup_point">Выбрать пункт самовывоза</string>
@@ -47,4 +46,12 @@
     <string name="incorrect_card_number_label">Ожидается номер карты вида: \n\"1111 1111 1111 1111\"</string>
     <string name="incorrect_mm_yy_label">Ожидается строка вида: \"12/34\"</string>
     <string name="mm_yy_label">Действует до</string>
+    <string name="order_title">Заказ: %1$s</string>
+    <string name="move_to_chat_label">Перейти в чат</string>
+    <string name="new_messages_label">Новых сообщений: %1$s</string>
+    <string name="expected_arrival_label">Ожидаемое прибытие: %1$s</string>
+    <string name="order_created_label">Дата заказа: %1$s</string>
+    <string name="delivary_address_label">Заказ доставят по адресу:</string>
+    <string name="pickup_point_address_label">Заказ доставят в пункт выдачи:</string>
+    <string name="order_in_place_label">Заказ пришел на пункт выдачи</string>
 </resources>

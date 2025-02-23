@@ -39,7 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState

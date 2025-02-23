@@ -43,7 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.io.IOException
 import me.likeavitoapp.MainActivity
-import me.likeavitoapp.MockDataProvider
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.log

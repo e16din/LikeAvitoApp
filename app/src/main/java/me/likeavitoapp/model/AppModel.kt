@@ -6,6 +6,7 @@ import me.likeavitoapp.className
 import me.likeavitoapp.log
 import me.likeavitoapp.screens.root.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
+import me.likeavitoapp.screens.main.MainScreen
 import kotlin.reflect.KClass
 
 
@@ -14,6 +15,7 @@ class AppModel {
     val user = UpdatableState<User?>(null)
 
     lateinit var rootScreen: RootScreen
+    lateinit var mainScreen: MainScreen
 
     fun onLogoutException() {
         if (rootScreen.navigator.screen.value !is AuthScreen) {
@@ -22,9 +24,9 @@ class AppModel {
     }
 }
 
-class StubScreen() : IScreen
+object InitialScreen : IScreen
 
-class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = "") {
+class ScreensNavigator(initialScreen: IScreen = InitialScreen, val tag: String = "") {
     val screens = mutableListOf(initialScreen)
     val screen = UpdatableState(initialScreen)
 
@@ -33,23 +35,25 @@ class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = 
         clearAll: Boolean = false,
         clearAfterFirst: Boolean = false
     ) {
-        if (screens.last().className() != screen.className()) {
-            if (clearAll) {
-                screens.clear()
-            }
-            if (clearAfterFirst) {
-                val first = screens.first()
-                screens.clear()
-                screens.add(first)
-            }
-
-            log("$tag.startScreen: ${screen.className()}")
-            screens.add(screen)
-            this@ScreensNavigator.screen.post(screen)
+        if (clearAll) {
+            screens.clear()
         }
+        if (screens.size > 1 && clearAfterFirst) {
+            val first = screens[1]
+            screens.clear()
+            screens.add(InitialScreen)
+            screens.add(first)
+        }
+
+        log("$tag.startScreen: ${screen.className()}")
+        screens.add(screen)
+
+        log("screens: $screens")
+        this@ScreensNavigator.screen.post(screen)
     }
 
     fun backToPrevious() {
+        log("$tag.screens: ${screens}")
         screens.removeAt(screens.lastIndex)
         screen.post(screens.last())
         log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
@@ -61,7 +65,7 @@ class ScreensNavigator(initialScreen: IScreen = StubScreen(), val tag: String = 
 
     fun hasScreen(): Boolean {
         val last = screens.lastOrNull()
-        return last != null && last !is StubScreen
+        return last != null && last !is InitialScreen
     }
 }
 
@@ -103,9 +107,10 @@ data class Ad(
     val owner: Owner,
     val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     val timerLabel: UpdatableState<String> = UpdatableState(""),
-    var reservedTimeMs: Long?
+    var reservedTimeMs: Long?,
+    var isOrdered: Boolean = false
 ) : ISource {
-    data class Address(val address: String)
+    data class Address(val data: String)
     data class Owner(
         var id: Long,
         var name: String,
@@ -116,7 +121,16 @@ data class Ad(
 data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
 
-data class Order(val ad: Ad, val type: Type, val state: State) {
+data class Order(
+    val ad: Ad,
+    val id: Long,
+    val number: String,
+    val type: Type,
+    val state: State,
+    val createdMs: Long,
+    val expectedArrivalMs: Long,
+    val pickupPoint: PickupPoint?
+) {
     enum class Type {
         Pickup,
         Delivery
@@ -133,7 +147,8 @@ data class Order(val ad: Ad, val type: Type, val state: State) {
         val address: String,
         val openingHoursFrom: Int,
         val openingHoursTo: Int,
-        val point: Point
+        val point: Point,
+        val isInPlace: Boolean
     ) : ISource {
         enum class Type {
             Post,
@@ -144,8 +159,6 @@ data class Order(val ad: Ad, val type: Type, val state: State) {
 
         class Point(val latitude: Double, val longitude: Double)
     }
-
-    data class Delivery(val address: Ad.Address)
 }
 
 interface IMessage : ISource {

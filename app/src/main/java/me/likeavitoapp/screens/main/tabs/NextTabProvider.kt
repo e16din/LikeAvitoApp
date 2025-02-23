@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.screens.main.tabs.cart.OrdersScreen
-import me.likeavitoapp.screens.main.tabs.cart.OrdersScreenProvider
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen

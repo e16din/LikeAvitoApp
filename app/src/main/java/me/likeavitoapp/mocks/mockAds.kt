@@ -1,75 +1,10 @@
-package me.likeavitoapp
+package me.likeavitoapp.mocks
 
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
-import me.likeavitoapp.model.Order
-import me.likeavitoapp.model.Order.PickupPoint
-import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.model.User
 
-
-class MockDataProvider {
-    var token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
-    var user = User(
-        id = 0,
-        name = "Кундрюков Александр",
-        contacts = Contacts(
-            telegram = "@alex_ku_san",
-            email = "a.kundryukov@gmail.com"
-        ),
-        ownAds = emptyList(),
-        photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
-    )
-
-    var categories = createCategories()
-    var ads = createAds()
-    var orders = mutableListOf<Order>()
-    var lastDeliveryAddresses = mutableListOf<String>()
-    var pickupPoints = createPickupPoints()
-
-    init {
-        repeat(5) {
-            lastDeliveryAddresses.add("г.Москва, ул.Ленина, д.45, к.$it")
-        }
-    }
-
-    fun createCategories(): List<Category> {
-        return listOf(
-            Category(name = "Квартиры", id = 1),
-            Category(name = "Авто", id = 2),
-            Category(name = "Ноутбуки", id = 3),
-            Category(name = "Мебель", id = 4),
-            Category(name = "Книги", id = 5),
-            Category(name = "Телефоны", id = 6),
-            Category(name = "Мониторы", id = 7),
-            Category(name = "Бытовая техника", id = 8),
-        )
-    }
-
-    fun getRegions(): List<Region> {
-        return listOf(
-            Region("Москва", 1),
-            Region("Санкт-Петербург", 2),
-            Region("Ростов-на-Дону", 3),
-            Region("Екатеринбург", 4),
-            Region("Омск", 5),
-        )
-    }
-
-    fun getSuccessOrFail(success: Boolean): Result<Boolean> {
-        return if (success)
-            Result.success(true)
-        else
-            Result.failure(Exception("Request failed"))
-    }
-
-    fun getFavorites(): List<Ad> {
-        return ads.filter { it.isFavorite.value }
-    }
-
-    fun createAds() = listOf(
+fun mockAds() = listOf(
         Ad(
             id = 1,
             title = "Квартира в центре города",
@@ -277,7 +212,8 @@ class MockDataProvider {
             owner = Ad.Owner(id = 12, name = "Игорь", contacts = Contacts(phone = "101010101")),
             isFavorite = UpdatableState(false),
             timerLabel = UpdatableState(""),
-            reservedTimeMs = null
+            reservedTimeMs = null,
+            isOrdered = true
         ),
         Ad(
             id = 13,
@@ -345,7 +281,8 @@ class MockDataProvider {
             owner = Ad.Owner(id = 16, name = "Марина", contacts = Contacts(phone = "505050505")),
             isFavorite = UpdatableState(false),
             timerLabel = UpdatableState(""),
-            reservedTimeMs = null
+            reservedTimeMs = null,
+            isOrdered = true
         ),
         Ad(
             id = 17,
@@ -569,7 +506,7 @@ class MockDataProvider {
             reservedTimeMs = null
         ),
         Ad(
-            id = 30,
+            id = 0,
             title = "Смартфон Huawei",
             description = "Продается новый смартфон Huawei с отличной камерой.",
             photoUrls = listOf("huawei_phone1.jpg", "huawei_phone2.jpg"),
@@ -586,48 +523,3 @@ class MockDataProvider {
             reservedTimeMs = null
         )
     )
-
-    private fun createPickupPoints(): List<PickupPoint> = listOf(
-        PickupPoint(1, "Улица Ленина, 1", 9, 21, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(2, "Улица Пушкина, 2", 10, 20, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(3, "Улица Гоголя, 3", 8, 22, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(4, "Улица Чехова, 4", 9, 18, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(5, "Улица Толстого, 5", 10, 19, PickupPoint.Point(55.7539, 37.6208)),
-        PickupPoint(6, "Улица Достоевского, 6", 11, 20, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(7, "Улица Суворова, 7", 9, 21, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(8, "Улица Тверская, 8", 10, 22, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(9, "Улица Невского, 9", 8, 20, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(10, "Улица Кутузова, 10", 9, 21, PickupPoint.Point(55.7539, 37.6208)),
-        PickupPoint(11, "Улица Маяковского, 11", 10, 19, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(12, "Улица Лермонтова, 12", 11, 20, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(13, "Улица Блока, 13", 9, 21, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(14, "Улица Цветкова, 14", 10, 22, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(15, "Улица Станиславского, 15", 8, 20, PickupPoint.Point(55.7539, 37.6208)),
-        PickupPoint(16, "Улица Крылатская, 16", 9, 21, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(17, "Улица Кутузова, 17", 10, 19, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(18, "Улица Пушкина, 18", 11, 20, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(19, "Улица Гоголя, 19", 9, 21, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(20, "Улица Чехова, 20", 10, 22, PickupPoint.Point(55.7539, 37.6208)),
-        PickupPoint(21, "Улица Толстого, 21", 8, 20, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(22, "Улица Достоевского, 22", 9, 21, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(23, "Улица Суворова, 23", 10, 19, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(24, "Улица Тверская, 24", 11, 20, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(25, "Улица Невского, 25", 9, 21, PickupPoint.Point(55.7539, 37.6208)),
-        PickupPoint(26, "Улица Маяковского, 26", 10, 22, PickupPoint.Point(55.7558, 37.6173)),
-        PickupPoint(27, "Улица Лермонтова, 27", 8, 20, PickupPoint.Point(59.9343, 30.3351)),
-        PickupPoint(28, "Улица Блока, 28", 9, 21, PickupPoint.Point(54.7388, 55.9721)),
-        PickupPoint(29, "Улица Цветкова, 29", 10, 19, PickupPoint.Point(56.3269, 44.0059)),
-        PickupPoint(30, "Улица Станиславского, 30", 11, 20, PickupPoint.Point(55.7539, 37.6208))
-    )
-
-    fun createOrder(adId:Long, type: Order.Type): Order {
-        val order = Order(
-            ad = ads.first { it.id == adId },
-            type = type,
-            state = Order.State.Init
-        )
-        orders.add(order)
-        return order
-    }
-
-}

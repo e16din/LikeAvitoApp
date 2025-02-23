@@ -1,18 +1,20 @@
 package me.likeavitoapp.screens.main
 
 import me.likeavitoapp.className
+import me.likeavitoapp.log
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.InitialScreen
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
-import me.likeavitoapp.screens.main.tabs.cart.OrdersScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
-class MainScreen : IScreen {
+class MainScreen() : IScreen {
 
     val state = State()
 
@@ -47,7 +49,7 @@ class MainScreen : IScreen {
     }
 
     fun ClickToCreateAdUseCase() {
-        this@MainScreen.navigator.startScreen(CreateAdScreen())
+        navigator.startScreen(CreateAdScreen())
     }
 
     fun ClickToCartUseCase() {
@@ -73,5 +75,10 @@ class MainScreen : IScreen {
                 }
             }
         }
+    }
+
+    fun returnToOrdersTab() {
+        navigator.startScreen(InitialScreen, clearAll = true)
+        tabsRootScreen.navigator.startScreen(ordersScreen)
     }
 }
