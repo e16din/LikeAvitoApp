@@ -56,6 +56,7 @@ fun SearchBarView(screen: SearchScreen) {
     val query by screen.searchBar.state.query.collectAsState()
     val searchTips by screen.searchBar.state.searchTips.output.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
+    val isCategoriesVisible by screen.state.isCategoriesVisible.collectAsState()
     val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
 
     fun hasSelectedCategory(): Boolean = selectedCategory != null
@@ -127,7 +128,7 @@ fun SearchBarView(screen: SearchScreen) {
             }
         }
 
-        AnimatedVisibility(!hasSelectedCategory()) {
+        AnimatedVisibility(isCategoriesVisible && !hasSelectedCategory()) {
             LazyHorizontalStaggeredGrid(
                 modifier = Modifier
                     .padding(top = 16.dp)
@@ -156,7 +157,7 @@ fun SearchBarView(screen: SearchScreen) {
             }
         }
 
-        AnimatedVisibility(hasSelectedCategory()) {
+        AnimatedVisibility(isCategoriesVisible && hasSelectedCategory()) {
             Box(Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)) {

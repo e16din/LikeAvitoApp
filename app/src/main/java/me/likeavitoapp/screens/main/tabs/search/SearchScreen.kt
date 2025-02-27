@@ -30,7 +30,8 @@ class SearchScreen(
 
     class State(
         val ads: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
-        var adsPage: UpdatableState<Int> = UpdatableState(0)
+        var adsPage: UpdatableState<Int> = UpdatableState(0),
+        var isCategoriesVisible: UpdatableState<Boolean> = UpdatableState(false),
     ) : BaseAdContainerState()
 
     val searchBar = SearchBar()
@@ -82,6 +83,7 @@ class SearchScreen(
         if (needToInit) {
             get.scope().launchWithHandler {
                 loadCategories()
+                state.isCategoriesVisible.post(true)
                 loadAds()
             }
         } else {
