@@ -3,8 +3,8 @@ package me.likeavitoapp.screens.main.tabs.search
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
-import me.likeavitoapp.Debouncer
 import me.likeavitoapp.bindScenarioDataSource
+import me.likeavitoapp.developer.primitives.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load

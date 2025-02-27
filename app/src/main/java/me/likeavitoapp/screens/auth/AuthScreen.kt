@@ -1,6 +1,6 @@
 package me.likeavitoapp.screens.auth
 
-import me.likeavitoapp.Debouncer
+import me.likeavitoapp.developer.primitives.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.get

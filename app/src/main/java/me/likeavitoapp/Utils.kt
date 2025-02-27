@@ -40,24 +40,6 @@ suspend inline fun <reified T> Worker<*>.load(
     }
 }
 
-class Debouncer<T>(var value: T, timeoutMs: Long = 390L, onTimeout: (value: T) -> Unit) {
-    var lastSetTimeMs = System.currentTimeMillis()
-
-    init {
-        while (true) {
-            if (System.currentTimeMillis() - lastSetTimeMs >= timeoutMs) {
-                onTimeout(value)
-                break
-            }
-        }
-    }
-
-    fun set(newValue: T) {
-        value = newValue
-        lastSetTimeMs = System.currentTimeMillis()
-    }
-}
-
 fun UpdatableState<Boolean>.inverse() {
     this.post(!this.value)
 }
