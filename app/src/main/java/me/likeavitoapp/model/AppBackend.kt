@@ -183,20 +183,10 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
-            return Result.success(
-                listOf(
-                    "Mac Book",
-                    "Mac Book Pro",
-                    "Mac Book Pro 14",
-                    "Mac Book Pro 16",
-                    "Mac Book Pro 16 2025",
-                )
-            )
+            return Result.success(mockDataProvider.searchTips)
         }
 
         suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
-
-
             return Result.success(true)
         }
 
@@ -215,6 +205,10 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 forEach { it.isFavorite.post(false) }
             }
             return mockDataProvider.getSuccessOrFail(true)
+        }
+
+        suspend fun postTip(tip: String) {
+            mockDataProvider.searchTips.add(tip)
         }
     }
 

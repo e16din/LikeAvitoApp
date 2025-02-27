@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import me.likeavitoapp.bindScenarioDataSource
 import me.likeavitoapp.developer.primitives.Debouncer
+import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
@@ -130,9 +131,19 @@ class SearchScreen(
 
         inner class State(
             var query: UpdatableState<String> = UpdatableState(""),
+            var selectedQuery: UpdatableState<String?> = UpdatableState(null),
             val searchTips: Worker<List<String>> = Worker(emptyList<String>())
         )
 
+        fun search(tip: String) {
+            ChangeSearchQueryUseCase("")
+            state.selectedQuery.post(tip)
+
+            work {
+                get.sources().backend.adsService.postTip(tip)
+                loadAds()
+            }
+        }
 
         fun ClickToCategoryUseCase(category: Category) {
             recordScenarioStep()
@@ -157,6 +168,7 @@ class SearchScreen(
             recordScenarioStep(newQuery)
 
             state.query.post(newQuery)
+            
 
             if (queryDebouncer == null) {
                 queryDebouncer = Debouncer(newQuery) { lastQuery ->
@@ -172,8 +184,8 @@ class SearchScreen(
                                     ?: 0,
                                 query = searchBar.state.query.value
                             )
-                        }, onSuccess = { data ->
-                            state.searchTips.output.post(data)
+                        }, onSuccess = { tips ->
+                            state.searchTips.output.post(tips)
                         })
                     }
                 }
@@ -183,23 +195,13 @@ class SearchScreen(
             }
         }
 
-        fun SelectSearchTipUseCase() {
-            recordScenarioStep()
-        }
-
-        suspend fun ClickToClearQueryUseCase() {
+        fun ClickToSearchTipUseCase(tip: String) {
             recordScenarioStep()
 
-            ChangeSearchQueryUseCase("")
+            search(tip)
         }
 
-        suspend fun ClickToSearchUseCase() {
-            recordScenarioStep()
-
-            loadAds()
-        }
-
-        fun ClickToTipsClearUseCase() {
+        fun ClickToClearUseCase() {
             recordScenarioStep()
 
             ChangeSearchQueryUseCase("")
@@ -215,6 +217,19 @@ class SearchScreen(
             recordScenarioStep()
 
             searchSettingsPanel.state.selectedCategory.post(null)
+        }
+
+        fun ClickToSelectedQueryUseCase() {
+            recordScenarioStep()
+
+            state.selectedQuery.post(null)
+            ChangeSearchQueryUseCase("")
+        }
+
+        fun ClickToSearchActionUseCase(query: String) {
+            recordScenarioStep()
+
+            search(query)
         }
     }
 

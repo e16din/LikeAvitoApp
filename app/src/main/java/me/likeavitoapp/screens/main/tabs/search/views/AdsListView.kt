@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ inline fun AdsListView(
     screen: SearchScreen,
     crossinline stickyHeaderContent: @Composable (displayHeader:Boolean) -> Unit
 ) {
+
     val listState = rememberLazyListState()
     val displayHeader = !listState.canScrollBackward || listState.lastScrolledBackward
     val isAtTheEndOfList by remember(listState) {

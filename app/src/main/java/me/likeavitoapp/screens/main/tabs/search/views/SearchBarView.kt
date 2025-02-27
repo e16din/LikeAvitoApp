@@ -1,14 +1,13 @@
 package me.likeavitoapp.screens.main.tabs.search.views
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -48,6 +46,7 @@ import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen.SearchBar
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
@@ -55,6 +54,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 fun SearchBarView(screen: SearchScreen) {
     val query by screen.searchBar.state.query.collectAsState()
     val searchTips by screen.searchBar.state.searchTips.output.collectAsState()
+    val selectedQuery by screen.searchBar.state.selectedQuery.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
     val isCategoriesVisible by screen.state.isCategoriesVisible.collectAsState()
     val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
@@ -65,15 +65,16 @@ fun SearchBarView(screen: SearchScreen) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        SearchBar(
-            inputField = {
+        AnimatedVisibility(
+            selectedQuery == null, enter = fadeIn(), exit = fadeOut()
+        ) {
+            SearchBar(inputField = {
                 SearchBarDefaults.InputField(
                     onSearch = { text ->
-                        screen.searchBar.ChangeSearchQueryUseCase(text)
+                        screen.searchBar.ClickToSearchActionUseCase(text)
                     },
                     expanded = isExpanded(),
-                    onExpandedChange = {
-                    },
+                    onExpandedChange = {},
                     placeholder = { Text(stringResource(R.string.search_hint)) },
                     leadingIcon = {
                         if (isExpanded()) {
@@ -82,13 +83,11 @@ fun SearchBarView(screen: SearchScreen) {
                                 contentDescription = "back",
                                 modifier = Modifier.clickable {
                                     screen.searchBar.ClickToTipsBackUseCase()
-                                }
-                            )
+                                })
 
                         } else {
                             Icon(
-                                Icons.Default.Search,
-                                contentDescription = "search_icon"
+                                Icons.Default.Search, contentDescription = "search_icon"
                             )
                         }
                     },
@@ -98,9 +97,8 @@ fun SearchBarView(screen: SearchScreen) {
                                 Icons.Default.Close,
                                 contentDescription = "clear",
                                 modifier = Modifier.clickable {
-                                    screen.searchBar.ClickToTipsClearUseCase()
-                                }
-                            )
+                                    screen.searchBar.ClickToClearUseCase()
+                                })
 
                         } else {
                             Icon(
@@ -114,17 +112,10 @@ fun SearchBarView(screen: SearchScreen) {
                     query = query,
                     onQueryChange = { newQuery ->
                         screen.searchBar.ChangeSearchQueryUseCase(newQuery)
-                    }
-                )
-            },
-            expanded = isExpanded(),
-            onExpandedChange = { expanded ->
-            }
-        ) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(searchTips) {
-                    Text(it)
-                }
+                    })
+            }, expanded = isExpanded(), onExpandedChange = { expanded ->
+            }) {
+                TipsView(screen.searchBar, searchTips)
             }
         }
 
@@ -141,12 +132,11 @@ fun SearchBarView(screen: SearchScreen) {
             ) {
                 items(categories.toMutableStateList()) { category ->
                     Card(
-                        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .clickable {
-                                screen.searchBar.ClickToCategoryUseCase(category)
-                            }
-                    ) {
+                        colors = CardDefaults.cardColors()
+                            .copy(containerColor = MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.clickable {
+                            screen.searchBar.ClickToCategoryUseCase(category)
+                        }) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = category.name,
@@ -157,21 +147,20 @@ fun SearchBarView(screen: SearchScreen) {
             }
         }
 
-        AnimatedVisibility(isCategoriesVisible && hasSelectedCategory()) {
-            Box(Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)) {
+        AnimatedVisibility(selectedQuery != null) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
                 OutlinedButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    onClick = {
-                        screen.searchBar.ClickToSelectedCategoryUseCase()
+                    modifier = Modifier.fillMaxWidth(), onClick = {
+                        screen.searchBar.ClickToSelectedQueryUseCase()
                     }) {
 
                     Text(
-                        text = selectedCategory?.name ?: "",
-                        modifier = Modifier
-                            .padding(vertical = 4.dp, horizontal = 16.dp)
+                        text = selectedQuery ?: "",
+                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp)
                     )
                 }
 
@@ -186,6 +175,54 @@ fun SearchBarView(screen: SearchScreen) {
                 )
 
             }
+        }
+
+        AnimatedVisibility(isCategoriesVisible && hasSelectedCategory()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(), onClick = {
+                        screen.searchBar.ClickToSelectedCategoryUseCase()
+                    }) {
+
+                    Text(
+                        text = selectedCategory?.name ?: "",
+                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp)
+                    )
+                }
+
+                Icon(
+                    Icons.Default.Close,
+                    "clear",
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .height(24.dp)
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+fun TipsView(searchBar: SearchBar, searchTips: List<String>) {
+    val query by searchBar.state.query.collectAsState()
+
+    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        val tips =
+            if (query.isEmpty())
+                searchTips
+            else
+                listOf(query) + searchTips
+        items(tips) {
+            Text(it, modifier = Modifier.clickable {
+                searchBar.ClickToSearchTipUseCase(it)
+            })
         }
     }
 }

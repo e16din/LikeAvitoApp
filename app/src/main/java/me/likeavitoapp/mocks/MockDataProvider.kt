@@ -22,6 +22,13 @@ class MockDataProvider {
     )
 
     var categories = createCategories()
+    var searchTips = mutableListOf(
+        "Mac Book",
+        "Mac Book Pro",
+        "Mac Book Pro 14",
+        "Mac Book Pro 16",
+        "Mac Book Pro 16 2025"
+    )
     var ads = mockAds()
     var orders = mutableListOf<Order>(
         createOrder(12, Order.Type.Delivery, Order.State.Active),
