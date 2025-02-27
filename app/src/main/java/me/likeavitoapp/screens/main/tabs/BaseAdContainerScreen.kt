@@ -2,7 +2,9 @@ package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
+import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
@@ -66,11 +68,14 @@ open class BaseAdContainerScreen(
         }
     }
 
-    fun startReserveTimer(ad: Ad) = get.scope().launchWithHandler {
-        fun getTimeMs(): Long = 20 * 60 * 1000 - (System.currentTimeMillis() - ad.reservedTimeMs!!)
+    fun startReserveTimer(ad: Ad) = work(onDone = {
+        ad.reservedTimeMs = null
+    }) {
+        fun getTimeMs(): Long =
+            20 * 60 * 1000 - (System.currentTimeMillis() - (ad.reservedTimeMs!!))
 
         var timeMs = getTimeMs()
-        while (timeMs > 0) {
+        while (ad.reservedTimeMs != null && timeMs > 0) {
             timeMs = getTimeMs()
             ad.timerLabel.post(ad.reservedTimeMs?.let {
                 String.format(
@@ -81,7 +86,6 @@ open class BaseAdContainerScreen(
             } ?: "")
             delay(1000)
         }
-        ad.reservedTimeMs = null
     }
 
     fun ClickToBargainingUseCase(ad: Ad) {

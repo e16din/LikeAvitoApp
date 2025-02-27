@@ -4,6 +4,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
 class Debouncer<T>(var value: T, val timeoutMs: Long = 390L, val onTimeout: (value: T) -> Unit) {
+
+    init {
+        set(value)
+    }
+
     var job: Job? = null
 
     fun set(newValue: T) {
