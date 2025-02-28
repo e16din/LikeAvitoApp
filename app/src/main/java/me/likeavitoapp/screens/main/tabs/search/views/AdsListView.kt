@@ -12,9 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.model.collectAsState
@@ -56,9 +55,7 @@ inline fun AdsListView(
             stickyHeaderContent(displayHeader)
         }
 
-        items(items = ads.value, key = { ad ->
-            ad.id
-        }) { ad ->
+        items(items = ads.value.toMutableStateList(), key = { ad -> ad.id }) { ad ->
             adsListenersMap[ad.id] = ad.isFavorite.collectAsState()
 
             if (ad.isPremium) {

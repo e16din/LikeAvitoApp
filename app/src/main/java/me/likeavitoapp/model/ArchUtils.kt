@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.likeavitoapp.developer.primitives.debug
+import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.log
@@ -32,8 +34,12 @@ class UpdatableState<T>(initial: T) {
         } ?: listOf(onChanged)
     }
 
+    @Deprecated("Use next()")
     fun post(value: T, scope: CoroutineScope = get.scope(), ifNew: Boolean = false) {
         if (!ifNew || (ifNew && _value != value)) {
+            debug {
+                println("post: $value")
+            }
             scope.launch(get.defaultContext + Dispatchers.Main) {
                 _value = value
                 callbacks.keys.forEach {
@@ -45,9 +51,23 @@ class UpdatableState<T>(initial: T) {
         }
     }
 
+    fun next(value: T, ifNew: Boolean = false) {
+        if (!ifNew || (ifNew && _value != value)) {
+            debug {
+                println("next: $value")
+            }
+            _value = value
+            callbacks.keys.forEach {
+                callbacks[it]?.forEach { onChange ->
+                    onChange(value)
+                }
+            }
+        }
+    }
+
     fun repostTo(state: UpdatableState<T>, key: Any = Unit) {
         listen(key) { value ->
-            state.post(value)
+            state.next(value)
         }
     }
 
@@ -110,19 +130,20 @@ class Worker<T>(initial: T) {
 
 // NOTE: act - действуй!
 // (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
-inline fun <T> Worker<T>.act(crossinline task: suspend () -> Pair<T, Boolean>) {
-    working.post(true)
-    get.scope().launchWithHandler {
-        val result = task()
-
-        log("act: $result")
-        output.post(result.first)
+inline fun <T> Worker<T>.act(crossinline task: suspend () -> Pair<T?, Boolean>) {
+    working.next(true)
+    work(onDone = { result ->
+        output.next(result.first ?: output.value)
         if (result.second) {
-            fail.post(false, ifNew = true)
+            fail.next(false, ifNew = true)
 
         } else {
-            fail.post(true)
+            fail.next(true)
         }
+
+        working.next(false)
+    }) {
+        return@work task()
     }
-    working.post(false)
+
 }

@@ -6,6 +6,9 @@ fun Any.contains(body: () -> Unit) {}
 fun values(body: () -> Unit) {}
 fun openScreen(screen: String) {}
 
+// NOTE: Это можно переписать на Compose(openScreen() заменить функциями вьюх),
+// как бонус: отпадет необходимость в навигации
+// (идея уже для будующего проекта, тут много рефакторить оставлю как есть)
 fun Goals() {
     "Получили товар".contains {
         "Заказали товар".contains {

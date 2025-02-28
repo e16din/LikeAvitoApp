@@ -14,6 +14,7 @@ import com.yandex.runtime.Error
 import io.ktor.client.*
 import kotlinx.coroutines.delay
 import me.likeavitoapp.UnauthorizedException
+import me.likeavitoapp.log
 import me.likeavitoapp.mocks.MockDataProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -169,21 +170,37 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun getAds(
             range: PriceRange,
-            regionId: Int,
-            categoryId: Int,
-            query: String,
-            page: Int,
+            regionId: Int?,
+            categoryId: Int?,
+            query: String?,
+            resetPage: Boolean
         ): Result<List<Ad>> {
             delay(2000)
-            return Result.success(mockDataProvider.ads)
+
+            log("query: $query")
+            log("categoryId: $categoryId")
+            log("regionId: $regionId")
+
+            val filterCondition : (Ad)->Boolean =  { it ->
+                if (categoryId == null || categoryId == 0) true else it.categoryId == categoryId
+                        && if (regionId == null || regionId == 0) true else it.regionId == regionId
+                        && if (query == null) true else it.title.contains(query, ignoreCase = true)
+            }
+            val ads = mockDataProvider.getNextAdsPage(filterCondition, resetPage)
+            return Result.success(ads)
         }
 
         suspend fun getAdDetails(ad: Ad): Result<Ad> {
             TODO("Not yet implemented")
         }
 
-        suspend fun getSearchTips(categoryId: Int, query: String): Result<List<String>> {
-            return Result.success(mockDataProvider.searchTips)
+        suspend fun getSearchTips(query: String): Result<List<String>> {
+            return Result.success(mockDataProvider.searchTips.filter {
+                it.contains(
+                    query,
+                    ignoreCase = true
+                )
+            })
         }
 
         suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
@@ -202,13 +219,13 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun deleteAllFavorites(): Result<Boolean> {
             mockDataProvider.ads = mockDataProvider.ads.apply {
-                forEach { it.isFavorite.post(false) }
+                forEach { it.isFavorite.next(false) }
             }
             return mockDataProvider.getSuccessOrFail(true)
         }
 
         suspend fun postTip(tip: String) {
-            mockDataProvider.searchTips.add(tip)
+            mockDataProvider.searchTips.add(0, tip)
         }
     }
 

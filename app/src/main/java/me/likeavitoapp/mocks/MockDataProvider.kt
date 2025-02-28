@@ -1,5 +1,6 @@
 package me.likeavitoapp.mocks
 
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
@@ -7,6 +8,7 @@ import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
+import kotlin.math.min
 
 class MockDataProvider {
     var token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
@@ -45,6 +47,7 @@ class MockDataProvider {
 
     fun createCategories(): List<Category> {
         return listOf(
+            Category(name = "Все", id = 0),
             Category(name = "Квартиры", id = 1),
             Category(name = "Авто", id = 2),
             Category(name = "Ноутбуки", id = 3),
@@ -89,6 +92,36 @@ class MockDataProvider {
             expectedArrivalMs = System.currentTimeMillis() + 3 * 24 * 60 * 60 * 60 * 1000,
             pickupPoint = null
         )
+    }
+
+    private val paged = mutableSetOf<Long>()
+    private var pageCounter = 0
+
+    fun getNextAdsPage(filterCondition: (Ad) -> Boolean, resetPage: Boolean = false): List<Ad> {
+        val filtered = ads.filter(filterCondition)
+        log("filtered: $filtered")
+        val maxPages = 20
+        if (resetPage || pageCounter > maxPages) {
+            paged.clear()
+            pageCounter = 0
+        }
+
+        pageCounter += 1
+
+        val pageSize = 10
+        if (filtered.size < pageSize) {
+            return filtered
+        }
+
+        val result = mutableListOf<Ad>()
+        for (i in 0 until min(pageSize, filtered.size)) {
+            val ad = filtered[i]
+            if (!paged.contains(ad.id)) {
+                paged.add(ad.id)
+                result.add(ad)
+            }
+        }
+        return result
     }
 
 }

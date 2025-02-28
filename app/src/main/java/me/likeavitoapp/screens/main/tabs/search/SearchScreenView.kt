@@ -112,7 +112,7 @@ fun SearchScreenPreview() {
     val screen = SearchScreen(
         navigator = mockScreensNavigator(),
     ).apply {
-        state.ads.output.post(MockDataProvider().ads.toMutableStateList())
+        state.ads.output.next(MockDataProvider().ads.toMutableStateList())
     }
 
     LikeAvitoAppTheme {

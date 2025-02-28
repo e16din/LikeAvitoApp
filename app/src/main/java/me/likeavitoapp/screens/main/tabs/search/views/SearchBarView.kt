@@ -3,14 +3,17 @@ package me.likeavitoapp.screens.main.tabs.search.views
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
@@ -63,13 +66,14 @@ fun SearchBarView(screen: SearchScreen) {
     fun isExpanded(): Boolean = !searchTips.isEmpty()
 
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
+
     ) {
         AnimatedVisibility(
             selectedQuery == null, enter = fadeIn(), exit = fadeOut()
         ) {
             SearchBar(inputField = {
                 SearchBarDefaults.InputField(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     onSearch = { text ->
                         screen.searchBar.ClickToSearchActionUseCase(text)
                     },
@@ -213,17 +217,42 @@ fun SearchBarView(screen: SearchScreen) {
 fun TipsView(searchBar: SearchBar, searchTips: List<String>) {
     val query by searchBar.state.query.collectAsState()
 
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         val tips =
             if (query.isEmpty())
                 searchTips
             else
                 listOf(query) + searchTips
         items(tips) {
-            Text(it, modifier = Modifier.clickable {
-                searchBar.ClickToSearchTipUseCase(it)
-            })
+            TipView(it, searchBar)
+            Spacer(
+                Modifier
+                    .height(0.36.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
         }
+    }
+}
+
+@Composable
+private fun TipView(
+    tip: String,
+    searchBar: SearchBar
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .clickable {
+                searchBar.ClickToSearchTipUseCase(tip)
+            }
+    ) {
+        Text(tip, modifier = Modifier, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 
@@ -234,7 +263,10 @@ fun SearchBarPreview() {
     val screen = SearchScreen(
         navigator = mockScreensNavigator(),
     ).apply {
-        searchSettingsPanel.state.categories.output.post(MockDataProvider().categories.toMutableStateList())
+        val mockDataProvider = MockDataProvider()
+        searchBar.state.query.post("Query")
+        searchBar.state.searchTips.output.post(mockDataProvider.searchTips)
+        searchSettingsPanel.state.categories.output.post(mockDataProvider.categories.toMutableStateList())
     }
 
     LikeAvitoAppTheme {

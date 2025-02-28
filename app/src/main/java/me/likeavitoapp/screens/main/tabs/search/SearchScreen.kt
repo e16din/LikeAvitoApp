@@ -1,14 +1,10 @@
 package me.likeavitoapp.screens.main.tabs.search
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
-import me.likeavitoapp.bindScenarioDataSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.Debouncer
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.inverse
-import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
 import me.likeavitoapp.log
 import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
@@ -29,49 +25,50 @@ class SearchScreen(
     override val state: State = State()
 ) : BaseAdContainerScreen(navigator, state) {
 
-    class State(
-        val ads: Worker<SnapshotStateList<Ad>> = Worker(mutableStateListOf<Ad>()),
-        var adsPage: UpdatableState<Int> = UpdatableState(0),
-        var isCategoriesVisible: UpdatableState<Boolean> = UpdatableState(false),
-    ) : BaseAdContainerState()
+    class State() : BaseAdContainerState() {
+        val ads = Worker<List<Ad>>(mutableListOf<Ad>())
+        var adsPage = UpdatableState(0)
+        var isCategoriesVisible = UpdatableState(false)
+    }
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
 
-    suspend fun loadAds() {
+    fun loadAds(resetPage: Boolean) {
         log("loadAds")
         state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
-        state.ads.load(
-            loading = {
-                return@load get.sources().backend.adsService.getAds(
-                    page = state.adsPage.value,
-                    query = searchBar.state.query.value,
-                    categoryId = searchSettingsPanel.state.selectedCategory.value?.id ?: 0,
-                    range = searchSettingsPanel.state.priceRange.value,
-                    regionId = searchSettingsPanel.state.selectedRegion.value?.id ?: 0
-                )
-            },
-            onSuccess = { newAds ->
-                with(newAds.toMutableStateList()) {
-                    state.ads.output.post(this)
-                    bindScenarioDataSource(Ad::class, this)
-                }
-            }
-        )
+        state.ads.act {
+            val result = get.sources().backend.adsService.getAds(
+                query = searchBar.state.selectedQuery.value,
+                categoryId = searchSettingsPanel.state.selectedCategory.value?.id,
+                range = searchSettingsPanel.state.priceRange.value,
+                regionId = searchSettingsPanel.state.selectedRegion.value?.id,
+                resetPage = resetPage
+            )
+
+            val newAds = result.getOrNull()
+
+            val list = if (!resetPage) state.ads.output.value + (newAds ?: emptyList()) else newAds
+            return@act Pair(list, result.isSuccess)
+        }
     }
 
-    suspend fun loadCategories() = with(searchSettingsPanel) {
-        state.categories.act {
+    inline fun loadCategories(crossinline onDone: () -> Unit) {
+        searchSettingsPanel.state.categories.act {
             val result = get.sources().backend.adsService.getCategories()
             val categories = result.getOrNull() ?: emptyList()
 
             val selectedCategoryId = get.sources().platform.appDataStore.loadCategoryId()
-            selectedCategoryId?.let { selected ->
-                categories.firstOrNull { it.id == selected }?.let {
-                    searchSettingsPanel.state.selectedCategory.post(it)
+            withContext(Dispatchers.Main) {
+                selectedCategoryId?.let { selected ->
+                    categories.firstOrNull { it.id == selected }?.let {
+                        searchSettingsPanel.state.selectedCategory.next(it)
+                        log("selectedCategory: ${searchSettingsPanel.state.selectedCategory.value}")
+                    }
                 }
-            }
 
+                onDone()
+            }
             return@act Pair(categories, result.isSuccess)
         }
     }
@@ -82,11 +79,11 @@ class SearchScreen(
         val ads = state.ads.output.value
         val needToInit = ads.isEmpty()
         if (needToInit) {
-            get.scope().launchWithHandler {
-                loadCategories()
-                state.isCategoriesVisible.post(true)
-                loadAds()
+            loadCategories {
+                state.isCategoriesVisible.next(true)
+                loadAds(true)
             }
+
         } else {
             ads.forEach {
                 if (it.reservedTimeMs != null) {
@@ -108,20 +105,16 @@ class SearchScreen(
         recordScenarioStep()
 
         if (!state.ads.output.value.isEmpty()) {
-            get.scope().launchWithHandler {
-                state.adsPage.post(state.adsPage.value + 1)
-                loadAds()
-            }
+            state.adsPage.next(state.adsPage.value + 1)
+            loadAds(false)
         }
     }
 
     fun CloseSearchSettingsPanelUseCase() {
         recordScenarioStep()
 
-        get.scope().launchWithHandler {
-            searchSettingsPanel.state.enabled.post(false)
-            loadAds()
-        }
+        searchSettingsPanel.state.enabled.next(false)
+        loadAds(true)
     }
 
     inner class SearchBar {
@@ -135,27 +128,25 @@ class SearchScreen(
             val searchTips: Worker<List<String>> = Worker(emptyList<String>())
         )
 
-        fun search(tip: String) {
+        fun search(selectedQuery: String) {
             ChangeSearchQueryUseCase("")
-            state.selectedQuery.post(tip)
+            state.selectedQuery.next(selectedQuery)
 
             work {
-                get.sources().backend.adsService.postTip(tip)
-                loadAds()
+                get.sources().backend.adsService.postTip(selectedQuery)
             }
+            loadAds(true)
         }
 
         fun ClickToCategoryUseCase(category: Category) {
             recordScenarioStep()
 
-            get.scope().launchWithHandler {
-                with(get.sources()) {
-                    platform.appDataStore.saveCategoryId(category.id)
-                }
-
-                searchSettingsPanel.state.selectedCategory.post(category)
-                loadAds()
+            work {
+                get.sources().platform.appDataStore.saveCategoryId(category.id)
             }
+            searchSettingsPanel.state.selectedCategory.next(category)
+            log("selectedCategory: ${searchSettingsPanel.state.selectedCategory.value}")
+            loadAds(true)
         }
 
         fun ClickToFilterButtonUseCase() {
@@ -167,8 +158,8 @@ class SearchScreen(
         fun ChangeSearchQueryUseCase(newQuery: String) {
             recordScenarioStep(newQuery)
 
-            state.query.post(newQuery)
-            
+            state.query.next(newQuery)
+
 
             if (queryDebouncer == null) {
                 queryDebouncer = Debouncer(newQuery) { lastQuery ->
@@ -176,17 +167,12 @@ class SearchScreen(
                         state.searchTips.resetWith(emptyList())
                         return@Debouncer
                     }
+                    state.searchTips.act {
+                        val result = get.sources().backend.adsService.getSearchTips(
+                            query = searchBar.state.query.value
+                        )
 
-                    get.scope().launchWithHandler {
-                        state.searchTips.load(loading = {
-                            get.sources().backend.adsService.getSearchTips(
-                                categoryId = searchSettingsPanel.state.selectedCategory.value?.id
-                                    ?: 0,
-                                query = searchBar.state.query.value
-                            )
-                        }, onSuccess = { tips ->
-                            state.searchTips.output.post(tips)
-                        })
+                        return@act Pair(result.getOrNull(), result.isSuccess)
                     }
                 }
 
@@ -216,14 +202,15 @@ class SearchScreen(
         fun ClickToSelectedCategoryUseCase() {
             recordScenarioStep()
 
-            searchSettingsPanel.state.selectedCategory.post(null)
+            searchSettingsPanel.state.selectedCategory.next(null)
         }
 
         fun ClickToSelectedQueryUseCase() {
             recordScenarioStep()
 
-            state.selectedQuery.post(null)
+            state.selectedQuery.next(null)
             ChangeSearchQueryUseCase("")
+            loadAds(true)
         }
 
         fun ClickToSearchActionUseCase(query: String) {
@@ -250,25 +237,25 @@ class SearchScreen(
         fun ChangePriceFromUseCase(value: Int) {
             recordScenarioStep(value)
 
-            state.priceRange.post(state.priceRange.value.copy(from = value))
+            state.priceRange.next(state.priceRange.value.copy(from = value))
         }
 
         fun ChangePriceToUseCase(value: Int) {
             recordScenarioStep(value)
 
-            state.priceRange.post(state.priceRange.value.copy(to = value))
+            state.priceRange.next(state.priceRange.value.copy(to = value))
         }
 
         fun ClickToCategoryUseCase() {
             recordScenarioStep()
 
-            state.categoryMenuEnabled.post(true)
+            state.categoryMenuEnabled.next(true)
         }
 
         fun ClickToRegionUseCase() {
             recordScenarioStep()
 
-            state.regionMenuEnabled.post(true)
+            state.regionMenuEnabled.next(true)
         }
     }
 }
