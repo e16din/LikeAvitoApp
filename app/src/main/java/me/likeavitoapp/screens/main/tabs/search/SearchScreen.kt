@@ -8,6 +8,7 @@ import me.likeavitoapp.inverse
 import me.likeavitoapp.log
 import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
@@ -27,7 +28,6 @@ class SearchScreen(
 
     class State() : BaseAdContainerState() {
         val ads = Worker<List<Ad>>(mutableListOf<Ad>())
-        var adsPage = UpdatableState(0)
         var isCategoriesVisible = UpdatableState(false)
     }
 
@@ -81,7 +81,7 @@ class SearchScreen(
         if (needToInit) {
             loadCategories {
                 state.isCategoriesVisible.next(true)
-                loadAds(true)
+                loadAds(resetPage = true)
             }
 
         } else {
@@ -104,9 +104,8 @@ class SearchScreen(
     fun ScrollToEndUseCase() {
         recordScenarioStep()
 
-        if (!state.ads.output.value.isEmpty()) {
-            state.adsPage.next(state.adsPage.value + 1)
-            loadAds(false)
+        if (state.ads.output.value.size % AppModel.adsPageSize == 0) {
+            loadAds(resetPage = false)
         }
     }
 
@@ -114,7 +113,7 @@ class SearchScreen(
         recordScenarioStep()
 
         searchSettingsPanel.state.enabled.next(false)
-        loadAds(true)
+        loadAds(resetPage = true)
     }
 
     inner class SearchBar {
@@ -135,7 +134,7 @@ class SearchScreen(
             work {
                 get.sources().backend.adsService.postTip(selectedQuery)
             }
-            loadAds(true)
+            loadAds(resetPage = true)
         }
 
         fun ClickToCategoryUseCase(category: Category) {
@@ -146,7 +145,7 @@ class SearchScreen(
             }
             searchSettingsPanel.state.selectedCategory.next(category)
             log("selectedCategory: ${searchSettingsPanel.state.selectedCategory.value}")
-            loadAds(true)
+            loadAds(resetPage = true)
         }
 
         fun ClickToFilterButtonUseCase() {
@@ -210,7 +209,7 @@ class SearchScreen(
 
             state.selectedQuery.next(null)
             ChangeSearchQueryUseCase("")
-            loadAds(true)
+            loadAds(resetPage = true)
         }
 
         fun ClickToSearchActionUseCase(query: String) {

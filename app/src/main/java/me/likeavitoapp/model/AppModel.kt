@@ -12,6 +12,10 @@ import kotlin.reflect.KClass
 
 class AppModel {
 
+    companion object {
+        const val adsPageSize = 10
+    }
+
     val user = UpdatableState<User?>(null)
 
     lateinit var rootScreen: RootScreen

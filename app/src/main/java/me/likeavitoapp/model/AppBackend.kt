@@ -13,7 +13,6 @@ import com.yandex.mapkit.search.Session.SearchListener
 import com.yandex.runtime.Error
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.log
 import me.likeavitoapp.mocks.MockDataProvider
@@ -178,16 +177,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         ): Result<List<Ad>> {
             delay(2000)
 
-            log("query: $query")
-            log("categoryId: $categoryId")
-            log("regionId: $regionId")
-
-            val filterCondition : (Ad) -> Boolean =  { it ->
-                (categoryId == null || categoryId == 0 || it.categoryId == categoryId)
-                        && ((regionId == null || regionId == 0) || it.regionId == regionId)
-                        &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
-            }
-            val ads = mockDataProvider.getNextAdsPage(filterCondition, resetPage)
+            val ads = mockDataProvider.getNextAdsPage(range, regionId, categoryId, query, resetPage)
             return Result.success(ads)
         }
 
@@ -282,14 +272,28 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 }
 
 fun main() {
-    val back = AppBackend()
-    runBlocking {
-        back.adsService.getAds(
-            range = PriceRange(),
-            regionId = null,
-            categoryId = 4,
-            query = "диван",
-            resetPage = true,
-        )
-    }
+    val mockDataProvider = MockDataProvider()
+    mockDataProvider.getNextAdsPage(
+        range = PriceRange(),
+        regionId = null,
+        categoryId = 4,
+        query = "диван",
+        resetPage = true,
+    ) // ожидаю 1 объявление с диваном
+
+    mockDataProvider.getNextAdsPage(
+        range = PriceRange(),
+        regionId = null,
+        categoryId = null,
+        query = null,
+        resetPage = false,
+    ) // ожидаю 1-ю страницу
+
+    mockDataProvider.getNextAdsPage(
+        range = PriceRange(),
+        regionId = null,
+        categoryId = null,
+        query = null,
+        resetPage = false,
+    ) // ожидаю 2-ю страницу
 }

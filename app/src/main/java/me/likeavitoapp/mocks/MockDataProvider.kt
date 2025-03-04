@@ -2,9 +2,11 @@ package me.likeavitoapp.mocks
 
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
@@ -97,10 +99,27 @@ class MockDataProvider {
     private val paged = mutableSetOf<Long>()
     private var pageCounter = 0
 
-    fun getNextAdsPage(filterCondition: (Ad) -> Boolean, resetPage: Boolean = false): List<Ad> {
+    fun getNextAdsPage(
+        range: PriceRange,
+        regionId: Int?,
+        categoryId: Int?,
+        query: String?,
+        resetPage: Boolean = false,
+        pageSize: Int = AppModel.adsPageSize
+    ): List<Ad> {
+        log("query: $query")
+        log("categoryId: $categoryId")
+        log("regionId: $regionId")
         log("getNextAdsPage")
+        val filterCondition : (Ad) -> Boolean =  { it ->
+            ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
+                    && ((regionId == null || regionId == 0) || it.regionId == regionId)
+                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
+        }
+
         val filtered = ads.filter(filterCondition)
         log("filtered: $filtered")
+
         val maxPages = 20
         if (resetPage || pageCounter > maxPages) {
             paged.clear()
@@ -109,20 +128,22 @@ class MockDataProvider {
 
         pageCounter += 1
 
-        val pageSize = 10
         if (filtered.size < pageSize) {
             return filtered
         }
 
         val result = mutableListOf<Ad>()
-        for (i in 0 until min(pageSize, filtered.size)) {
+        log("pageCounter: $pageCounter")
+        for (i in (pageCounter-1) * pageSize until min((pageCounter-1) * pageSize + pageSize, filtered.size)) {
+            log("i: $i")
             val ad = filtered[i]
             if (!paged.contains(ad.id)) {
+                log("ad.id: ${ad.id}")
                 paged.add(ad.id)
                 result.add(ad)
             }
         }
-        log("result: $filtered")
+        log("result: $result")
         return result
     }
 
