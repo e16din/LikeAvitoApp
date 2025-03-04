@@ -10,8 +10,6 @@ import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.debug
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.log
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -130,10 +128,14 @@ class Worker<T>(initial: T) {
 
 // NOTE: act - действуй!
 // (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
-inline fun <T> Worker<T>.act(crossinline task: suspend () -> Pair<T?, Boolean>) {
+inline fun <T> Worker<T>.act(
+    crossinline afterAll: (T) -> Unit = {},
+    crossinline task: suspend () -> Pair<T?, Boolean>
+) {
     working.next(true)
     work(onDone = { result ->
-        output.next(result.first ?: output.value)
+        val data = result.first ?: output.value
+        output.next(data)
         if (result.second) {
             fail.next(false, ifNew = true)
 
@@ -142,6 +144,7 @@ inline fun <T> Worker<T>.act(crossinline task: suspend () -> Pair<T?, Boolean>) 
         }
 
         working.next(false)
+        afterAll(data)
     }) {
         return@work task()
     }

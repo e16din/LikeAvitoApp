@@ -8,7 +8,6 @@ import me.likeavitoapp.inverse
 import me.likeavitoapp.log
 import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
@@ -29,15 +28,16 @@ class SearchScreen(
     class State() : BaseAdContainerState() {
         val ads = Worker<List<Ad>>(mutableListOf<Ad>())
         var isCategoriesVisible = UpdatableState(false)
+        var pullToRefreshEnabled = UpdatableState(false)
     }
 
     val searchBar = SearchBar()
     val searchSettingsPanel = SearchSettingsPanel()
 
-    fun loadAds(resetPage: Boolean) {
+    fun loadAds(resetPage: Boolean, afterAll: () -> Unit = {}) {
         log("loadAds")
         state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
-        state.ads.act {
+        state.ads.act(afterAll = { afterAll() }) {
             val result = get.sources().backend.adsService.getAds(
                 query = searchBar.state.selectedQuery.value,
                 categoryId = searchSettingsPanel.state.selectedCategory.value?.id,
@@ -104,9 +104,7 @@ class SearchScreen(
     fun ScrollToEndUseCase() {
         recordScenarioStep()
 
-        if (state.ads.output.value.size % AppModel.adsPageSize == 0) {
-            loadAds(resetPage = false)
-        }
+        loadAds(resetPage = false)
     }
 
     fun CloseSearchSettingsPanelUseCase() {
@@ -114,6 +112,13 @@ class SearchScreen(
 
         searchSettingsPanel.state.enabled.next(false)
         loadAds(resetPage = true)
+    }
+
+    fun PullToRefreshUseCase() {
+        state.pullToRefreshEnabled.next(true)
+        loadAds(resetPage = true) {
+            state.pullToRefreshEnabled.next(false)
+        }
     }
 
     inner class SearchBar {

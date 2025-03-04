@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.main.tabs.AdView
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
@@ -34,12 +35,13 @@ inline fun AdsListView(
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1
         }
     }
+    var ads = screen.state.ads.output.collectAsState()
 
-    if (isAtTheEndOfList) {
+    if (isAtTheEndOfList && ads.value.size % AppModel.adsPageSize == 0) {
         screen.ScrollToEndUseCase()
     }
 
-    var ads = screen.state.ads.output.collectAsState()
+
 
     val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>() }
     LazyColumn(

@@ -17,10 +17,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,7 +34,9 @@ import me.likeavitoapp.screens.main.tabs.search.views.AdsListView
 import me.likeavitoapp.screens.main.tabs.search.views.SearchBarView
 import me.likeavitoapp.screens.main.tabs.search.views.SearchSettingsPanelView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import me.likeavitoapp.log
 
 @Composable
 fun SearchScreenProvider(
@@ -61,11 +62,14 @@ fun SearchScreenProvider(
 fun SearchScreenView(screen: SearchScreen) {
     val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState()
     var displayHeader by remember { mutableStateOf(true) }
-
+    var pullToRefreshEnabled = screen.state.pullToRefreshEnabled.collectAsState()
+    log("pullToRefreshEnabled: $pullToRefreshEnabled")
     Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
-            isRefreshing = false,
-            onRefresh = { },
+            isRefreshing = pullToRefreshEnabled.value,
+            onRefresh = {
+                screen.PullToRefreshUseCase()
+            },
             modifier = Modifier
         ) {
             Column {
