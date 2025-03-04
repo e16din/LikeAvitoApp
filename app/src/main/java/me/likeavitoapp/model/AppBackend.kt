@@ -11,8 +11,9 @@ import com.yandex.mapkit.search.SearchOptions
 import com.yandex.mapkit.search.SearchType
 import com.yandex.mapkit.search.Session.SearchListener
 import com.yandex.runtime.Error
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.log
 import me.likeavitoapp.mocks.MockDataProvider
@@ -181,10 +182,10 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             log("categoryId: $categoryId")
             log("regionId: $regionId")
 
-            val filterCondition : (Ad)->Boolean =  { it ->
-                if (categoryId == null || categoryId == 0) true else it.categoryId == categoryId
-                        && if (regionId == null || regionId == 0) true else it.regionId == regionId
-                        && if (query == null) true else it.title.contains(query, ignoreCase = true)
+            val filterCondition : (Ad) -> Boolean =  { it ->
+                (categoryId == null || categoryId == 0 || it.categoryId == categoryId)
+                        && ((regionId == null || regionId == 0) || it.regionId == regionId)
+                        &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
             }
             val ads = mockDataProvider.getNextAdsPage(filterCondition, resetPage)
             return Result.success(ads)
@@ -277,5 +278,18 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(orders)
         }
 
+    }
+}
+
+fun main() {
+    val back = AppBackend()
+    runBlocking {
+        back.adsService.getAds(
+            range = PriceRange(),
+            regionId = null,
+            categoryId = 4,
+            query = "диван",
+            resetPage = true,
+        )
     }
 }

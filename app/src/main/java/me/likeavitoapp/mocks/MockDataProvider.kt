@@ -98,6 +98,7 @@ class MockDataProvider {
     private var pageCounter = 0
 
     fun getNextAdsPage(filterCondition: (Ad) -> Boolean, resetPage: Boolean = false): List<Ad> {
+        log("getNextAdsPage")
         val filtered = ads.filter(filterCondition)
         log("filtered: $filtered")
         val maxPages = 20
@@ -121,6 +122,7 @@ class MockDataProvider {
                 result.add(ad)
             }
         }
+        log("result: $filtered")
         return result
     }
 
