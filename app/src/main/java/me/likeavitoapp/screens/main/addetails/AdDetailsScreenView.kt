@@ -49,6 +49,7 @@ import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
+import me.likeavitoapp.screens.DetailsTopBar
 import me.likeavitoapp.screens.main.order.ChatView
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
@@ -58,7 +59,14 @@ import me.likeavitoapp.ui.theme.backgroundLight
 @Composable
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        AdDetailsScreenView(screen)
+        DetailsTopBar(
+            title = screen.state.ad.title,
+            onBack = {
+                screen.PressBackUseCase()
+            },
+        ) { innerPadding ->
+            AdDetailsScreenView(screen, Modifier.padding(innerPadding))
+        }
     }
 
     BackHandler {
@@ -73,27 +81,17 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 }
 
 @Composable
-fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
+fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(screen.state) {
     val favoriteSelected by screen.state.ad.isFavorite.collectAsState()
     val timerLabel = ad.timerLabel.collectAsState(AdDetailsScreen::class)
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Text(
-            text = ad.title,
-            style = AppTypography.titleLarge,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         Box {
             val pagerState = rememberPagerState(pageCount = {
                 ad.photoUrls.size
             })
             Box {
                 HorizontalPager(state = pagerState) { page ->
-
                     val url = ad.photoUrls[page]
                     ActualAsyncImage(
                         modifier = Modifier
@@ -104,8 +102,6 @@ fun AdDetailsScreenView(screen: AdDetailsScreen) = with(screen.state) {
                             },
                         url = url
                     )
-
-
                 }
                 Text(
                     modifier = Modifier
@@ -218,7 +214,8 @@ fun AdDetailsScreenPreview() {
             AdDetailsScreen(
                 ad = MockDataProvider().ads.first(),
                 navigator = mockScreensNavigator(),
-            )
+            ),
+            Modifier.padding(56.dp)
         )
     }
 }

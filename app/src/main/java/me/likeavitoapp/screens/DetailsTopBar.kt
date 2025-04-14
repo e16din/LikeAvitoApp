@@ -2,8 +2,7 @@ package me.likeavitoapp.screens
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,11 +17,9 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-inline fun ActionTopBar(
+inline fun DetailsTopBar(
     title:String,
-    withDoneButton:Boolean = true,
-    crossinline onClose: () -> Unit,
-    crossinline onDone: () -> Unit,
+    crossinline onBack: () -> Unit,
     crossinline content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -42,29 +39,16 @@ inline fun ActionTopBar(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        onClose()
+                        onBack()
 
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Close,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             contentDescription = "close"
                         )
                     }
-                },
-                actions = {
-                    if(withDoneButton) {
-                        IconButton(onClick = {
-                            onDone()
-
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    }
-                },
+                }
             )
         },
     ) { innerPadding ->
