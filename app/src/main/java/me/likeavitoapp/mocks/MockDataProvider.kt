@@ -111,11 +111,12 @@ class MockDataProvider {
         pageSize: Int = AppModel.adsPageSize
     ): List<Ad> {
         log("getNextAdsPage")
+        log("range: $range")
         val filterCondition : (Ad) -> Boolean =  { it ->
             ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
                     && ((regionId == null || regionId == 0) || it.regionId == regionId)
-                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true)
-                    && (it.price >= range.from && (range.to <= range.from || it.price <= range.to)))
+                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
+                    && (it.price >= range.from && (range.to <= range.from || it.price <= range.to))
         }
 
         val filtered = ads.filter(filterCondition)

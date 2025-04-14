@@ -21,7 +21,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,14 +63,8 @@ inline fun SearchSettingsPanelView(
 
     val category by panel.state.selectedCategory.collectAsState()
     val region by panel.state.selectedRegion.collectAsState()
-    val priceRange by panel.state.priceRange.collectAsState()
-    val textFrom = remember { priceRange.from.toString() }
-    val textTo = remember {
-        if (priceRange.to < 0)
-            ""
-        else
-            priceRange.to.toString()
-    }
+    val priceFrom by panel.state.priceFrom.collectAsState()
+    val priceTo by panel.state.priceTo.collectAsState()
 
     val localFocusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -114,9 +107,9 @@ inline fun SearchSettingsPanelView(
                                 onFocus()
                             }
                         },
-                    value = textFrom,
+                    value = priceFrom,
                     onValueChange = { value ->
-                        panel.ChangePriceFromUseCase(value.toIntOrNull() ?: 0)
+                        panel.ChangePriceFromUseCase(value)
                     },
                     label = {
                         Text(stringResource(R.string.from))
@@ -142,17 +135,12 @@ inline fun SearchSettingsPanelView(
                                 onFocus()
                             }
                         },
-                    value = textTo,
+                    value = priceTo,
                     onValueChange = { value ->
-                        panel.ChangePriceToUseCase(value.toIntOrNull() ?: 0)
+                        panel.ChangePriceToUseCase(value)
                     },
                     label = {
                         Text(stringResource(R.string.to))
-                    },
-                    placeholder = {
-                        if (textTo.isEmpty()) {
-                            Text(stringResource(R.string.hint_max))
-                        }
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal)

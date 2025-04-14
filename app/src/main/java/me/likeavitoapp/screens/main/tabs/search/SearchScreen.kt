@@ -39,10 +39,20 @@ class SearchScreen(
         log("loadAds")
         state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
         state.ads.act(afterAll = { afterAll() }) {
+            val from = if(searchSettingsPanel.state.priceFrom.value.isEmpty())
+                0
+            else
+                searchSettingsPanel.state.priceFrom.value.toInt()
+
+            val to = if(searchSettingsPanel.state.priceTo.value.isEmpty())
+                0
+            else
+                searchSettingsPanel.state.priceTo.value.toInt()
+
             val result = get.sources().backend.adsService.getAds(
                 query = searchBar.state.selectedQuery.value,
                 categoryId = searchSettingsPanel.state.selectedCategory.value?.id,
-                range = searchSettingsPanel.state.priceRange.value,
+                range = PriceRange(from, to),
                 regionId = searchSettingsPanel.state.selectedRegion.value?.id,
                 resetPage = resetPage
             )
@@ -99,13 +109,13 @@ class SearchScreen(
         val needToInit = ads.isEmpty()
         if (needToInit) {
             loadCategories { categories ->
-                if(searchSettingsPanel.state.selectedCategory.value == null) {
+                if (searchSettingsPanel.state.selectedCategory.value == null) {
                     searchSettingsPanel.state.selectedCategory.next(categories.first())
                 }
                 state.isCategoriesVisible.next(true)
 
                 loadRegions { regions ->
-                    if(searchSettingsPanel.state.selectedRegion.value == null) {
+                    if (searchSettingsPanel.state.selectedRegion.value == null) {
                         searchSettingsPanel.state.selectedRegion.next(regions.first())
                     }
                     state.isSearchSettingsVisible.next(true)
@@ -263,21 +273,22 @@ class SearchScreen(
             var selectedCategory: UpdatableState<Category?> = UpdatableState(null),
             val regions: Worker<List<Region>> = Worker(emptyList<Region>()),
             var selectedRegion: UpdatableState<Region?> = UpdatableState(null),
-            var priceRange: UpdatableState<PriceRange> = UpdatableState(PriceRange()),
+            var priceFrom: UpdatableState<String> = UpdatableState(""),
+            var priceTo: UpdatableState<String> = UpdatableState(""),
             var categoryMenuEnabled: UpdatableState<Boolean> = UpdatableState(false),
             var regionMenuEnabled: UpdatableState<Boolean> = UpdatableState(false),
         )
 
-        fun ChangePriceFromUseCase(value: Int) {
+        fun ChangePriceFromUseCase(value: String) {
             recordScenarioStep(value)
 
-            state.priceRange.next(state.priceRange.value.copy(from = value))
+            state.priceFrom.next(value)
         }
 
-        fun ChangePriceToUseCase(value: Int) {
+        fun ChangePriceToUseCase(value: String) {
             recordScenarioStep(value)
 
-            state.priceRange.next(state.priceRange.value.copy(to = value))
+            state.priceTo.next(value)
         }
 
         fun ClickToCategoryUseCase() {
@@ -291,11 +302,13 @@ class SearchScreen(
 
             state.regionMenuEnabled.next(true)
         }
+
         fun DismissCategoryMenuUseCase() {
             recordScenarioStep()
 
             state.categoryMenuEnabled.next(false)
         }
+
         fun ChangeCategoryUseCase(category: Category) {
             recordScenarioStep(category)
 
@@ -311,6 +324,7 @@ class SearchScreen(
 
             state.regionMenuEnabled.next(false)
         }
+
         fun ChangeRegionUseCase(region: Region) {
             recordScenarioStep(region)
 

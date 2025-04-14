@@ -25,7 +25,6 @@
     <string name="price_title">Цена</string>
     <string name="from">От</string>
     <string name="to">До</string>
-    <string name="hint_max">Максимум</string>
     <string name="search_settings_title">Настройки поиска</string>
     <string name="continue_order_label">Продолжить оформление заказа %1$s</string>
     <string name="edit_profile_title">Редактирование профиля</string>

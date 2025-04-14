@@ -14,7 +14,6 @@ import com.yandex.runtime.Error
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
 import me.likeavitoapp.UnauthorizedException
-import me.likeavitoapp.log
 import me.likeavitoapp.mocks.MockDataProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -192,6 +191,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun getSearchTips(query: String): Result<List<String>> {
+            delay(500)
             return Result.success(mockDataProvider.searchTips.filter {
                 it.contains(
                     query,
@@ -201,10 +201,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun updateFavoriteState(ad: Ad): Result<Boolean> {
+            delay(500)
             return Result.success(true)
         }
 
         suspend fun getFavorites(): Result<List<Ad>> {
+            delay(1500)
             return Result.success(mockDataProvider.getFavorites())
         }
 
@@ -215,6 +217,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun deleteAllFavorites(): Result<Boolean> {
+            delay(300)
             mockDataProvider.ads = mockDataProvider.ads.apply {
                 forEach { it.isFavorite.next(false) }
             }
@@ -222,6 +225,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun postTip(tip: String) {
+            delay(400)
             mockDataProvider.searchTips.add(0, tip)
         }
     }
@@ -234,6 +238,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun reserve(adId: Long): Result<Boolean> {
+            delay(400)
             val testFailId = 2L
 
             if (adId != testFailId) {
