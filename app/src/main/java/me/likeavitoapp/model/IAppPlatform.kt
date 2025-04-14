@@ -13,6 +13,9 @@ interface IAppPlatform {
         suspend fun saveCategoryId(id: Int)
         suspend fun loadCategoryId(): Int?
 
+        suspend fun saveRegionId(id: Int)
+        suspend fun loadRegionId(): Int?
+
         suspend fun clear()
     }
 }

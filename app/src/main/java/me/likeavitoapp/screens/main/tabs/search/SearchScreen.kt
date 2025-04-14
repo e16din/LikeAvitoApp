@@ -28,6 +28,7 @@ class SearchScreen(
     class State() : BaseAdContainerState() {
         val ads = Worker<List<Ad>>(mutableListOf<Ad>())
         var isCategoriesVisible = UpdatableState(false)
+        var isSearchSettingsVisible = UpdatableState(false)
         var pullToRefreshEnabled = UpdatableState(false)
     }
 
@@ -53,7 +54,26 @@ class SearchScreen(
         }
     }
 
-    inline fun loadCategories(crossinline onDone: () -> Unit) {
+    fun loadRegions(onDone: (List<Region>) -> Unit) {
+        searchSettingsPanel.state.regions.act {
+            val result = get.sources().backend.adsService.getRegions()
+            val regions = result.getOrNull() ?: emptyList()
+
+            val selectedRegionId = get.sources().platform.appDataStore.loadRegionId()
+            withContext(Dispatchers.Main) {
+                selectedRegionId?.let { selected ->
+                    regions.firstOrNull { it.id == selected }?.let {
+                        searchSettingsPanel.state.selectedRegion.next(it)
+                    }
+                }
+
+                onDone(regions)
+            }
+            return@act Pair(regions, result.isSuccess)
+        }
+    }
+
+    fun loadCategories(onDone: (List<Category>) -> Unit) {
         searchSettingsPanel.state.categories.act {
             val result = get.sources().backend.adsService.getCategories()
             val categories = result.getOrNull() ?: emptyList()
@@ -63,11 +83,10 @@ class SearchScreen(
                 selectedCategoryId?.let { selected ->
                     categories.firstOrNull { it.id == selected }?.let {
                         searchSettingsPanel.state.selectedCategory.next(it)
-                        log("selectedCategory: ${searchSettingsPanel.state.selectedCategory.value}")
                     }
                 }
 
-                onDone()
+                onDone(categories)
             }
             return@act Pair(categories, result.isSuccess)
         }
@@ -79,9 +98,21 @@ class SearchScreen(
         val ads = state.ads.output.value
         val needToInit = ads.isEmpty()
         if (needToInit) {
-            loadCategories {
+            loadCategories { categories ->
+                if(searchSettingsPanel.state.selectedCategory.value == null) {
+                    searchSettingsPanel.state.selectedCategory.next(categories.first())
+                }
                 state.isCategoriesVisible.next(true)
+
+                loadRegions { regions ->
+                    if(searchSettingsPanel.state.selectedRegion.value == null) {
+                        searchSettingsPanel.state.selectedRegion.next(regions.first())
+                    }
+                    state.isSearchSettingsVisible.next(true)
+                }
+
                 loadAds(resetPage = true)
+
             }
 
         } else {
@@ -143,13 +174,12 @@ class SearchScreen(
         }
 
         fun ClickToCategoryUseCase(category: Category) {
-            recordScenarioStep()
+            recordScenarioStep(category)
 
             work {
                 get.sources().platform.appDataStore.saveCategoryId(category.id)
             }
             searchSettingsPanel.state.selectedCategory.next(category)
-            log("selectedCategory: ${searchSettingsPanel.state.selectedCategory.value}")
             loadAds(resetPage = true)
         }
 
@@ -260,6 +290,35 @@ class SearchScreen(
             recordScenarioStep()
 
             state.regionMenuEnabled.next(true)
+        }
+        fun DismissCategoryMenuUseCase() {
+            recordScenarioStep()
+
+            state.categoryMenuEnabled.next(false)
+        }
+        fun ChangeCategoryUseCase(category: Category) {
+            recordScenarioStep(category)
+
+            work {
+                get.sources().platform.appDataStore.saveCategoryId(category.id)
+            }
+            state.selectedCategory.next(category)
+            state.categoryMenuEnabled.next(false)
+        }
+
+        fun DismissRegionMenuUseCase() {
+            recordScenarioStep()
+
+            state.regionMenuEnabled.next(false)
+        }
+        fun ChangeRegionUseCase(region: Region) {
+            recordScenarioStep(region)
+
+            work {
+                get.sources().platform.appDataStore.saveCategoryId(region.id)
+            }
+            state.selectedRegion.next(region)
+            state.regionMenuEnabled.next(false)
         }
     }
 }

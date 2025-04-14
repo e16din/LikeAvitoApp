@@ -25,6 +25,7 @@ class AppPlatform : IAppPlatform, Application() {
     inner class AuthDataStore() : IAppPlatform.IAppDataStore {
         private val USER_ID_KEY = longPreferencesKey("user_id")
         private val CATEGORY_ID_KEY = intPreferencesKey("category_id")
+        private val REGION_ID_KEY = intPreferencesKey("region_id")
         private val TOKEN_KEY = stringPreferencesKey("token")
 
         override suspend fun loadUserId(): Long? {
@@ -52,6 +53,17 @@ class AppPlatform : IAppPlatform, Application() {
         override suspend fun loadCategoryId(): Int? {
             val prefs = dataStore.data.first()
             return prefs[CATEGORY_ID_KEY]
+        }
+
+        override suspend fun saveRegionId(id: Int) {
+            dataStore.edit { settings ->
+                settings[REGION_ID_KEY] = id
+            }
+        }
+
+        override suspend fun loadRegionId(): Int? {
+            val prefs = dataStore.data.first()
+            return prefs[REGION_ID_KEY]
         }
 
         override suspend fun saveToken(token: String) {

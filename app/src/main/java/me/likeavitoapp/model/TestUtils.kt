@@ -100,6 +100,13 @@ fun mockMainSet() = MainSet().apply {
                     return null
                 }
 
+                override suspend fun saveRegionId(id: Int) {
+                }
+
+                override suspend fun loadRegionId(): Int? {
+                    return null
+                }
+
                 override suspend fun saveToken(token: String) {
                 }
 

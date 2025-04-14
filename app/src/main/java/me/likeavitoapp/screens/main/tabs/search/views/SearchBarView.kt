@@ -60,6 +60,7 @@ fun SearchBarView(screen: SearchScreen) {
     val selectedQuery by screen.searchBar.state.selectedQuery.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
     val isCategoriesVisible by screen.state.isCategoriesVisible.collectAsState()
+    val isSearchSettingsVisible by screen.state.isSearchSettingsVisible.collectAsState()
     val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
 
     fun hasSelectedCategory(): Boolean = selectedCategory != null
@@ -105,12 +106,14 @@ fun SearchBarView(screen: SearchScreen) {
                                 })
 
                         } else {
-                            Icon(
-                                ImageVector.vectorResource(R.drawable.baseline_tune_24),
-                                "searchbar_trailing_icon",
-                                modifier = Modifier.clickable {
-                                    screen.searchBar.ClickToFilterButtonUseCase()
-                                })
+                            AnimatedVisibility(isSearchSettingsVisible) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.baseline_tune_24),
+                                    "searchbar_trailing_icon",
+                                    modifier = Modifier.clickable {
+                                        screen.searchBar.ClickToFilterButtonUseCase()
+                                    })
+                            }
                         }
                     },
                     query = query,
@@ -264,9 +267,9 @@ fun SearchBarPreview() {
         navigator = mockScreensNavigator(),
     ).apply {
         val mockDataProvider = MockDataProvider()
-        searchBar.state.query.post("Query")
-        searchBar.state.searchTips.output.post(mockDataProvider.searchTips)
-        searchSettingsPanel.state.categories.output.post(mockDataProvider.categories.toMutableStateList())
+        searchBar.state.query.next("Query")
+        searchBar.state.searchTips.output.next(mockDataProvider.searchTips)
+        searchSettingsPanel.state.categories.output.next(mockDataProvider.categories.toMutableStateList())
     }
 
     LikeAvitoAppTheme {

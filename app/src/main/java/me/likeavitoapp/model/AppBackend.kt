@@ -165,7 +165,13 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     // NOTE: this is mock for an example
     inner class AdsService {
         suspend fun getCategories(): Result<List<Category>> {
+            delay(600)
             return Result.success(mockDataProvider.categories)
+        }
+
+        suspend fun getRegions(): Result<List<Region>> {
+            delay(500)
+            return Result.success(mockDataProvider.regions)
         }
 
         suspend fun getAds(

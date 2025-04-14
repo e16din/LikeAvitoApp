@@ -25,7 +25,8 @@ class MockDataProvider {
         photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
     )
 
-    var categories = createCategories()
+    val categories = createCategories()
+    val regions = createRegions()
     var searchTips = mutableListOf(
         "Mac Book",
         "Диван",
@@ -47,7 +48,7 @@ class MockDataProvider {
 
     fun createCategories(): List<Category> {
         return listOf(
-            Category(name = "Все", id = 0),
+            Category(name = "Все категории", id = 0),
             Category(name = "Квартиры", id = 1),
             Category(name = "Авто", id = 2),
             Category(name = "Ноутбуки", id = 3),
@@ -59,13 +60,17 @@ class MockDataProvider {
         )
     }
 
-    fun getRegions(): List<Region> {
+    fun createRegions(): List<Region> {
         return listOf(
+            Region("Все регионы", 0),
             Region("Москва", 1),
             Region("Санкт-Петербург", 2),
             Region("Ростов-на-Дону", 3),
             Region("Екатеринбург", 4),
             Region("Омск", 5),
+            Region("Новосибирск", 6),
+            Region("Чебоксары", 7),
+            Region("Калининград", 8),
         )
     }
 
@@ -105,14 +110,12 @@ class MockDataProvider {
         resetPage: Boolean = false,
         pageSize: Int = AppModel.adsPageSize
     ): List<Ad> {
-        log("query: $query")
-        log("categoryId: $categoryId")
-        log("regionId: $regionId")
         log("getNextAdsPage")
         val filterCondition : (Ad) -> Boolean =  { it ->
             ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
                     && ((regionId == null || regionId == 0) || it.regionId == regionId)
-                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
+                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true)
+                    && (it.price >= range.from && (range.to <= range.from || it.price <= range.to)))
         }
 
         val filtered = ads.filter(filterCondition)

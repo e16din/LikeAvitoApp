@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.35.0-alpha"
-agp = "8.10.0-alpha07"
+agp = "8.11.0-alpha04"
 browser = "1.8.0"
 coilCompose = "3.0.4"
 coilNetworkKtor3 = "3.0.4"

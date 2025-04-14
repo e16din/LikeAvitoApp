@@ -20,8 +20,6 @@
     <string name="cart_tab">Покупки</string>
     <string name="search_hint">Искать</string>
     <string name="bargaining_button">Торг</string>
-    <string name="all_categories">Все категории</string>
-    <string name="all_regions">Все регионы</string>
     <string name="category_title">Категория</string>
     <string name="region_title">Регион</string>
     <string name="price_title">Цена</string>
@@ -58,4 +56,6 @@
     <string name="archived_tab">Выполненные</string>
     <string name="order_active_state_label">Активен</string>
     <string name="done_order_status_label">Выполнен</string>
+    <string name="select_region_lable">Выбрать регион:</string>
+    <string name="select_category_lable">Выбрать категорию:</string>
 </resources>
