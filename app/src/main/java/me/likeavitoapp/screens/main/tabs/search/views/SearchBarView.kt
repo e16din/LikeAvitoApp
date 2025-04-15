@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -29,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -59,6 +63,9 @@ fun SearchBarView(screen: SearchScreen) {
     val searchTips by screen.searchBar.state.searchTips.output.collectAsState()
     val selectedQuery by screen.searchBar.state.selectedQuery.collectAsState()
     val selectedCategory by screen.searchSettingsPanel.state.selectedCategory.collectAsState()
+    val selectedRegion by screen.searchSettingsPanel.state.selectedRegion.collectAsState()
+    val priceFrom by screen.searchSettingsPanel.state.priceFrom.collectAsState()
+    val priceTo by screen.searchSettingsPanel.state.priceTo.collectAsState()
     val isCategoriesVisible by screen.state.isCategoriesVisible.collectAsState()
     val isSearchSettingsVisible by screen.state.isSearchSettingsVisible.collectAsState()
     val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
@@ -66,62 +73,55 @@ fun SearchBarView(screen: SearchScreen) {
     fun hasSelectedCategory(): Boolean = selectedCategory != null
     fun isExpanded(): Boolean = !searchTips.isEmpty()
 
-    Column(
-
-    ) {
+    Column {
         AnimatedVisibility(
             selectedQuery == null, enter = fadeIn(), exit = fadeOut()
         ) {
-            SearchBar(inputField = {
-                SearchBarDefaults.InputField(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onSearch = { text ->
-                        screen.searchBar.ClickToSearchActionUseCase(text)
-                    },
-                    expanded = isExpanded(),
-                    onExpandedChange = {},
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    leadingIcon = {
-                        if (isExpanded()) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "back",
-                                modifier = Modifier.clickable {
-                                    screen.searchBar.ClickToTipsBackUseCase()
-                                })
-
-                        } else {
-                            Icon(
-                                Icons.Default.Search, contentDescription = "search_icon"
-                            )
-                        }
-                    },
-                    trailingIcon = {
-                        if (isExpanded()) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "clear",
-                                modifier = Modifier.clickable {
-                                    screen.searchBar.ClickToClearUseCase()
-                                })
-
-                        } else {
-                            AnimatedVisibility(isSearchSettingsVisible) {
+            SearchBar(
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onSearch = { text ->
+                            screen.searchBar.ClickToSearchActionUseCase(text)
+                        },
+                        expanded = isExpanded(),
+                        onExpandedChange = {},
+                        placeholder = { Text(stringResource(R.string.search_hint)) },
+                        leadingIcon = {
+                            if (isExpanded()) {
                                 Icon(
-                                    ImageVector.vectorResource(R.drawable.baseline_tune_24),
-                                    "searchbar_trailing_icon",
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "back",
                                     modifier = Modifier.clickable {
-                                        screen.searchBar.ClickToFilterButtonUseCase()
+                                        screen.searchBar.ClickToTipsBackUseCase()
+                                    })
+
+                            } else {
+                                Icon(
+                                    Icons.Default.Search, contentDescription = "search_icon"
+                                )
+                            }
+                        },
+                        trailingIcon = {
+                            if (isExpanded()) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "clear",
+                                    modifier = Modifier.clickable {
+                                        screen.searchBar.ClickToClearUseCase()
                                     })
                             }
-                        }
-                    },
-                    query = query,
-                    onQueryChange = { newQuery ->
-                        screen.searchBar.ChangeSearchQueryUseCase(newQuery)
-                    })
-            }, expanded = isExpanded(), onExpandedChange = { expanded ->
-            }) {
+                        },
+                        query = query,
+                        onQueryChange = { newQuery ->
+                            screen.searchBar.ChangeSearchQueryUseCase(newQuery)
+                        })
+                },
+                expanded = isExpanded(),
+                onExpandedChange = { expanded ->
+
+                }) {
                 TipsView(screen.searchBar, searchTips)
             }
         }
@@ -158,7 +158,7 @@ fun SearchBarView(screen: SearchScreen) {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(), onClick = {
@@ -188,7 +188,7 @@ fun SearchBarView(screen: SearchScreen) {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(), onClick = {
@@ -211,6 +211,65 @@ fun SearchBarView(screen: SearchScreen) {
                         .height(24.dp)
                 )
 
+            }
+        }
+
+        AnimatedVisibility(isSearchSettingsVisible) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 6.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        screen.searchBar.ClickToFilterButtonUseCase()
+                    }
+                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.baseline_tune_24),
+                    contentDescription = "searchbar_trailing_icon",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                OutlinedCard(modifier = Modifier.padding(start = 12.dp)) {
+                    Text(
+                        text = selectedRegion?.name ?: "",
+                        modifier = Modifier.padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = 6.dp,
+                            bottom = 6.dp
+                        )
+                    )
+                }
+
+                if (priceFrom.isNotEmpty()) {
+                    OutlinedCard(modifier = Modifier.padding(start = 12.dp)) {
+                        Text(
+                            text = "от $priceFrom",
+                            modifier = Modifier.padding(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = 6.dp,
+                                bottom = 6.dp
+                            )
+                        )
+                    }
+                }
+
+                if (priceTo.isNotEmpty()) {
+                    OutlinedCard(modifier = Modifier.padding(start = 12.dp)) {
+                        Text(
+                            text = "до $priceTo",
+                            modifier = Modifier.padding(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = 6.dp,
+                                bottom = 6.dp
+                            )
+                        )
+                    }
+                }
             }
         }
     }
