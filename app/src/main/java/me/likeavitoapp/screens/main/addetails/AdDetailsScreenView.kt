@@ -138,7 +138,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
             }
         }
 
-        AnimatedVisibility(!timerLabel.value.isEmpty()) {
+        AnimatedVisibility(timerLabel.value != "00:00") {
             ClosableMessage(
                 text = stringResource(R.string.continue_order_label, timerLabel.value),
                 onCloseClick = {

@@ -96,7 +96,7 @@ fun AdView(
                     )
                 }
 
-                if (!timerLabel.value.isEmpty()) {
+                if (timerLabel.value != "00:00") {
                     ClosableMessage(
                         text = stringResource(R.string.continue_order_label, timerLabel.value),
                         onCloseClick = {
