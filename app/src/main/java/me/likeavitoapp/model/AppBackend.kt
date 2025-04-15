@@ -282,29 +282,29 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     }
 }
 
-fun main() {
-    val mockDataProvider = MockDataProvider()
-    mockDataProvider.getNextAdsPage(
-        range = PriceRange(),
-        regionId = null,
-        categoryId = 4,
-        query = "диван",
-        resetPage = true,
-    ) // ожидаю 1 объявление с диваном
-
-    mockDataProvider.getNextAdsPage(
-        range = PriceRange(),
-        regionId = null,
-        categoryId = null,
-        query = null,
-        resetPage = false,
-    ) // ожидаю 1-ю страницу
-
-    mockDataProvider.getNextAdsPage(
-        range = PriceRange(),
-        regionId = null,
-        categoryId = null,
-        query = null,
-        resetPage = false,
-    ) // ожидаю 2-ю страницу
-}
+//fun main() {
+//    val mockDataProvider = MockDataProvider()
+//    mockDataProvider.getNextAdsPage(
+//        range = PriceRange(),
+//        regionId = null,
+//        categoryId = 4,
+//        query = "диван",
+//        resetPage = true,
+//    ) // ожидаю 1 объявление с диваном
+//
+//    mockDataProvider.getNextAdsPage(
+//        range = PriceRange(),
+//        regionId = null,
+//        categoryId = null,
+//        query = null,
+//        resetPage = false,
+//    ) // ожидаю 1-ю страницу
+//
+//    mockDataProvider.getNextAdsPage(
+//        range = PriceRange(),
+//        regionId = null,
+//        categoryId = null,
+//        query = null,
+//        resetPage = false,
+//    ) // ожидаю 2-ю страницу
+//}

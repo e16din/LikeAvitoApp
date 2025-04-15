@@ -62,8 +62,8 @@ fun SearchScreenProvider(
 fun SearchScreenView(screen: SearchScreen) {
     val searchFilterPanelEnabled by screen.searchSettingsPanel.state.enabled.collectAsState()
     var displayHeader by remember { mutableStateOf(true) }
-    var pullToRefreshEnabled = screen.state.pullToRefreshEnabled.collectAsState()
-    log("pullToRefreshEnabled: $pullToRefreshEnabled")
+    val pullToRefreshEnabled = screen.state.pullToRefreshEnabled.collectAsState()
+
     Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
             isRefreshing = pullToRefreshEnabled.value,

@@ -36,12 +36,12 @@ suspend inline fun <reified T> Worker<*>.load(
 
     } else {
         log("!!!loadingFailed!!!")
-        this@load.fail.post(true)
+        this@load.fail.next(true)
     }
 }
 
 fun UpdatableState<Boolean>.inverse() {
-    this.post(!this.value)
+    this.next(!this.value)
 }
 
 fun CharSequence.isDigitsOnly(): Boolean {

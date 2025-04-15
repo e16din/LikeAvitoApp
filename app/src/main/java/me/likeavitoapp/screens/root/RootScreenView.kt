@@ -42,22 +42,7 @@ fun RootScreenView(rootScreen: RootScreen) {
         rootScreen.StartScreenUseCase()
     }
 
-    Box(modifier = Modifier.pointerInput(Unit) {
-
-        detectTapGestures {
-            log("Tap: x = ${it.x}, y = ${it.y}")
-        }
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent()
-                // handle pointer event
-//                if (filter == null || event.type == filter) {
-                log("PointerEvent | ${event.type}, ${event.changes.first().position}")
-//                }
-            }
-        }
-
-    }) {
+    Box(modifier = Modifier) {
         Box(
             modifier = Modifier
                 .systemBarsPadding()

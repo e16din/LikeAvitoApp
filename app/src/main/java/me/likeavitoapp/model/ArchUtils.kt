@@ -51,9 +51,9 @@ class UpdatableState<T>(initial: T) {
 
     fun next(value: T, ifNew: Boolean = false) {
         if (!ifNew || (ifNew && _value != value)) {
-            debug {
-                println("next: $value")
-            }
+//            debug {
+//                println("next: $value")
+//            }
             _value = value
             callbacks.keys.forEach {
                 callbacks[it]?.forEach { onChange ->

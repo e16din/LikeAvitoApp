@@ -122,7 +122,6 @@ class SearchScreen(
                 }
 
                 loadAds(resetPage = true)
-
             }
 
         } else {
@@ -156,6 +155,8 @@ class SearchScreen(
     }
 
     fun PullToRefreshUseCase() {
+        recordScenarioStep()
+
         state.pullToRefreshEnabled.next(true)
         loadAds(resetPage = true) {
             state.pullToRefreshEnabled.next(false)
@@ -174,6 +175,7 @@ class SearchScreen(
         )
 
         fun search(selectedQuery: String) {
+            log("search")
             ChangeSearchQueryUseCase("")
             state.selectedQuery.next(selectedQuery)
 

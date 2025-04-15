@@ -35,13 +35,13 @@ inline fun AdsListView(
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1
         }
     }
-    var ads = screen.state.ads.output.collectAsState()
+    val ads = screen.state.ads.output.collectAsState()
 
-    if (isAtTheEndOfList && ads.value.size % AppModel.adsPageSize == 0) {
+    if (isAtTheEndOfList
+        && ads.value.size > 0
+        && ads.value.size % AppModel.adsPageSize == 0) {
         screen.ScrollToEndUseCase()
     }
-
-
 
     val adsListenersMap = remember { mutableMapOf<Long, State<Boolean>>() }
     LazyColumn(
