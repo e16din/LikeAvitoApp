@@ -147,6 +147,9 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(vertical = 16.dp, horizontal = 16.dp)
+                    .clickable {
+                        screen.ClickToBuyUseCase(ad)
+                    }
             )
         }
 

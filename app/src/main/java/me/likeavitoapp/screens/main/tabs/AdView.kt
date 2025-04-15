@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -104,6 +105,9 @@ fun AdView(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .padding(vertical = 24.dp, horizontal = 24.dp)
+                            .clickable {
+                                screen.ClickToBuyUseCase(ad)
+                            }
                     )
                 }
             }
