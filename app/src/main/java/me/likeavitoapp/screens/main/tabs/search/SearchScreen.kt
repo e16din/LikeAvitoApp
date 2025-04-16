@@ -331,7 +331,7 @@ class SearchScreen(
             recordScenarioStep(region)
 
             work {
-                get.sources().platform.appDataStore.saveCategoryId(region.id)
+                get.sources().platform.appDataStore.saveRegionId(region.id)
             }
             state.selectedRegion.next(region)
             state.regionMenuEnabled.next(false)
