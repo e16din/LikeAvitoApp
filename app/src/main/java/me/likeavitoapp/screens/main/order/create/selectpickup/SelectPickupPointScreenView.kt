@@ -51,7 +51,10 @@ import me.likeavitoapp.R
 import me.likeavitoapp.isPreviewMode
 import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.mocks.mockAds
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Order.PickupPoint
+import me.likeavitoapp.model.OrderRequest
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -63,7 +66,7 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectPickupScreenProvider(screen: SelectPickupScreen) {
+fun SelectPickupPointScreenProvider(screen: SelectPickupPointScreen) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ActionTopBar(
@@ -74,8 +77,9 @@ fun SelectPickupScreenProvider(screen: SelectPickupScreen) {
             onDone = {
                 screen.ClickToDoneUseCase()
             },
+            withDoneButton = true
         ) { innerPadding ->
-            SelectPickupScreenView(screen, Modifier.padding(innerPadding))
+            SelectPickupPointScreenView(screen, Modifier.padding(innerPadding))
         }
     }
 
@@ -92,7 +96,7 @@ fun SelectPickupScreenProvider(screen: SelectPickupScreen) {
 }
 
 @Composable
-fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = with(screen) {
+fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modifier) = with(screen) {
     val query by screen.state.query.collectAsState()
     val selectedTypeId by screen.state.selectedTypeId.collectAsState()
     val types = screen.enabledTypes
@@ -183,7 +187,7 @@ fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = wit
 
 
 @Composable
-fun YandexMapView(screen: SelectPickupScreen) {
+fun YandexMapView(screen: SelectPickupPointScreen) {
     val mapKit = remember { MapKitFactory.getInstance() }
     val locationManager = remember { mapKit.createLocationManager() }
 
@@ -298,20 +302,22 @@ class LocationTracker(context: Context) {
 @Composable
 fun SelectPickupScreenPreview() {
     get = mockMainSet()
+    get.sources().app.activeOrderRequest = OrderRequest(
+        ad = mockAds().first(),
+        type = Order.Type.Delivery,
+        pickupPoint = PickupPoint(
+            id = 0,
+            typeId = 1,
+            address = "г.Москва, пр-т.Ленина, д.48",
+            openingHoursFrom = 8,
+            openingHoursTo = 21,
+            point = PickupPoint.Point(0.0, 0.0),
+            isInPlace = true
+        )
+    )
     LikeAvitoAppTheme {
-        SelectPickupScreenProvider(
-            screen = SelectPickupScreen(
-                selectedPickupPoint = UpdatableState(
-                    PickupPoint(
-                        id = 0,
-                        typeId = 1,
-                        address = "г.Москва, пр-т.Ленина, д.48",
-                        openingHoursFrom = 8,
-                        openingHoursTo = 21,
-                        point = PickupPoint.Point(0.0, 0.0),
-                        isInPlace = true
-                    )
-                ),
+        SelectPickupPointScreenProvider(
+            screen = SelectPickupPointScreen(
                 enabledTypes = emptyList(),
                 navigator = mockScreensNavigator(),
             )

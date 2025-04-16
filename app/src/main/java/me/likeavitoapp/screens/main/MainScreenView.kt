@@ -49,8 +49,8 @@ import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
-import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
-import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
 import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
@@ -88,7 +88,7 @@ fun MainScreenProvider(screen: MainScreen) {
                 is EditProfileScreen -> EditProfileScreenProvider(this)
                 is PhotoScreen -> PhotoScreenProvider(this)
                 is ChatScreen -> ChatScreenProvider(this)
-                is SelectPickupScreen -> SelectPickupScreenProvider(this)
+                is SelectPickupPointScreen -> SelectPickupPointScreenProvider(this)
                 is PaymentScreen -> PaymentScreenProvider(this)
             }
         }

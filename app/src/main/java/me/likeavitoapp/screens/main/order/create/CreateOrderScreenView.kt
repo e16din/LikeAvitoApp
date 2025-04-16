@@ -2,8 +2,6 @@ package me.likeavitoapp.screens.main.order.create
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,11 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -101,53 +95,24 @@ fun CreateOrderScreenView(screen: CreateOrderScreen, modifier: Modifier) = with(
         }
 
         AnimatedVisibility(selectedOrderType == Order.Type.Delivery) {
-            DeliveryModeView(screen)
+            Button(onClick = {
+                screen.ClickToSelectDeliveryAddressUseCase()
+            }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(stringResource(R.string.select_delivery_address_button))
+            }
+
         }
         AnimatedVisibility(selectedOrderType == Order.Type.Pickup) {
-            PickupModeView(screen)
-        }
-
-        Button(onClick = {
-            screen.ClickToOrderUseCase()
-        }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(stringResource(R.string.order_button))
-        }
-    }
-}
-
-@Composable
-private fun DeliveryModeView(screen: CreateOrderScreen) = with(screen) {
-
-}
-
-@Composable
-private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
-    val selectedPickupPoint by state.selectedPickupPoint.collectAsState()
-
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
-            .clickable {
-                screen.ClickToPickupUseCase()
+            Button(onClick = {
+                screen.ClickToSelectPickupPointUseCase()
+            }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(stringResource(R.string.select_pickup_point_button))
             }
-    ) {
-        Column {
-            Text(text = "Пункт выдачи", style = MaterialTheme.typography.labelSmall)
-            Text(
-                text = selectedPickupPoint?.address
-                    ?: "Выбрать", style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        if (selectedPickupPoint != null) {
-            Icon(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                imageVector = Icons.Default.Done,
-                contentDescription = "selected"
-            )
+
         }
     }
 }
+
 
 @Preview
 @Composable

@@ -5,11 +5,11 @@ import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Order.PickupPoint
+import me.likeavitoapp.model.OrderRequest
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
-import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
 
 
 class CreateOrderScreen(
@@ -29,6 +29,15 @@ class CreateOrderScreen(
 
     val state = State()
 
+    init {
+        if (get.sources().app.activeOrderRequest?.ad?.id != ad.id) {
+            get.sources().app.activeOrderRequest = OrderRequest(
+                ad = ad,
+                type = state.orderType.value
+            )
+        }
+    }
+
     fun PressBackUseCase() {
         recordScenarioStep()
 
@@ -41,11 +50,11 @@ class CreateOrderScreen(
         state.orderType.next(orderType)
     }
 
-    fun ClickToPickupUseCase() {
+    fun ClickToSelectDeliveryAddressUseCase() {
         recordScenarioStep()
 
         navigator.startScreen(
-            SelectPickupScreen(
+            SelectDeliveryAddressScreen(
                 state.selectedPickupPoint,
                 get.sources().app.pickupPointTypes.filter {
                     ad.enabledPickupPointTypes.contains(it.id)
@@ -55,11 +64,17 @@ class CreateOrderScreen(
         )
     }
 
-    fun ClickToOrderUseCase() {
+    fun ClickToSelectPickupPointUseCase() {
         recordScenarioStep()
 
         navigator.startScreen(
-            PaymentScreen(ad, state.orderType.value, navigator)
+            SelectPickupPointScreen(
+                state.selectedPickupPoint,
+                get.sources().app.pickupPointTypes.filter {
+                    ad.enabledPickupPointTypes.contains(it.id)
+                },
+                navigator
+            )
         )
     }
 

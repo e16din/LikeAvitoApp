@@ -6,23 +6,24 @@ import me.likeavitoapp.load
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.MapItem
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 
 
-class SelectPickupScreen(
-    val selectedPickupPoint: UpdatableState<PickupPoint?>,
+class SelectPickupPointScreen(
     val enabledTypes: List<PickupPointType>,
     val navigator: ScreensNavigator
 ) : IScreen {
 
     inner class State {
         val selectedTypeId = UpdatableState(
-            selectedPickupPoint.value?.typeId
+            get.sources().app.activeOrderRequest?.pickupPoint?.typeId
                 ?: enabledTypes.first().id
         )
         val query = UpdatableState("")
@@ -83,15 +84,34 @@ class SelectPickupScreen(
         navigator.backToPrevious()
     }
 
-    fun ClickToDoneUseCase() {
-        recordScenarioStep()
-
-        navigator.backToPrevious()
-    }
-
     fun ClickToTabUseCase(tabIndex: Int) {
         recordScenarioStep(tabIndex)
 
         state.tabIndex.next(tabIndex)
+    }
+
+    fun ClickToDoneUseCase() {
+        recordScenarioStep()
+
+        val orderRequest = get.sources().app.activeOrderRequest!!
+        if(orderRequest.type == Order.Type.Pickup) {
+            if(orderRequest.pickupPoint != null) {
+                navigator.startScreen(
+                    PaymentScreen(navigator)
+                )
+            }else {
+                /please select point to continue
+            }
+
+        } else {
+            if(orderRequest.deliveryAddress != null) {
+                navigator.startScreen(
+                    PaymentScreen(navigator)
+                )
+
+            } else {
+                /please select address to continue
+            }
+        }
     }
 }

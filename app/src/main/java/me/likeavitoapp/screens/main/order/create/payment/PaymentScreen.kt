@@ -23,8 +23,6 @@ import me.likeavitoapp.recordScenarioStep
 
 
 class PaymentScreen(
-    val ad: Ad,
-    val orderType: Order.Type,
     val navigator: ScreensNavigator
 ) : IScreen {
 
@@ -69,9 +67,10 @@ class PaymentScreen(
         state.validationEnabled.next(false)
 
         state.payment.worker().act {
+            val activeOrderRequest = get.sources().app.activeOrderRequest!!
             val result = get.sources().backend.orderService.order(
-                adId = ad.id,
-                type = orderType,
+                adId = activeOrderRequest.ad.id,
+                type = activeOrderRequest.type,
                 cardNumber = state.cardNumber.data().text,
                 mmYy = state.mmYy.data().text,
                 cvvCvc = state.cvvCvc.data().text,

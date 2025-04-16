@@ -4,6 +4,8 @@ package me.likeavitoapp.model
 import com.yandex.mapkit.geometry.Point
 import me.likeavitoapp.className
 import me.likeavitoapp.log
+import me.likeavitoapp.model.Order.PickupPoint
+import me.likeavitoapp.model.Order.Type
 import me.likeavitoapp.screens.root.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
@@ -20,6 +22,8 @@ class AppModel {
     var categories = listOf<Category>()
     var regions = listOf<Region>()
     var pickupPointTypes = listOf<PickupPointType>()
+
+    var activeOrderRequest: OrderRequest? = null
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
@@ -133,6 +137,13 @@ data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
 
 data class PickupPointType(val name: String, val id: Int)
+
+data class OrderRequest(
+    var ad: Ad,
+    val type: Type,
+    val pickupPoint: PickupPoint? = null,
+    val deliveryAddress: String? = null,
+)
 
 data class Order(
     val ad: Ad,
