@@ -15,15 +15,17 @@ import kotlin.math.min
 
 class MockDataProvider {
     var token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
-    var user = User(
-        id = 0,
-        name = "Кундрюков Александр",
-        contacts = Contacts(
-            telegram = "@alex_ku_san",
-            email = "a.kundryukov@gmail.com"
-        ),
-        ownAds = emptyList(),
-        photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
+    var users = listOf(
+        User(
+            id = 0,
+            name = "Кундрюков Александр",
+            contacts = Contacts(
+                telegram = "@alex_ku_san",
+                email = "a.kundryukov@gmail.com"
+            ),
+            ownAds = emptyList(),
+            photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
+        )
     )
 
     val categories = mockCategories()
@@ -58,6 +60,7 @@ class MockDataProvider {
             PickupPointType(name = "Yandex", id = 4),
         )
     }
+
     fun mockCategories(): List<Category> {
         return listOf(
             Category(name = "Все категории", id = 0),
@@ -125,10 +128,13 @@ class MockDataProvider {
     ): List<Ad> {
         log("getNextAdsPage")
         log("range: $range")
-        val filterCondition : (Ad) -> Boolean =  { it ->
+        val filterCondition: (Ad) -> Boolean = { it ->
             ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
                     && ((regionId == null || regionId == 0) || it.regionId == regionId)
-                    &&  ((query == null || query.isEmpty()) || it.title.contains(query, ignoreCase = true))
+                    && ((query == null || query.isEmpty()) || it.title.contains(
+                query,
+                ignoreCase = true
+            ))
                     && (it.price >= range.from && (range.to <= range.from || it.price <= range.to))
         }
 
@@ -149,7 +155,10 @@ class MockDataProvider {
 
         val result = mutableListOf<Ad>()
         log("pageCounter: $pageCounter")
-        for (i in (pageCounter-1) * pageSize until min((pageCounter-1) * pageSize + pageSize, filtered.size)) {
+        for (i in (pageCounter - 1) * pageSize until min(
+            (pageCounter - 1) * pageSize + pageSize,
+            filtered.size
+        )) {
             log("i: $i")
             val ad = filtered[i]
             if (!paged.contains(ad.id)) {

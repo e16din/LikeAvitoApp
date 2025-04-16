@@ -23,11 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -39,19 +39,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.OfferMessage
 import me.likeavitoapp.model.TextMessage
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
 import me.likeavitoapp.screens.DetailsTopBar
 import me.likeavitoapp.screens.main.order.ChatView
-import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
 

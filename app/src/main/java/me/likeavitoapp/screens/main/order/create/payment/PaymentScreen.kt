@@ -104,7 +104,7 @@ class PaymentScreen(
             stringBuilder = stringBuilder
         )
         stringBuilder.clear()
-        var newPosition = result.indexOf(cursor)
+        val newPosition = result.indexOf(cursor)
         result = result.replace("$cursor", "")
 
         return TextFieldValue(result, TextRange(newPosition))

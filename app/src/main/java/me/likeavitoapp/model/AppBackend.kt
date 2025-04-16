@@ -116,9 +116,10 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         suspend fun login(username: String, password: String): Result<LoginResult> {
             delay(1500)
             if (username == "ss@ss.ss" && password == "123456") {
+                val userId = 0L
                 return Result.success(
                     LoginResult(
-                        user = mockDataProvider.user,
+                        user = mockDataProvider.users.first { it.id == userId},
                         token = mockDataProvider.token
                     )
                 )
@@ -134,7 +135,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun getUser(userId: Long): Result<User> {
             delay(1000)
-            return Result.success(mockDataProvider.user)
+            return Result.success(mockDataProvider.users.first { it.id == userId })
         }
 
         suspend fun postPhoto(photoBase64: String): Result<String> { //todo: return url on prod
@@ -143,6 +144,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         }
 
         suspend fun updateUser(
+            userId: Long,
             name: String,
             phone: String?,
             telegram: String?,
@@ -150,14 +152,15 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             email: String?
         ): Result<User> {
             delay(2000)
-            return Result.success(mockDataProvider.user.apply {
-                this.name = name
+            return Result.success(mockDataProvider.users.first { it.id == userId }
+                .apply {
+                    this.name = name
 
-                this.contacts.email = email
-                this.contacts.whatsapp = whatsapp
-                this.contacts.telegram = telegram
-                this.contacts.phone = phone
-            })
+                    this.contacts.email = email
+                    this.contacts.whatsapp = whatsapp
+                    this.contacts.telegram = telegram
+                    this.contacts.phone = phone
+                })
         }
     }
 
@@ -184,10 +187,6 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
             val ads = mockDataProvider.getNextAdsPage(range, regionId, categoryId, query, resetPage)
             return Result.success(ads)
-        }
-
-        suspend fun getAdDetails(ad: Ad): Result<Ad> {
-            TODO("Not yet implemented")
         }
 
         suspend fun getSearchTips(query: String): Result<List<String>> {
@@ -272,6 +271,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             val types = mockDataProvider.pickupPointTypes
             return Result.success(types)
         }
+
         suspend fun getActiveOrders(): Result<List<Order>> {
             delay(300)
             val orders = mockDataProvider.orders.filter { it.state == Order.State.Active }

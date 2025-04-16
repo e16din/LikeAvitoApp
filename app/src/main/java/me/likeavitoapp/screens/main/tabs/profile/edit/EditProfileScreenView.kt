@@ -203,7 +203,7 @@ fun EditProfileScreenPreview() {
         EditProfileScreenView(
             EditProfileScreen(
                 navigator = mockScreensNavigator(),
-                user = MockDataProvider().user
+                user = MockDataProvider().users.first()
             ),
             Modifier
         )

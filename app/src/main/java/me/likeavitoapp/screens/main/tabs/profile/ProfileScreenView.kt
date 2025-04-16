@@ -188,7 +188,7 @@ fun ProfileScreenPreview() {
         ProfileScreenView(
             ProfileScreen(
                 navigator = mockScreensNavigator(),
-                user = MockDataProvider().user
+                user = MockDataProvider().users.first()
             )
         )
     }

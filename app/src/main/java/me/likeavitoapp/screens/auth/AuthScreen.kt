@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.auth
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.Debouncer
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
@@ -81,24 +83,28 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
     fun ClickToLoginUseCase() {
         recordScenarioStep()
 
+        state.loginButtonEnabled.next(false)
+        state.login.working.next(true)
         get.scope().launchWithHandler {
-            state.loginButtonEnabled.post(false)
-            state.login.working.post(true)
             val result =
                 get.sources().backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
-                get.sources().app.user.post(loginData.user)
-
                 get.sources().platform.appDataStore.saveUserId(loginData.user.id)
 
-                val mainScreen = MainScreen()
-                get.sources().app.mainScreen = mainScreen
-                navigator.startScreen(mainScreen)
+                withContext(Dispatchers.Main) {
+                    get.sources().app.user.next(loginData.user)
+
+                    val mainScreen = MainScreen()
+                    get.sources().app.mainScreen = mainScreen
+                    navigator.startScreen(mainScreen)
+                }
 
             } else {
-                state.login.working.post(false)
-                state.login.fail.post(true)
+                withContext(Dispatchers.Main) {
+                    state.login.working.next(false)
+                    state.login.fail.next(true)
+                }
             }
         }
     }

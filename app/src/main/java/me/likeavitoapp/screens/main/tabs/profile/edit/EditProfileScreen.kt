@@ -69,6 +69,7 @@ class EditProfileScreen(
                 get.sources().backend.userService.postPhoto(photoBase64)
 
                 return@load get.sources().backend.userService.updateUser(
+                    userId = state.user.id,
                     name = state.user.name,
                     phone = state.user.contacts.phone,
                     telegram = state.user.contacts.telegram,

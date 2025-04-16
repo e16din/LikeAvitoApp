@@ -2,13 +2,12 @@ package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import me.likeavitoapp.developer.primitives.work
+import me.likeavitoapp.get
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
