@@ -20,16 +20,17 @@ class SelectPickupScreen(
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State(
-        selectedPickupPoint: UpdatableState<PickupPoint?>,
-    ) {
-        val selectedTypeId = UpdatableState(selectedPickupPoint.value?.typeId)
+    inner class State {
+        val selectedTypeId = UpdatableState(
+            selectedPickupPoint.value?.typeId
+                ?: enabledTypes.first().id
+        )
         val query = UpdatableState("")
         val areaPoint = UpdatableState(Point())
         val suggestions = Worker<List<MapItem>>(emptyList())
     }
 
-    val state = State(selectedPickupPoint)
+    val state = State()
 
     fun PressBackUseCase() {
         recordScenarioStep()
