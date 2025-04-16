@@ -39,12 +39,12 @@ class SearchScreen(
         log("loadAds")
         state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
         state.ads.act(onDone = { afterAll() }) {
-            val from = if(searchSettingsPanel.state.priceFrom.value.isEmpty())
+            val from = if (searchSettingsPanel.state.priceFrom.value.isEmpty())
                 0
             else
                 searchSettingsPanel.state.priceFrom.value.toInt()
 
-            val to = if(searchSettingsPanel.state.priceTo.value.isEmpty())
+            val to = if (searchSettingsPanel.state.priceTo.value.isEmpty())
                 0
             else
                 searchSettingsPanel.state.priceTo.value.toInt()
@@ -64,59 +64,31 @@ class SearchScreen(
         }
     }
 
-    fun loadRegions(onDone: (List<Region>) -> Unit) {
-        searchSettingsPanel.state.regions.act {
-            val result = get.sources().backend.adsService.getRegions()
-            val regions = result.getOrNull() ?: emptyList()
-
-            val selectedRegionId = get.sources().platform.appDataStore.loadRegionId()
-            withContext(Dispatchers.Main) {
-                selectedRegionId?.let { selected ->
-                    regions.firstOrNull { it.id == selected }?.let {
-                        searchSettingsPanel.state.selectedRegion.next(it)
-                    }
-                }
-
-                onDone(regions)
-            }
-            return@act Pair(regions, result.isSuccess)
-        }
-    }
-
-    fun loadCategories(onDone: (List<Category>) -> Unit) {
-        searchSettingsPanel.state.categories.act {
-            val result = get.sources().backend.adsService.getCategories()
-            val categories = result.getOrNull() ?: emptyList()
-
-            val selectedCategoryId = get.sources().platform.appDataStore.loadCategoryId()
-            withContext(Dispatchers.Main) {
-                selectedCategoryId?.let { selected ->
-                    categories.firstOrNull { it.id == selected }?.let {
-                        searchSettingsPanel.state.selectedCategory.next(it)
-                    }
-                }
-
-                onDone(categories)
-            }
-            return@act Pair(categories, result.isSuccess)
-        }
-    }
-
     fun StartScreenUseCase() {
         recordScenarioStep()
 
         val ads = state.ads.output.value
         val needToInit = ads.isEmpty()
         if (needToInit) {
-            loadCategories { categories ->
-                if (searchSettingsPanel.state.selectedCategory.value == null) {
-                    searchSettingsPanel.state.selectedCategory.next(categories.first())
+            work {
+                val platform = get.sources().platform
+                val selectedCategoryId = platform.appDataStore.loadCategoryId()
+                withContext(Dispatchers.Main) {
+                    val categories = get.sources().app.categories
+                    selectedCategoryId?.let { selected ->
+                        categories.firstOrNull { it.id == selected }?.let {
+                            searchSettingsPanel.state.selectedCategory.next(it)
+                        }
+                    }
+                    state.isCategoriesVisible.next(true)
                 }
-                state.isCategoriesVisible.next(true)
 
-                loadRegions { regions ->
-                    if (searchSettingsPanel.state.selectedRegion.value == null) {
-                        searchSettingsPanel.state.selectedRegion.next(regions.first())
+                val selectedRegionId = platform.appDataStore.loadRegionId()
+                withContext(Dispatchers.Main) {
+                    selectedRegionId?.let { selected ->
+                        get.sources().app.regions.firstOrNull { it.id == selected }?.let {
+                            searchSettingsPanel.state.selectedRegion.next(it)
+                        }
                     }
                     state.isSearchSettingsVisible.next(true)
                 }
@@ -270,10 +242,10 @@ class SearchScreen(
         val state = State()
 
         inner class State(
+            var categories: List<Category> = get.sources().app.categories,
+            val regions: List<Region> = get.sources().app.regions,
             var enabled: UpdatableState<Boolean> = UpdatableState(false),
-            val categories: Worker<List<Category>> = Worker(emptyList<Category>()),
             var selectedCategory: UpdatableState<Category?> = UpdatableState(null),
-            val regions: Worker<List<Region>> = Worker(emptyList<Region>()),
             var selectedRegion: UpdatableState<Region?> = UpdatableState(null),
             var priceFrom: UpdatableState<String> = UpdatableState(""),
             var priceTo: UpdatableState<String> = UpdatableState(""),

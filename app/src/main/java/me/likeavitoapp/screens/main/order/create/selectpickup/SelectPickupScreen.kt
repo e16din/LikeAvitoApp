@@ -7,6 +7,7 @@ import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.MapItem
 import me.likeavitoapp.model.Order.PickupPoint
+import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
@@ -14,12 +15,15 @@ import me.likeavitoapp.recordScenarioStep
 
 
 class SelectPickupScreen(
-    selectedPickupPoint: UpdatableState<PickupPoint?>,
+    val selectedPickupPoint: UpdatableState<PickupPoint?>,
+    val enabledTypes: List<PickupPointType>,
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State(val selectedPickupPoint: UpdatableState<PickupPoint?>) {
-        val pickupPointType = UpdatableState(PickupPoint.Type.OwnerAddress)
+    class State(
+        selectedPickupPoint: UpdatableState<PickupPoint?>,
+    ) {
+        val selectedTypeId = UpdatableState(selectedPickupPoint.value?.typeId)
         val query = UpdatableState("")
         val areaPoint = UpdatableState(Point())
         val suggestions = Worker<List<MapItem>>(emptyList())
@@ -64,10 +68,10 @@ class SelectPickupScreen(
         state.areaPoint.next(point)
     }
 
-    fun SelectPickupPointTypeUseCase(type: PickupPoint.Type) {
+    fun SelectPickupPointTypeUseCase(typeId: Int) {
         recordScenarioStep()
 
-        state.pickupPointType.next(type)
+        state.selectedTypeId.next(typeId)
     }
 
     fun ClickToCloseUseCase() {

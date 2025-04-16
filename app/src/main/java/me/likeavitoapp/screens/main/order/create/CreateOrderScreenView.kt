@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +29,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
-import me.likeavitoapp.log
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -48,7 +46,7 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
         modifier = Modifier.fillMaxSize()
     ) {
         DetailsTopBar(
-            title = stringResource(R.string.order_title, screen.state.ad.title),
+            title = stringResource(R.string.order_title, screen.ad.title),
             onBack = {
                 screen.PressBackUseCase()
             }
@@ -75,8 +73,8 @@ fun CreateOrderScreenView(screen: CreateOrderScreen, modifier: Modifier) = with(
     Column(modifier.selectableGroup()) {
         Order.Type.entries.forEach { orderType ->
             if (
-                (orderType == Order.Type.Pickup && state.ad.isPickupEnabled)
-                || (orderType == Order.Type.Delivery && state.ad.isDeliveryEnabled)
+                (orderType == Order.Type.Pickup && ad.isPickupEnabled)
+                || (orderType == Order.Type.Delivery && ad.isDeliveryEnabled)
             ) {
                 Row(
                     Modifier

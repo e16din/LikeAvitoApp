@@ -16,7 +16,10 @@ class AppModel {
         const val adsPageSize = 10
     }
 
-    val user = UpdatableState<User?>(null)
+    var user = UpdatableState<User?>(null)
+    var categories = listOf<Category>()
+    var regions = listOf<Region>()
+    var pickupPointTypes = listOf<PickupPointType>()
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
@@ -110,13 +113,13 @@ data class Ad(
     val address: Address?,
     val isPickupEnabled: Boolean,
     val isDeliveryEnabled: Boolean,
-//    val enabledPickupPointTypes: List<Int>,
+    val enabledPickupPointTypes: List<Int>,
     val owner: Owner,
     val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     val timerLabel: UpdatableState<String> = UpdatableState(""),
     var reservedTimeMs: Long?,
     var isOrdered: Boolean = false,
-    var newMessagesCount : Worker<Int> = Worker<Int>(0)
+    var newMessagesCount: Worker<Int> = Worker<Int>(0)
 ) : ISource {
     data class Address(val data: String)
     data class Owner(
@@ -128,6 +131,8 @@ data class Ad(
 
 data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
+
+data class PickupPointType(val name: String, val id: Int)
 
 data class Order(
     val ad: Ad,
@@ -149,22 +154,15 @@ data class Order(
         Active,
         Archived
     }
-
     data class PickupPoint(
         override val id: Long,
+        val typeId: Int,
         val address: String,
         val openingHoursFrom: Int,
         val openingHoursTo: Int,
         val point: Point,
         val isInPlace: Boolean
     ) : ISource {
-        enum class Type {
-            Post,
-            Cdek,
-            Boxberry,
-            OwnerAddress
-        }
-
         class Point(val latitude: Double, val longitude: Double)
     }
 }

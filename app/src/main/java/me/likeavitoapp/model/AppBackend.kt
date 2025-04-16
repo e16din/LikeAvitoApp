@@ -30,7 +30,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     var mapService = MapService()
 
 
-    var mockDataProvider = MockDataProvider()
+    private var mockDataProvider = MockDataProvider()
 
     data class LoginResult(val user: User, val token: String)
 
@@ -267,6 +267,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             )
         }
 
+        suspend fun getPickupPointTypes(): Result<List<PickupPointType>> {
+            delay(320)
+            val types = mockDataProvider.pickupPointTypes
+            return Result.success(types)
+        }
         suspend fun getActiveOrders(): Result<List<Order>> {
             delay(300)
             val orders = mockDataProvider.orders.filter { it.state == Order.State.Active }

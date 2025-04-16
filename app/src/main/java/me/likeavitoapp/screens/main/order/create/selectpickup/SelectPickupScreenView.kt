@@ -50,7 +50,6 @@ import me.likeavitoapp.isPreviewMode
 import me.likeavitoapp.log
 import me.likeavitoapp.get
 import me.likeavitoapp.model.Order.PickupPoint
-import me.likeavitoapp.model.Order.PickupPoint.Type.*
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -93,7 +92,8 @@ fun SelectPickupScreenProvider(screen: SelectPickupScreen) {
 @Composable
 fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = with(screen) {
     val query by screen.state.query.collectAsState()
-    val pickupPointType by screen.state.pickupPointType.collectAsState()
+    val selectedTypeId by screen.state.selectedTypeId.collectAsState()
+    val types = screen.enabledTypes
 
     Column(modifier = modifier.fillMaxSize()) {
         val addressText by screen.state.query.collectAsState()
@@ -122,27 +122,18 @@ fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = wit
                 }
             )
 
-            fun getPickupTypeName(type: PickupPoint.Type): String {
-                return when (type) {
-                    Post -> "Почта России"
-                    Cdek -> "CDEK"
-                    Boxberry -> "Boxberry"
-                    OwnerAddress -> "Адрес продавца"
-                }
-            }
-
             Row {
-                entries.forEach { type ->
+                types.forEach { type ->
                     Chip(
                         startIcon = {
-                            if (pickupPointType == type) Icons.Default.Check else null
+                            if (selectedTypeId == type.id) Icons.Default.Check else null
                         },
                         startIconTint = Color.Black.copy(alpha = 0.5f),
-                        contentDescription = getPickupTypeName(type),
-                        label = getPickupTypeName(type),
+                        contentDescription = type.name,
+                        label = type.name,
                         isClickable = true,
                         onClick = {
-                            screen.SelectPickupPointTypeUseCase(type)
+                            screen.SelectPickupPointTypeUseCase(type.id)
                         }
                     )
                 }
@@ -296,6 +287,7 @@ fun SelectPickupScreenPreview() {
                 selectedPickupPoint = UpdatableState(
                     PickupPoint(
                         id = 0,
+                        typeId = 1,
                         address = "г.Москва, пр-т.Ленина, д.48",
                         openingHoursFrom = 8,
                         openingHoursTo = 21,
@@ -303,6 +295,7 @@ fun SelectPickupScreenPreview() {
                         isInPlace = true
                     )
                 ),
+                enabledTypes = emptyList(),
                 navigator = mockScreensNavigator(),
             )
         )

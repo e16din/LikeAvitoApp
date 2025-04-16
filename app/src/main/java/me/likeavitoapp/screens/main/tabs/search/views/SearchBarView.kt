@@ -68,7 +68,7 @@ fun SearchBarView(screen: SearchScreen) {
     val priceTo by screen.searchSettingsPanel.state.priceTo.collectAsState()
     val isCategoriesVisible by screen.state.isCategoriesVisible.collectAsState()
     val isSearchSettingsVisible by screen.state.isSearchSettingsVisible.collectAsState()
-    val categories by screen.searchSettingsPanel.state.categories.output.collectAsState()
+    val categories = screen.searchSettingsPanel.state.categories
 
     fun hasSelectedCategory(): Boolean = selectedCategory != null
     fun isExpanded(): Boolean = !searchTips.isEmpty()
@@ -328,7 +328,7 @@ fun SearchBarPreview() {
         val mockDataProvider = MockDataProvider()
         searchBar.state.query.next("Query")
         searchBar.state.searchTips.output.next(mockDataProvider.searchTips)
-        searchSettingsPanel.state.categories.output.next(mockDataProvider.categories.toMutableStateList())
+        searchSettingsPanel.state.categories = mockDataProvider.categories.toMutableStateList()
     }
 
     LikeAvitoAppTheme {

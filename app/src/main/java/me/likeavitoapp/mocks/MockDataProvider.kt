@@ -6,6 +6,7 @@ import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.UpdatableState
@@ -25,8 +26,10 @@ class MockDataProvider {
         photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
     )
 
-    val categories = createCategories()
-    val regions = createRegions()
+    val categories = mockCategories()
+    val regions = mockRegions()
+
+    val pickupPointTypes = mockPickupPointTypes()
     var searchTips = mutableListOf(
         "Mac Book",
         "Диван",
@@ -46,7 +49,16 @@ class MockDataProvider {
         }
     }
 
-    fun createCategories(): List<Category> {
+    fun mockPickupPointTypes(): List<PickupPointType> {
+        return listOf(
+            PickupPointType(name = "Адрес продавца", id = 0),
+            PickupPointType(name = "Почта России", id = 1),
+            PickupPointType(name = "CDEK", id = 2),
+            PickupPointType(name = "Boxberry", id = 3),
+            PickupPointType(name = "Yandex", id = 4),
+        )
+    }
+    fun mockCategories(): List<Category> {
         return listOf(
             Category(name = "Все категории", id = 0),
             Category(name = "Квартиры", id = 1),
@@ -60,7 +72,7 @@ class MockDataProvider {
         )
     }
 
-    fun createRegions(): List<Region> {
+    fun mockRegions(): List<Region> {
         return listOf(
             Region("Все регионы", 0),
             Region("Москва", 1),

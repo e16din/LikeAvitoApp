@@ -30,16 +30,27 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
             get.sources().backend.token = get.sources().platform.appDataStore.loadToken()
             val userId = get.sources().platform.appDataStore.loadUserId()
             var isAuthorized = false
+            val app = get.sources().app
             if (userId != null) {
                 val result = get.sources().backend.userService.getUser(userId)
                 val user = result.getOrNull()
                 if (user != null) {
                     withContext(Dispatchers.Main) {
-                        get.sources().app.user.next(user)
+                        app.user.next(user)
                     }
                     isAuthorized = true
                 }
             }
+
+            val categoriesResult = get.sources().backend.adsService.getCategories()
+            app.categories = categoriesResult.getOrNull() ?: emptyList()
+
+            val regionsResult = get.sources().backend.adsService.getRegions()
+            app.regions = regionsResult.getOrNull() ?: emptyList()
+
+            val typesResult = get.sources().backend.orderService.getPickupPointTypes()
+            app.pickupPointTypes = typesResult.getOrNull() ?: emptyList()
+
 
             val finishMs = System.currentTimeMillis()
             val delayMs = 1000 - (finishMs - startMs)
@@ -49,7 +60,7 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
                 navigator.startScreen(
                     if (isAuthorized)
                         MainScreen().also {
-                            get.sources().app.mainScreen = it
+                            app.mainScreen = it
                         }
                     else
                         AuthScreen(navigator = navigator)
