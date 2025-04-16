@@ -57,4 +57,5 @@
     <string name="done_order_status_label">Выполнен</string>
     <string name="select_region_lable">Выбрать регион:</string>
     <string name="select_category_lable">Выбрать категорию:</string>
+
 </resources>

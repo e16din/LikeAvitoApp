@@ -21,17 +21,22 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import me.likeavitoapp.R
 import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.get
+import me.likeavitoapp.log
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.DetailsTopBar
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -41,7 +46,14 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        CreateOrderScreenView(screen)
+        DetailsTopBar(
+            title = stringResource(R.string.order_title, screen.state.ad.title),
+            onBack = {
+                screen.PressBackUseCase()
+            }
+        ) { innerPadding ->
+            CreateOrderScreenView(screen, Modifier.padding(innerPadding))
+        }
     }
 
     BackHandler {
@@ -50,8 +62,8 @@ fun CreateOrderScreenProvider(screen: CreateOrderScreen) {
 }
 
 @Composable
-fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
-    val selectedOrderType = state.orderType.collectAsState()
+fun CreateOrderScreenView(screen: CreateOrderScreen, modifier: Modifier) = with(screen) {
+    val selectedOrderType by state.orderType.collectAsState()
 
     fun getTextBy(type: Order.Type): String {
         return when(type) {
@@ -59,14 +71,14 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
             Order.Type.Delivery -> "Доставка"
         }
     }
-    Column(Modifier.selectableGroup()) {
+    Column(modifier.selectableGroup()) {
         Order.Type.entries.forEach { orderType ->
             Row(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .selectable(
-                        selected = (orderType == selectedOrderType.value),
+                        selected = (orderType == selectedOrderType),
                         onClick = { screen.ClickToOrderTypeUseCase(orderType) },
                         role = Role.RadioButton
                     )
@@ -74,7 +86,7 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
-                    selected = (orderType == selectedOrderType.value),
+                    selected = (orderType == selectedOrderType),
                     onClick = null // null recommended for accessibility with screen readers
                 )
                 Text(
@@ -84,12 +96,14 @@ fun CreateOrderScreenView(screen: CreateOrderScreen) = with(screen) {
             }
         }
 
-        when (selectedOrderType.value) {
+        when (selectedOrderType) {
             Order.Type.Delivery -> {
+                log("selectedOrderType1")
                 DeliveryModeView(screen)
             }
 
             Order.Type.Pickup -> {
+                log("selectedOrderType2")
                 PickupModeView(screen)
             }
         }
@@ -121,7 +135,7 @@ private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
 
     val selectedPickupPoint = state.selectedPickupPoint.collectAsState()
 
-    if (ad.isPickupEnabled) {
+    if (state.ad.isPickupEnabled) {
         Box(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)

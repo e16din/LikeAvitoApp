@@ -1,6 +1,8 @@
 package me.likeavitoapp.screens.splash
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
@@ -21,7 +23,9 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
     fun StartScreenUseCase(startMs: Long = System.currentTimeMillis()) {
         get.scope().launchWithHandler {
             delay(200)
-            state.contentEnabled.post(true)
+            withContext(Dispatchers.Main) {
+                state.contentEnabled.next(true)
+            }
 
             get.sources().backend.token = get.sources().platform.appDataStore.loadToken()
             val userId = get.sources().platform.appDataStore.loadUserId()
@@ -30,7 +34,9 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
                 val result = get.sources().backend.userService.getUser(userId)
                 val user = result.getOrNull()
                 if (user != null) {
-                    get.sources().app.user.post(user)
+                    withContext(Dispatchers.Main) {
+                        get.sources().app.user.next(user)
+                    }
                     isAuthorized = true
                 }
             }
@@ -39,14 +45,16 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
             val delayMs = 1000 - (finishMs - startMs)
             delay(delayMs)
 
-            navigator.startScreen(
-                if (isAuthorized)
-                    MainScreen().also {
-                        get.sources().app.mainScreen = it
-                    }
-                else
-                    AuthScreen(navigator = navigator)
-            )
+            withContext(Dispatchers.Main) {
+                navigator.startScreen(
+                    if (isAuthorized)
+                        MainScreen().also {
+                            get.sources().app.mainScreen = it
+                        }
+                    else
+                        AuthScreen(navigator = navigator)
+                )
+            }
         }
     }
 }

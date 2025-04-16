@@ -12,16 +12,16 @@ import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupScreen
 
 
 class CreateOrderScreen(
-    val ad: Ad,
+    ad: Ad,
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State {
+    class State(val ad: Ad) {
         val orderType = UpdatableState(Order.Type.Delivery)
         var selectedPickupPoint = UpdatableState<PickupPoint?>(null)
     }
 
-    val state = State()
+    val state = State(ad)
 
     fun PressBackUseCase() {
         recordScenarioStep()
@@ -47,7 +47,7 @@ class CreateOrderScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            PaymentScreen(ad, state.orderType.value,  navigator)
+            PaymentScreen(state.ad, state.orderType.value,  navigator)
         )
     }
 
