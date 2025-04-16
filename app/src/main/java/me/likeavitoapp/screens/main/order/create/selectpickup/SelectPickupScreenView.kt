@@ -20,6 +20,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -97,7 +99,8 @@ fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = wit
 
     Column(modifier = modifier.fillMaxSize()) {
         val addressText by screen.state.query.collectAsState()
-        val suggestions by screen.state.suggestions.output.collectAsState()
+        val points by screen.state.suggestions.output.collectAsState()
+        val tabIndex by screen.state.tabIndex.collectAsState()
 
         Column {
             TextField(
@@ -139,27 +142,41 @@ fun SelectPickupScreenView(screen: SelectPickupScreen, modifier: Modifier) = wit
                 }
             }
 
-            Surface(modifier = Modifier.fillMaxSize()) {
-                if (suggestions.isNotEmpty()) {
-                    LazyColumn {
-                        items(suggestions) { suggestion ->
-                            Text(
-                                text = suggestion.name,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        screen.ClickToSelectSuggestion(suggestion)
-                                    }
-                                    .padding(8.dp)
-                            )
+            val tabs = listOf("Список", "Карта")
+
+            TabRow(selectedTabIndex = tabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = tabIndex == index,
+                        onClick = {
+                            screen.ClickToTabUseCase(index)
                         }
+                    )
+                }
+            }
+
+            when (tabIndex) {
+                0 -> LazyColumn {
+                    items(points) { point ->
+                        Text(
+                            text = point.name,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    screen.ClickToPickupPoint(point)
+                                }
+                                .padding(8.dp)
+                        )
                     }
                 }
 
-                if (!isPreviewMode()) {
+                1 -> if (!isPreviewMode()) {
                     YandexMapView(screen)
                 }
             }
+
+
         }
     }
 }

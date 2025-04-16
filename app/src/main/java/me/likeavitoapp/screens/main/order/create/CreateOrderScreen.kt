@@ -17,8 +17,13 @@ class CreateOrderScreen(
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State {
-        val orderType = UpdatableState(Order.Type.Delivery)
+    inner class State {
+        val orderType = UpdatableState(
+            if (ad.isDeliveryEnabled)
+                Order.Type.Delivery
+            else
+                Order.Type.Pickup
+        )
         var selectedPickupPoint = UpdatableState<PickupPoint?>(null)
     }
 

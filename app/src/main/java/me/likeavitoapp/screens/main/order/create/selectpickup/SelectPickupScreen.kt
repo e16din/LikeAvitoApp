@@ -28,6 +28,8 @@ class SelectPickupScreen(
         val query = UpdatableState("")
         val areaPoint = UpdatableState(Point())
         val suggestions = Worker<List<MapItem>>(emptyList())
+
+        val tabIndex = UpdatableState<Int>(0)
     }
 
     val state = State()
@@ -57,7 +59,7 @@ class SelectPickupScreen(
         state.suggestions.resetWith(emptyList())
     }
 
-    fun ClickToSelectSuggestion(item: MapItem) {
+    fun ClickToPickupPoint(item: MapItem) {
         state.query.next(item.name)
         state.suggestions.resetWith(emptyList())
         state.areaPoint.next(item.point)
@@ -87,4 +89,9 @@ class SelectPickupScreen(
         navigator.backToPrevious()
     }
 
+    fun ClickToTabUseCase(tabIndex: Int) {
+        recordScenarioStep(tabIndex)
+
+        state.tabIndex.next(tabIndex)
+    }
 }

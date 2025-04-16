@@ -52,7 +52,6 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val archivedOrders by state.archivedOrders.output.collectAsState()
     val tabIndex by state.tabIndex.collectAsState()
 
-
     val tabs = listOf(stringResource(R.string.active_tab), stringResource(R.string.archived_tab))
 
     Column(modifier = Modifier.fillMaxWidth()) {
