@@ -109,6 +109,8 @@ data class Ad(
     val regionId: Int,
     val address: Address?,
     val isPickupEnabled: Boolean,
+    val isDeliveryEnabled: Boolean,
+//    val enabledPickupPointTypes: List<Int>,
     val owner: Owner,
     val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     val timerLabel: UpdatableState<String> = UpdatableState(""),

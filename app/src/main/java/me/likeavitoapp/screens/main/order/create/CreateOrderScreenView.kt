@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.order.create
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -66,52 +67,52 @@ fun CreateOrderScreenView(screen: CreateOrderScreen, modifier: Modifier) = with(
     val selectedOrderType by state.orderType.collectAsState()
 
     fun getTextBy(type: Order.Type): String {
-        return when(type) {
+        return when (type) {
             Order.Type.Pickup -> "Самовывоз"
             Order.Type.Delivery -> "Доставка"
         }
     }
     Column(modifier.selectableGroup()) {
         Order.Type.entries.forEach { orderType ->
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .selectable(
-                        selected = (orderType == selectedOrderType),
-                        onClick = { screen.ClickToOrderTypeUseCase(orderType) },
-                        role = Role.RadioButton
-                    )
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            if (
+                (orderType == Order.Type.Pickup && state.ad.isPickupEnabled)
+                || (orderType == Order.Type.Delivery && state.ad.isDeliveryEnabled)
             ) {
-                RadioButton(
-                    selected = (orderType == selectedOrderType),
-                    onClick = null // null recommended for accessibility with screen readers
-                )
-                Text(
-                    text = getTextBy(orderType),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .selectable(
+                            selected = (orderType == selectedOrderType),
+                            onClick = { screen.ClickToOrderTypeUseCase(orderType) },
+                            role = Role.RadioButton
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = (orderType == selectedOrderType),
+                        onClick = null // null recommended for accessibility with screen readers
+                    )
+                    Text(
+                        text = getTextBy(orderType),
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
             }
         }
 
-        when (selectedOrderType) {
-            Order.Type.Delivery -> {
-                log("selectedOrderType1")
-                DeliveryModeView(screen)
-            }
-
-            Order.Type.Pickup -> {
-                log("selectedOrderType2")
-                PickupModeView(screen)
-            }
+        AnimatedVisibility(selectedOrderType == Order.Type.Delivery) {
+            DeliveryModeView(screen)
+        }
+        AnimatedVisibility(selectedOrderType == Order.Type.Pickup) {
+            PickupModeView(screen)
         }
 
         Button(onClick = {
             screen.ClickToOrderUseCase()
         }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text("Заказать")
+            Text(stringResource(R.string.order_button))
         }
     }
 }
@@ -123,37 +124,29 @@ private fun DeliveryModeView(screen: CreateOrderScreen) = with(screen) {
 
 @Composable
 private fun PickupModeView(screen: CreateOrderScreen) = with(screen) {
+    val selectedPickupPoint by state.selectedPickupPoint.collectAsState()
 
-    @Composable
-    fun BoxScope.SelectedIcon() {
-        Icon(
-            modifier = Modifier.align(Alignment.CenterEnd),
-            imageVector = Icons.Default.Done,
-            contentDescription = "selected"
-        )
-    }
-
-    val selectedPickupPoint = state.selectedPickupPoint.collectAsState()
-
-    if (state.ad.isPickupEnabled) {
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
-                .clickable {
-                    screen.ClickToPickupUseCase()
-                }
-        ) {
-            Column {
-                Text(text = "Пункт выдачи", style = MaterialTheme.typography.labelSmall)
-                Text(
-                    text = selectedPickupPoint.value?.address
-                        ?: "Выбрать", style = MaterialTheme.typography.bodyMedium
-                )
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .clickable {
+                screen.ClickToPickupUseCase()
             }
-            if (selectedPickupPoint.value != null) {
-                SelectedIcon()
-            }
+    ) {
+        Column {
+            Text(text = "Пункт выдачи", style = MaterialTheme.typography.labelSmall)
+            Text(
+                text = selectedPickupPoint?.address
+                    ?: "Выбрать", style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        if (selectedPickupPoint != null) {
+            Icon(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                imageVector = Icons.Default.Done,
+                contentDescription = "selected"
+            )
         }
     }
 }

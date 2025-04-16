@@ -71,6 +71,7 @@ class MockDataProvider {
             Region("Новосибирск", 6),
             Region("Чебоксары", 7),
             Region("Калининград", 8),
+            Region("Сочи", 9),
         )
     }
 
