@@ -49,11 +49,11 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
                     isEmailValid = checkEmail(lastEmail)
 
                 } else {
-                    state.emailErrorEnabled.post(false)
+                    state.emailErrorEnabled.next(false)
                     isEmailValid = true
                 }
 
-                state.loginButtonEnabled.post(
+                state.loginButtonEnabled.next(
                     lastEmail.isNotBlank() && state.password.value.isNotBlank() && isEmailValid
                 )
             }
@@ -63,19 +63,19 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
     fun ChangeEmailUseCase(newEmail: String) {
         recordScenarioStep()
 
-        state.email.post(newEmail)
+        state.email.next(newEmail)
     }
 
     fun ChangePasswordUseCase(newPassword: String) {
         recordScenarioStep()
 
-        get.scope().launchWithHandler {
-            state.password.post(newPassword)
-            val isEmailValid = !state.emailErrorEnabled.value
-            state.loginButtonEnabled.post(
-                state.email.value.isNotBlank() == true && newPassword.isNotBlank() && isEmailValid
-            )
-        }
+        state.password.next(newPassword)
+        val isEmailValid = !state.emailErrorEnabled.value
+        state.loginButtonEnabled.next(
+            state.email.value.isNotBlank()
+                    && newPassword.isNotBlank()
+                    && isEmailValid
+        )
     }
 
     fun ClickToLoginUseCase() {
@@ -84,7 +84,8 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
         get.scope().launchWithHandler {
             state.loginButtonEnabled.post(false)
             state.login.working.post(true)
-            val result = get.sources().backend.userService.login(state.email.value, state.password.value)
+            val result =
+                get.sources().backend.userService.login(state.email.value, state.password.value)
             val loginData = result.getOrNull()
             if (loginData?.user != null) {
                 get.sources().app.user.post(loginData.user)

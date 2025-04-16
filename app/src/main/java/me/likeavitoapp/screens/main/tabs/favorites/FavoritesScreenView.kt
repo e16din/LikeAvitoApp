@@ -137,7 +137,7 @@ fun FavoritesScreenPreview() {
     val screen = FavoritesScreen(
         navigator = mockScreensNavigator(),
     ).apply {
-        state.favorites.output.post(MockDataProvider().getFavorites().toMutableStateList())
+        state.favorites.output.next(MockDataProvider().getFavorites().toMutableStateList())
     }
 
     LikeAvitoAppTheme {

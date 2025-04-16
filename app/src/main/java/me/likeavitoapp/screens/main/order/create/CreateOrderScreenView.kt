@@ -154,7 +154,7 @@ fun CreateOrderScreenPreview() {
                 ad = MockDataProvider().ads.first(),
                 navigator = mockScreensNavigator(),
             ).apply {
-                state.orderType.post(Order.Type.Pickup, get.scope())
+                state.orderType.next(Order.Type.Pickup)
             }
         )
     }

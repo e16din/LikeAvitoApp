@@ -96,7 +96,7 @@ fun OrdersScreenPreview() {
     val screen = OrdersScreen(
         navigator = mockScreensNavigator(),
     ).apply {
-        state.activeOrders.output.post(
+        state.activeOrders.output.next(
             listOf(MockDataProvider().createOrder(0, Order.Type.Delivery))
         )
     }

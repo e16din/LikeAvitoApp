@@ -35,9 +35,7 @@ class EditProfileScreen(
     fun ClickToEditPhotoUseCase() {
         recordScenarioStep()
 
-        get.scope().launchWithHandler {
-            state.userPickerEnabled.post(true)
-        }
+        state.userPickerEnabled.next(true)
     }
 
     fun ChangeUserPhotoUseCase(bytes: ByteArray?) {
@@ -79,7 +77,7 @@ class EditProfileScreen(
                 )
 
             }, onSuccess = { newUser ->
-                get.sources().app.user.post(newUser)
+                get.sources().app.user.next(newUser)
             })
         }
     }

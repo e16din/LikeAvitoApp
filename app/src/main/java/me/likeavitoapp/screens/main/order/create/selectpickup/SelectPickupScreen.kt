@@ -36,38 +36,38 @@ class SelectPickupScreen(
     fun ChangeQueryUseCase(query: String) {
         recordScenarioStep(query)
 
-        state.query.post(query)
+        state.query.next(query)
 
         get.scope().launchWithHandler {
             state.suggestions.load(loading = {
                 get.sources().backend.mapService.getAddressesBy(query, state.areaPoint.value)
             }, onSuccess = { data ->
-                state.suggestions.output.post(data)
+                state.suggestions.output.next(data)
             })
         }
     }
 
     fun ClickToClearAddress() {
-        state.query.post("")
+        state.query.next("")
         state.suggestions.resetWith(emptyList())
     }
 
     fun ClickToSelectSuggestion(item: MapItem) {
-        state.query.post(item.name)
+        state.query.next(item.name)
         state.suggestions.resetWith(emptyList())
-        state.areaPoint.post(item.point)
+        state.areaPoint.next(item.point)
     }
 
     fun ChangeAreaPointUseCase(point: Point) {
         recordScenarioStep()
 
-        state.areaPoint.post(point)
+        state.areaPoint.next(point)
     }
 
     fun SelectPickupPointTypeUseCase(type: PickupPoint.Type) {
         recordScenarioStep()
 
-        state.pickupPointType.post(type)
+        state.pickupPointType.next(type)
     }
 
     fun ClickToCloseUseCase() {

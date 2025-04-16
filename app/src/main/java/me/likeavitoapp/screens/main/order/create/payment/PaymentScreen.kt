@@ -62,11 +62,11 @@ class PaymentScreen(
         val hasInvalidValue = listOf(state.cardNumber, state.cvvCvc, state.mmYy)
             .any { it.data().text.isEmpty() || it.hasFail() }
         if (hasInvalidValue) {
-            state.validationEnabled.post(true)
+            state.validationEnabled.next(true)
             return
         }
 
-        state.validationEnabled.post(false)
+        state.validationEnabled.next(false)
 
         state.payment.worker().act {
             val result = get.sources().backend.orderService.order(

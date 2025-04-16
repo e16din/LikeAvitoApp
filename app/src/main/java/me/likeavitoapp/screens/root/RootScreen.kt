@@ -50,6 +50,6 @@ class RootScreen() : IScreen {
     }
 
     fun ClickToDemoDeveloperUseCase() {
-        state.scenariosEnabled.post(true)
+        state.scenariosEnabled.next(true)
     }
 }

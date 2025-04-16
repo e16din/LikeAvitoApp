@@ -52,8 +52,8 @@ open class BaseAdContainerScreen(
             state.reserve.load(loading = {
                 get.sources().backend.orderService.reserve(adId = ad.id)
             }, onSuccess = { isReserved ->
-                if (isReserved == true) {
-                    state.reserve.output.post(true)
+                if (isReserved) {
+                    state.reserve.output.next(true)
 
                     ad.reservedTimeMs = System.currentTimeMillis()
 
@@ -62,7 +62,7 @@ open class BaseAdContainerScreen(
                     navigator.startScreen(createOrderScreen)
 
                 } else {
-                    state.reserve.fail.post(true)
+                    state.reserve.fail.next(true)
                 }
             })
         }
@@ -77,7 +77,7 @@ open class BaseAdContainerScreen(
         var timeMs = getTimeMs()
         while (ad.reservedTimeMs != null && timeMs > 0) {
             timeMs = getTimeMs()
-            ad.timerLabel.post(ad.reservedTimeMs?.let {
+            ad.timerLabel.next(ad.reservedTimeMs?.let {
                 String.format(
                     Locale.current.platformLocale,
                     "%02d:%02d",
@@ -100,7 +100,7 @@ open class BaseAdContainerScreen(
         recordScenarioStep(ad)
 
         timersMap[ad.id]?.cancel()
-        ad.timerLabel.post("")
+        ad.timerLabel.next("")
         ad.reservedTimeMs = null
     }
 

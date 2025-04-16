@@ -74,6 +74,6 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
     fun ClickToTabUseCase(tabIndex: Int) {
         recordScenarioStep(tabIndex)
 
-        state.tabIndex.post(tabIndex)
+        state.tabIndex.next(tabIndex)
     }
 }

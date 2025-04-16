@@ -32,7 +32,7 @@ class CreateOrderScreen(
     fun ClickToOrderTypeUseCase(orderType: Order.Type) {
         recordScenarioStep()
 
-        state.orderType.post(orderType)
+        state.orderType.next(orderType)
     }
 
     fun ClickToPickupUseCase() {

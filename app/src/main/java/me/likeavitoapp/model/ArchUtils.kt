@@ -21,7 +21,7 @@ class UpdatableState<T>(initial: T) {
     var value: T
         get() = _value
         set(value) {
-            throw IllegalStateException("Use '.post($value)' instead")
+            throw IllegalStateException("Use '.next($value)' instead")
         }
 
     private var callbacks = mutableMapOf<Any, List<(value: T) -> Unit>>()
@@ -109,9 +109,9 @@ class Worker<T>(initial: T) {
     var isDoOnceCalled = false
 
     fun resetWith(newData: T) {
-        output.post(newData)
-        working.post(false, ifNew = true)
-        fail.post(false, ifNew = true)
+        output.next(newData)
+        working.next(false, ifNew = true)
+        fail.next(false, ifNew = true)
     }
 
     inline fun worker(doOnce: () -> Unit = {}): Worker<T> {
@@ -129,7 +129,7 @@ class Worker<T>(initial: T) {
 // NOTE: act - действуй!
 // (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
 inline fun <T> Worker<T>.act(
-    crossinline afterAll: (T) -> Unit = {},
+    crossinline onDone: (T) -> Unit = {},
     crossinline task: suspend () -> Pair<T?, Boolean>
 ) {
     working.next(true)
@@ -144,7 +144,7 @@ inline fun <T> Worker<T>.act(
         }
 
         working.next(false)
-        afterAll(data)
+        onDone(data)
     }) {
         return@work task()
     }

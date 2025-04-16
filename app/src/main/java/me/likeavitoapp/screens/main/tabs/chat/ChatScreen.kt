@@ -26,13 +26,13 @@ class ChatScreen(
     fun ChangeMessageUseCase(newMessage: String) {
         recordScenarioStep(newMessage)
 
-        state.message.post(newMessage)
+        state.message.next(newMessage)
     }
 
     fun ClickToSendUseCase() {
         recordScenarioStep()
 
-        state.message.post("")
+        state.message.next("")
     }
 
     fun PressBackUseCase() {

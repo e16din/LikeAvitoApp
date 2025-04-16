@@ -37,8 +37,8 @@ class FavoritesScreen(
                     return@load get.sources().backend.adsService.getFavorites()
                 },
                 onSuccess = { newFavorites ->
-                    state.favorites.output.post(newFavorites.toMutableStateList())
-                    state.moveToAdsEnabled.post(newFavorites.isEmpty())
+                    state.favorites.output.next(newFavorites.toMutableStateList())
+                    state.moveToAdsEnabled.next(newFavorites.isEmpty())
                 }
             )
         }
@@ -57,8 +57,8 @@ class FavoritesScreen(
                         val newFavorites = state.favorites.output.value.apply {
                             remove(ad)
                         }
-                        state.favorites.output.post(newFavorites)
-                        state.moveToAdsEnabled.post(newFavorites.isEmpty())
+                        state.favorites.output.next(newFavorites)
+                        state.moveToAdsEnabled.next(newFavorites.isEmpty())
                     }
                 }
             )
@@ -93,12 +93,12 @@ class FavoritesScreen(
                 onSuccess = { data ->
 //                    state.favorites.data.value.forEach { favorite ->
 //                        mainSet.sources().app.ads.firstOrNull { it.id == favorite.id }?.apply {
-//                            isFavorite.post(false)
+//                            isFavorite.next(false)
 //                        }
 //                    }
 
-                    state.favorites.output.post(mutableStateListOf())
-                    state.moveToAdsEnabled.post(true)
+                    state.favorites.output.next(mutableStateListOf())
+                    state.moveToAdsEnabled.next(true)
                 }
             )
         }
