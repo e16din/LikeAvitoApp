@@ -60,7 +60,7 @@
     <string name="order_button">Заказать</string>
     <string name="select_delivery_address_button">Выбрать адрес доставки</string>
     <string name="select_pickup_point_button">Выбрать пункт выдачи</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="data_loading_failed_message">Не удалось загрузить данные.</string>
     <string name="select_delivery_address_title">Выбрать адрес доставки</string>
 
