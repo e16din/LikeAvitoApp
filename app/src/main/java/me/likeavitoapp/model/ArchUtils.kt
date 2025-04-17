@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.likeavitoapp.R
 import me.likeavitoapp.developer.primitives.debug
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
@@ -133,7 +134,14 @@ inline fun <T> Worker<T>.act(
     crossinline task: suspend () -> Pair<T?, Boolean>
 ) {
     working.repostTo(get.sources().app.loading)
-    fail.repostTo(get.sources().app.loadingFailed)
+    fail.listen { failed ->
+        if (failed) {
+            get.sources().app.message.next(
+                get.sources().platform.getString(R.string.data_loading_failed_message)
+            )
+        }
+    }
+
 
     working.next(true)
     work(onDone = { result ->

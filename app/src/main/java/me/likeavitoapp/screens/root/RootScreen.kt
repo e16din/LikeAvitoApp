@@ -1,8 +1,8 @@
 package me.likeavitoapp.screens.root
 
 import me.likeavitoapp.develop
-import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.get
+import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -51,7 +51,7 @@ class RootScreen() : IScreen {
     fun ClickToLoadingFailedOkUseCase() {
         recordScenarioStep()
 
-        get.sources().app.loadingFailed.next(false)
+        get.sources().app.message.next(null)
     }
 
     fun ClickToDemoDeveloperUseCase() {

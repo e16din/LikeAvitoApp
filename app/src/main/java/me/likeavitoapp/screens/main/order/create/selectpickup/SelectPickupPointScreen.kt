@@ -1,9 +1,10 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
 import com.yandex.mapkit.geometry.Point
+import me.likeavitoapp.R
+import me.likeavitoapp.get
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.MapItem
 import me.likeavitoapp.model.PickupPointType
@@ -97,7 +98,9 @@ class SelectPickupPointScreen(
                 PaymentScreen(navigator)
             )
         } else {
-            //please select point to continue
+            get.sources().app.message.next(
+                get.sources().platform.getString(R.string.select_pickup_point_to_next_message)
+            )
         }
     }
 }

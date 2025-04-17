@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.main.order.create.selectdelivery
 
+import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
@@ -64,7 +65,9 @@ class SelectDeliveryAddressScreen(
             )
 
         } else {
-            // please select address to continue
+            get.sources().app.message.next(
+                get.sources().platform.getString(R.string.select_address_to_next_message)
+            )
         }
     }
 }

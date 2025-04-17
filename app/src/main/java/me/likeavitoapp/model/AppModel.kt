@@ -6,9 +6,9 @@ import me.likeavitoapp.className
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.Order.Type
-import me.likeavitoapp.screens.root.RootScreen
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
+import me.likeavitoapp.screens.root.RootScreen
 import kotlin.reflect.KClass
 
 
@@ -26,7 +26,7 @@ class AppModel {
     var activeOrderRequest: OrderRequest? = null
 
     val loading = UpdatableState(false)
-    val loadingFailed = UpdatableState(false)
+    val message = UpdatableState<String?>(null)
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen

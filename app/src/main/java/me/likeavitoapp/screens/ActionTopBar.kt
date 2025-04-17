@@ -60,7 +60,8 @@ inline fun ActionTopBar(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Done,
-                                contentDescription = "Localized description"
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentDescription = "done"
                             )
                         }
                     }

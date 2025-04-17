@@ -40,7 +40,7 @@ import me.likeavitoapp.ui.theme.primaryContainerDark
 fun RootScreenView(screen: RootScreen) {
     val nextScreen by screen.navigator.screen.collectAsState()
     val loadingEnabled by get.sources().app.loading.collectAsState()
-    val loadingFailedEnabled by get.sources().app.loadingFailed.collectAsState()
+    val message by get.sources().app.message.collectAsState()
 
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
@@ -79,7 +79,7 @@ fun RootScreenView(screen: RootScreen) {
             }
         }
 
-        if (loadingFailedEnabled) {
+        if (message != null) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
@@ -89,7 +89,7 @@ fun RootScreenView(screen: RootScreen) {
             ) {
                 Box {
                     Text(
-                        text = stringResource(R.string.data_loading_failed_message),
+                        text = message!!,
                         modifier = Modifier.align(Alignment.Center)
                     )
 

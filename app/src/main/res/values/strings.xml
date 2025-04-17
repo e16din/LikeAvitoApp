@@ -63,5 +63,7 @@
     <string name="ok">OK</string>
     <string name="data_loading_failed_message">Не удалось загрузить данные.</string>
     <string name="select_delivery_address_title">Выбрать адрес доставки</string>
+    <string name="select_address_to_next_message">Выберите адрес для продолжения</string>
+    <string name="select_pickup_point_to_next_message">Выберите пункт выдачи для продолжения</string>
 
 </resources>
