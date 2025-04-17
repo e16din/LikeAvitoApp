@@ -32,8 +32,8 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.location.LocationListener
 import com.yandex.mapkit.location.LocationStatus
 import me.likeavitoapp.R
-import me.likeavitoapp.isPreviewMode
 import me.likeavitoapp.get
+import me.likeavitoapp.isPreviewMode
 import me.likeavitoapp.mocks.mockAds
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Order.PickupPoint
@@ -99,7 +99,7 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
                     label = { Text(stringResource(R.string.enter_address_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        if (!addressText.isNotEmpty()) {
+                        if (addressText.isNotEmpty()) {
                             IconButton(onClick = {
                                 screen.ClickToClearAddressUseCase()
                             }) {

@@ -48,10 +48,9 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             })
         }
 
-        suspend fun getAddressesBy(query: String):Result<List<String>> {
-
+        suspend fun getAddressesBy(query: String): Result<List<String>> {
             delay(800)
-            return Result.failure(Exception())
+            return Result.success(mockDataProvider.addresses.filter { it.lowercase().contains(query.lowercase()) })
         }
 
         suspend fun getPickupPointsBy(
@@ -124,7 +123,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 val userId = 0L
                 return Result.success(
                     LoginResult(
-                        user = mockDataProvider.users.first { it.id == userId},
+                        user = mockDataProvider.users.first { it.id == userId },
                         token = mockDataProvider.token
                     )
                 )

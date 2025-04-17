@@ -28,6 +28,8 @@ class MockDataProvider {
         )
     )
 
+    val addresses = mockAddresses()
+
     val categories = mockCategories()
     val regions = mockRegions()
 

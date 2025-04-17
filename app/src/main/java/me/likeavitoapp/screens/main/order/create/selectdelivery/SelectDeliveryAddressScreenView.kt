@@ -77,7 +77,7 @@ fun SelectDeliveryAddressScreenView(screen: SelectDeliveryAddressScreen, modifie
                 label = { Text(stringResource(R.string.enter_address_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    if (!addressText.isNotEmpty()) {
+                    if (addressText.text.isNotEmpty()) {
                         IconButton(onClick = {
                             screen.ClickToClearAddress()
                         }) {

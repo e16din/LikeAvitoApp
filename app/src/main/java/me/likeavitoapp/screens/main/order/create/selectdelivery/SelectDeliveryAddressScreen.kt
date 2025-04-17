@@ -1,5 +1,7 @@
 package me.likeavitoapp.screens.main.order.create.selectdelivery
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
@@ -16,7 +18,12 @@ class SelectDeliveryAddressScreen(
 ) : IScreen {
 
     inner class State {
-        val query = UpdatableState("")
+        val query = UpdatableState(
+            TextFieldValue(
+                get.sources().app.activeOrderRequest!!.deliveryAddress ?: ""
+            )
+        )
+
         val addresses = Worker<List<String>>(emptyList())
     }
 
@@ -28,25 +35,28 @@ class SelectDeliveryAddressScreen(
         navigator.backToPrevious()
     }
 
-    fun ChangeQueryUseCase(query: String) {
-        recordScenarioStep(query)
+    fun ChangeQueryUseCase(address: TextFieldValue) {
+        recordScenarioStep(address)
 
-        state.query.next(query)
+        state.query.next(address)
+        val orderRequest = get.sources().app.activeOrderRequest!!
+        orderRequest.deliveryAddress = address.text.ifEmpty { null }
 
         state.addresses.act {
-            val result = get.sources().backend.mapService.getAddressesBy(query)
+            val result = get.sources().backend.mapService.getAddressesBy(address.text)
             return@act Pair(result.getOrNull(), result.isSuccess)
         }
     }
 
     fun ClickToClearAddress() {
-        state.query.next("")
+        state.query.next(TextFieldValue(""))
+        val orderRequest = get.sources().app.activeOrderRequest!!
+        orderRequest.deliveryAddress = null
         state.addresses.resetWith(emptyList())
     }
 
     fun ClickToAddressUseCase(address: String) {
-        state.query.next(address)
-        state.addresses.resetWith(emptyList())
+        state.query.next(TextFieldValue(address, TextRange(address.length)))
     }
 
     fun ClickToCloseUseCase() {

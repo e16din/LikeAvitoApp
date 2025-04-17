@@ -144,8 +144,8 @@ data class PickupPointType(val name: String, val id: Int)
 data class OrderRequest(
     var ad: Ad,
     val type: Type,
-    val pickupPoint: PickupPoint? = null,
-    val deliveryAddress: String? = null,
+    var pickupPoint: PickupPoint? = null,
+    var deliveryAddress: String? = null,
 )
 
 data class Order(
