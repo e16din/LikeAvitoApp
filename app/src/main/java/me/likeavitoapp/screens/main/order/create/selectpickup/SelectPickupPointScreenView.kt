@@ -1,9 +1,5 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
-import android.location.Location
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -26,41 +22,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.location.LocationServices
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.location.LocationListener
 import com.yandex.mapkit.location.LocationStatus
-import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.Map
-import com.yandex.mapkit.mapview.MapView
 import me.likeavitoapp.R
 import me.likeavitoapp.isPreviewMode
-import me.likeavitoapp.log
 import me.likeavitoapp.get
 import me.likeavitoapp.mocks.mockAds
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.OrderRequest
-import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.Chip
+import me.likeavitoapp.screens.main.YandexMapView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 
@@ -96,207 +79,111 @@ fun SelectPickupPointScreenProvider(screen: SelectPickupPointScreen) {
 }
 
 @Composable
-fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modifier) = with(screen) {
-    val query by screen.state.query.collectAsState()
-    val selectedTypeId by screen.state.selectedTypeId.collectAsState()
-    val types = screen.enabledTypes
+fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modifier) =
+    with(screen) {
+        val query by screen.state.query.collectAsState()
+        val selectedTypeId by screen.state.selectedTypeId.collectAsState()
+        val types = screen.enabledTypes
 
-    Column(modifier = modifier.fillMaxSize()) {
-        val addressText by screen.state.query.collectAsState()
-        val points by screen.state.suggestions.output.collectAsState()
-        val tabIndex by screen.state.tabIndex.collectAsState()
+        Column(modifier = modifier.fillMaxSize()) {
+            val addressText by screen.state.query.collectAsState()
+            val points by screen.state.suggestions.output.collectAsState()
+            val tabIndex by screen.state.tabIndex.collectAsState()
 
-        Column {
-            TextField(
-                value = query,
-                onValueChange = { newText ->
-                    screen.ChangeQueryUseCase(newText)
-                },
-                label = { Text(stringResource(R.string.enter_address_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    if (!addressText.isNotEmpty()) {
-                        IconButton(onClick = {
-                            screen.ClickToClearAddress()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Очистить",
-                                tint = Color.Gray
-                            )
+            Column {
+                TextField(
+                    value = query,
+                    onValueChange = { newText ->
+                        screen.ChangeQueryUseCase(newText)
+                    },
+                    label = { Text(stringResource(R.string.enter_address_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        if (!addressText.isNotEmpty()) {
+                            IconButton(onClick = {
+                                screen.ClickToClearAddressUseCase()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Очистить",
+                                    tint = Color.Gray
+                                )
+                            }
                         }
                     }
-                }
-            )
+                )
 
-            Row {
-                types.forEach { type ->
-                    Chip(
-                        startIcon = {
-                            if (selectedTypeId == type.id) Icons.Default.Check else null
-                        },
-                        startIconTint = Color.Black.copy(alpha = 0.5f),
-                        contentDescription = type.name,
-                        label = type.name,
-                        isClickable = true,
-                        onClick = {
-                            screen.SelectPickupPointTypeUseCase(type.id)
-                        }
-                    )
-                }
-            }
-
-            val tabs = listOf("Список", "Карта")
-
-            TabRow(selectedTabIndex = tabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        text = { Text(title) },
-                        selected = tabIndex == index,
-                        onClick = {
-                            screen.ClickToTabUseCase(index)
-                        }
-                    )
-                }
-            }
-
-            when (tabIndex) {
-                0 -> LazyColumn {
-                    items(points) { point ->
-                        Text(
-                            text = point.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    screen.ClickToPickupPoint(point)
-                                }
-                                .padding(8.dp)
+                Row {
+                    types.forEach { type ->
+                        Chip(
+                            startIcon = {
+                                if (selectedTypeId == type.id) Icons.Default.Check else null
+                            },
+                            startIconTint = Color.Black.copy(alpha = 0.5f),
+                            contentDescription = type.name,
+                            label = type.name,
+                            isClickable = true,
+                            onClick = {
+                                screen.SelectPickupPointTypeUseCase(type.id)
+                            }
                         )
                     }
                 }
 
-                1 -> if (!isPreviewMode()) {
-                    YandexMapView(screen)
-                }
-            }
+                val tabs = listOf("Список", "Карта")
 
-
-        }
-    }
-}
-
-
-@Composable
-fun YandexMapView(screen: SelectPickupPointScreen) {
-    val mapKit = remember { MapKitFactory.getInstance() }
-    val locationManager = remember { mapKit.createLocationManager() }
-
-    DisposableEffect(Unit) {
-        mapKit.onStart()
-
-        onDispose {
-            mapKit.resetLocationManagerToDefault()
-            mapKit.onStop()
-        }
-    }
-
-    var actualMap by remember { mutableStateOf<Map?>(null) }
-
-    RequestLocationPermission(
-        onPermissionGranted = {
-            mapKit.setLocationManager(locationManager)
-            val locationListener = object : LocationListener {
-                override fun onLocationUpdated(location: com.yandex.mapkit.location.Location) {
-                    screen.ChangeAreaPointUseCase(location.position)
+                TabRow(selectedTabIndex = tabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            text = { Text(title) },
+                            selected = tabIndex == index,
+                            onClick = {
+                                screen.ClickToTabUseCase(index)
+                            }
+                        )
+                    }
                 }
 
-                override fun onLocationStatusUpdated(status: LocationStatus) {
+                when (tabIndex) {
+                    0 -> LazyColumn {
+                        items(points) { point ->
+                            Text(
+                                text = point.name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        screen.ClickToPickupPointUseCase(point)
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
+
+                    1 -> if (!isPreviewMode()) {
+                        val locationListener = object : LocationListener {
+                            override fun onLocationUpdated(location: com.yandex.mapkit.location.Location) {
+                                screen.ChangeAreaPointUseCase(location.position)
+                            }
+
+                            override fun onLocationStatusUpdated(status: LocationStatus) {
+                            }
+                        }
+                        val areaPoint = screen.state.areaPoint.collectAsState()
+                        YandexMapView(
+                            areaPoint,
+                            locationListener,
+                            {
+                                screen.PressBackUseCase()
+                            }
+                        )
+                    }
                 }
+
+
             }
-            locationManager.requestSingleUpdate(locationListener)
-
-        },
-        onPermissionDenied = {
-            screen.PressBackUseCase()
-        }
-    )
-
-    fun moveTo(position: Point) {
-        val zoom = 18f
-        val azimuth = 150f
-        val tilt = 30f
-        log("move: ${position}")
-        actualMap?.move(
-            CameraPosition(
-                position,
-                zoom,
-                azimuth,
-                tilt
-            )
-        )
-    }
-
-    val areaPoint = screen.state.areaPoint.collectAsState()
-    LaunchedEffect(areaPoint) {
-        moveTo(areaPoint.value)
-    }
-
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            MapView(context).apply {
-                actualMap = mapWindow.map
-            }
-        },
-        update = { view ->
-            // View's been inflated or state read in this block has been updated
-            // Add logic here if necessary
-
-            // As selectedItem is read here, AndroidView will recompose
-            // whenever the state changes
-            // Example of Compose -> View communication
-        }
-    )
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun RequestLocationPermission(
-    onPermissionGranted: () -> Unit,
-    onPermissionDenied: () -> Unit
-) {
-    val locationPermissionsState = rememberMultiplePermissionsState(
-        permissions = listOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    )
-
-    LaunchedEffect(Unit) {
-        locationPermissionsState.launchMultiplePermissionRequest()
-    }
-
-    if (locationPermissionsState.allPermissionsGranted) {
-        onPermissionGranted()
-    } else {
-        onPermissionDenied()
-    }
-}
-
-class LocationTracker(context: Context) {
-    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
-    @SuppressLint("MissingPermission")
-    fun listenCurrentLocation(onLocationReceived: (Location?) -> Unit) {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            log("location: $location")
-            onLocationReceived(location)
-        }.addOnFailureListener { throwable ->
-            throwable.log()
-            onLocationReceived(null)
         }
     }
-}
+
 
 @Preview
 @Composable

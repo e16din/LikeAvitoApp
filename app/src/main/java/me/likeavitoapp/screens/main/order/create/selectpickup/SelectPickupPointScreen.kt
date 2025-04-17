@@ -6,8 +6,6 @@ import me.likeavitoapp.load
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.MapItem
-import me.likeavitoapp.model.Order
-import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -48,19 +46,19 @@ class SelectPickupPointScreen(
 
         get.scope().launchWithHandler {
             state.suggestions.load(loading = {
-                get.sources().backend.mapService.getAddressesBy(query, state.areaPoint.value)
+                get.sources().backend.mapService.getPickupPointsBy(query, state.areaPoint.value)
             }, onSuccess = { data ->
                 state.suggestions.output.next(data)
             })
         }
     }
 
-    fun ClickToClearAddress() {
+    fun ClickToClearAddressUseCase() {
         state.query.next("")
         state.suggestions.resetWith(emptyList())
     }
 
-    fun ClickToPickupPoint(item: MapItem) {
+    fun ClickToPickupPointUseCase(item: MapItem) {
         state.query.next(item.name)
         state.suggestions.resetWith(emptyList())
         state.areaPoint.next(item.point)
@@ -94,24 +92,12 @@ class SelectPickupPointScreen(
         recordScenarioStep()
 
         val orderRequest = get.sources().app.activeOrderRequest!!
-        if(orderRequest.type == Order.Type.Pickup) {
-            if(orderRequest.pickupPoint != null) {
-                navigator.startScreen(
-                    PaymentScreen(navigator)
-                )
-            }else {
-                /please select point to continue
-            }
-
+        if (orderRequest.pickupPoint != null) {
+            navigator.startScreen(
+                PaymentScreen(navigator)
+            )
         } else {
-            if(orderRequest.deliveryAddress != null) {
-                navigator.startScreen(
-                    PaymentScreen(navigator)
-                )
-
-            } else {
-                /please select address to continue
-            }
+            //please select point to continue
         }
     }
 }

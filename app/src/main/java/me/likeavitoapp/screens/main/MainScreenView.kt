@@ -49,6 +49,8 @@ import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreen
+import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
@@ -89,6 +91,7 @@ fun MainScreenProvider(screen: MainScreen) {
                 is PhotoScreen -> PhotoScreenProvider(this)
                 is ChatScreen -> ChatScreenProvider(this)
                 is SelectPickupPointScreen -> SelectPickupPointScreenProvider(this)
+                is SelectDeliveryAddressScreen -> SelectDeliveryAddressScreenProvider(this)
                 is PaymentScreen -> PaymentScreenProvider(this)
             }
         }

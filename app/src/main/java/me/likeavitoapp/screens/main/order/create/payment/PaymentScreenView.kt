@@ -375,9 +375,7 @@ private fun isRemove(
 fun PaymentScreenPreview() {
     get = mockMainSet()
     val screen = PaymentScreen(
-        navigator = mockScreensNavigator(),
-        ad = MockDataProvider().ads.first(),
-        orderType = Order.Type.Pickup
+        navigator = mockScreensNavigator()
     )
     LikeAvitoAppTheme {
         PaymentScreenProvider(

@@ -1,4 +1,4 @@
-package me.likeavitoapp
+package me.likeavitoapp.model
 
 import android.app.Application
 import android.content.Context
@@ -10,11 +10,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
-import me.likeavitoapp.model.IAppPlatform
 
 class UnauthorizedException : Exception("UnauthorizedException")
-
-
 
 class AppPlatform : IAppPlatform, Application() {
 

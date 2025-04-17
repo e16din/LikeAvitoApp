@@ -16,7 +16,6 @@ class RootScreen() : IScreen {
         var isStarted: Boolean = false,
         var demoLabelEnabled: Boolean = develop,
         val scenariosEnabled: UpdatableState<Boolean> = UpdatableState(false),
-        val loadingEnabled: UpdatableState<Boolean> = UpdatableState(false),
     )
 
     val state = State()
@@ -49,7 +48,15 @@ class RootScreen() : IScreen {
         }
     }
 
+    fun ClickToLoadingFailedOkUseCase() {
+        recordScenarioStep()
+
+        get.sources().app.loadingFailed.next(false)
+    }
+
     fun ClickToDemoDeveloperUseCase() {
+        recordScenarioStep()
+
         state.scenariosEnabled.next(true)
     }
 }

@@ -2,13 +2,13 @@ package me.likeavitoapp.screens.main.tabs.profile.edit
 
 import android.util.Base64
 import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
+import me.likeavitoapp.model.act
 import me.likeavitoapp.recordScenarioStep
 
 class EditProfileScreen(
@@ -59,27 +59,21 @@ class EditProfileScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        state.updateUser.working.repostTo(
-            get.sources().app.rootScreen.state.loadingEnabled
-        )
+        state.updateUser.act(onDone = { newUser ->
+            get.sources().app.user.next(newUser)
+        }) {
+            val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
+            get.sources().backend.userService.postPhoto(photoBase64)
 
-        get.scope().launchWithHandler {
-            state.updateUser.load(loading = {
-                val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
-                get.sources().backend.userService.postPhoto(photoBase64)
-
-                return@load get.sources().backend.userService.updateUser(
-                    userId = state.user.id,
-                    name = state.user.name,
-                    phone = state.user.contacts.phone,
-                    telegram = state.user.contacts.telegram,
-                    whatsapp = state.user.contacts.whatsapp,
-                    email = state.user.contacts.email,
-                )
-
-            }, onSuccess = { newUser ->
-                get.sources().app.user.next(newUser)
-            })
+            val userResult = get.sources().backend.userService.updateUser(
+                userId = state.user.id,
+                name = state.user.name,
+                phone = state.user.contacts.phone,
+                telegram = state.user.contacts.telegram,
+                whatsapp = state.user.contacts.whatsapp,
+                email = state.user.contacts.email,
+            )
+            return@act Pair(userResult.getOrNull(), userResult.isSuccess)
         }
     }
 }

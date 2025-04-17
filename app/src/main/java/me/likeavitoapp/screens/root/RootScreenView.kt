@@ -2,26 +2,30 @@ package me.likeavitoapp.screens.root
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.log
+import me.likeavitoapp.R
+import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.auth.AuthScreenProvider
@@ -34,12 +38,13 @@ import me.likeavitoapp.ui.theme.onPrimaryDark
 import me.likeavitoapp.ui.theme.primaryContainerDark
 
 @Composable
-fun RootScreenView(rootScreen: RootScreen) {
-    val screen = rootScreen.navigator.screen.collectAsState()
-    val loadingEnabled = rootScreen.state.loadingEnabled.collectAsState()
+fun RootScreenView(screen: RootScreen) {
+    val nextScreen by screen.navigator.screen.collectAsState()
+    val loadingEnabled by get.sources().app.loading.collectAsState()
+    val loadingFailedEnabled by get.sources().app.loadingFailed.collectAsState()
 
     LaunchedEffect(Unit) {
-        rootScreen.StartScreenUseCase()
+        screen.StartScreenUseCase()
     }
 
     Box(modifier = Modifier) {
@@ -49,7 +54,7 @@ fun RootScreenView(rootScreen: RootScreen) {
                 .navigationBarsPadding()
                 .fillMaxSize()
         ) {
-            with(screen.value) {
+            with(nextScreen) {
                 when (this) {
                     is SplashScreen -> SplashScreenProvider(this)
                     is AuthScreen -> AuthScreenProvider(this)
@@ -58,10 +63,11 @@ fun RootScreenView(rootScreen: RootScreen) {
             }
         }
 
-        if (loadingEnabled.value) {
+        if (loadingEnabled) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
                     .alpha(0.72f)
             ) {
                 Box {
@@ -74,13 +80,41 @@ fun RootScreenView(rootScreen: RootScreen) {
             }
         }
 
-        if (rootScreen.state.demoLabelEnabled) {
+        if (loadingFailedEnabled) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                    .imePadding()
+                    .alpha(0.96f)
+            ) {
+                Box {
+                    Text(
+                        text = stringResource(R.string.data_loading_failed_message),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+
+                    OutlinedButton(
+                        onClick = {
+                            screen.ClickToLoadingFailedOkUseCase()
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                    ) {
+                        Text(stringResource(R.string.ok))
+                    }
+                }
+            }
+        }
+
+        if (screen.state.demoLabelEnabled) {
             Text(
                 modifier = Modifier
                     .padding(vertical = 32.dp, horizontal = 24.dp)
                     .clip(CircleShape)
                     .clickable {
-                        rootScreen.ClickToDemoDeveloperUseCase()
+                        screen.ClickToDemoDeveloperUseCase()
                     }
                     .background(primaryContainerDark)
                     .padding(8.dp)

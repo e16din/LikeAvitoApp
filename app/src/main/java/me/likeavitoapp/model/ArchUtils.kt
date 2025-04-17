@@ -132,6 +132,9 @@ inline fun <T> Worker<T>.act(
     crossinline onDone: (T) -> Unit = {},
     crossinline task: suspend () -> Pair<T?, Boolean>
 ) {
+    working.repostTo(get.sources().app.loading)
+    fail.repostTo(get.sources().app.loadingFailed)
+
     working.next(true)
     work(onDone = { result ->
         val data = result.first ?: output.value

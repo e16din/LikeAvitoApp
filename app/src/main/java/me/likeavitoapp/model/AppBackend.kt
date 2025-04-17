@@ -13,7 +13,6 @@ import com.yandex.mapkit.search.Session.SearchListener
 import com.yandex.runtime.Error
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
-import me.likeavitoapp.UnauthorizedException
 import me.likeavitoapp.mocks.MockDataProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -49,7 +48,13 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             })
         }
 
-        suspend fun getAddressesBy(
+        suspend fun getAddressesBy(query: String):Result<List<String>> {
+
+            delay(800)
+            return Result.failure(Exception())
+        }
+
+        suspend fun getPickupPointsBy(
             query: String,
             areaPoint: Point
         ): Result<List<MapItem>> {

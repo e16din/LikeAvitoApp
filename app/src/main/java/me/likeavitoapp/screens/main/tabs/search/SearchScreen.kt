@@ -37,7 +37,6 @@ class SearchScreen(
 
     fun loadAds(resetPage: Boolean, afterAll: () -> Unit = {}) {
         log("loadAds")
-        state.ads.working.repostTo(get.sources().app.rootScreen.state.loadingEnabled)
         state.ads.act(onDone = { afterAll() }) {
             val from = if (searchSettingsPanel.state.priceFrom.value.isEmpty())
                 0

@@ -25,6 +25,9 @@ class AppModel {
 
     var activeOrderRequest: OrderRequest? = null
 
+    val loading = UpdatableState(false)
+    val loadingFailed = UpdatableState(false)
+
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
 

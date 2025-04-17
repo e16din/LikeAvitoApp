@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LikeAvitoApp"
-        android:name=".AppPlatform"
+        android:name=".model.AppPlatform"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="33"
         >

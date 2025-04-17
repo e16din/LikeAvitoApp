@@ -3,7 +3,7 @@ package me.likeavitoapp.screens.main.tabs.profile
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import me.likeavitoapp.UnauthorizedException
+import me.likeavitoapp.model.UnauthorizedException
 import me.likeavitoapp.get
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load

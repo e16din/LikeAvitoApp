@@ -4,11 +4,11 @@ import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order
-import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.OrderRequest
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
 
 
@@ -24,7 +24,6 @@ class CreateOrderScreen(
             else
                 Order.Type.Pickup
         )
-        var selectedPickupPoint = UpdatableState<PickupPoint?>(null)
     }
 
     val state = State()
@@ -54,13 +53,7 @@ class CreateOrderScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            SelectDeliveryAddressScreen(
-                state.selectedPickupPoint,
-                get.sources().app.pickupPointTypes.filter {
-                    ad.enabledPickupPointTypes.contains(it.id)
-                },
-                navigator
-            )
+            SelectDeliveryAddressScreen(navigator)
         )
     }
 
@@ -69,7 +62,6 @@ class CreateOrderScreen(
 
         navigator.startScreen(
             SelectPickupPointScreen(
-                state.selectedPickupPoint,
                 get.sources().app.pickupPointTypes.filter {
                     ad.enabledPickupPointTypes.contains(it.id)
                 },
