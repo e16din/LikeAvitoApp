@@ -2,12 +2,15 @@ package me.likeavitoapp.screens.main.order.create
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Button
@@ -94,21 +97,36 @@ fun CreateOrderScreenView(screen: CreateOrderScreen, modifier: Modifier) = with(
             }
         }
 
+        Spacer(Modifier.height(24.dp))
+
         AnimatedVisibility(selectedOrderType == Order.Type.Delivery) {
-            Button(onClick = {
-                screen.ClickToSelectDeliveryAddressUseCase()
-            }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Text(stringResource(R.string.select_delivery_address_button))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = {
+                        screen.ClickToSelectDeliveryAddressUseCase()
+                    }, modifier = Modifier.wrapContentWidth()
+                ) {
+                    Text(stringResource(R.string.select_delivery_address_button))
+                }
             }
-
         }
-        AnimatedVisibility(selectedOrderType == Order.Type.Pickup) {
-            Button(onClick = {
-                screen.ClickToSelectPickupPointUseCase()
-            }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Text(stringResource(R.string.select_pickup_point_button))
-            }
 
+        AnimatedVisibility(selectedOrderType == Order.Type.Pickup) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = {
+                        screen.ClickToSelectPickupPointUseCase()
+                    }, modifier = Modifier.wrapContentWidth()
+                ) {
+                    Text(stringResource(R.string.select_pickup_point_button))
+                }
+            }
         }
     }
 }

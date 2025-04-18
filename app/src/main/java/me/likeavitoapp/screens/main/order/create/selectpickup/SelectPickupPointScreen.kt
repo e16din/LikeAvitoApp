@@ -73,6 +73,7 @@ class SelectPickupPointScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         orderRequest.pickupPoint = null
         state.points.resetWith(emptyList())
+        loadPickupPoints()
     }
 
     fun ClickToPickupPointUseCase(point: Order.PickupPoint) {

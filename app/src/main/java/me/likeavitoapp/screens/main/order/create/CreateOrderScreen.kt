@@ -29,11 +29,15 @@ class CreateOrderScreen(
     val state = State()
 
     init {
-        if (get.sources().app.activeOrderRequest?.ad?.id != ad.id) {
+        val activeOrderRequest = get.sources().app.activeOrderRequest
+        if (activeOrderRequest?.ad?.id != ad.id) {
             get.sources().app.activeOrderRequest = OrderRequest(
                 ad = ad,
                 type = state.orderType.value
             )
+
+        } else {
+            state.orderType.next(activeOrderRequest.type)
         }
     }
 
