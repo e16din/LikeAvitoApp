@@ -2,20 +2,12 @@ package me.likeavitoapp.model
 
 
 import androidx.compose.runtime.toMutableStateList
-import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.search.Response
 import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManagerType
-import com.yandex.mapkit.search.SearchOptions
-import com.yandex.mapkit.search.SearchType
-import com.yandex.mapkit.search.Session.SearchListener
-import com.yandex.runtime.Error
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
 import me.likeavitoapp.mocks.MockDataProvider
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.random.Random
 
 
@@ -35,7 +27,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
     inner class MapService {
         val searchManager by lazy {
-            SearchFactory.getInstance().createSearchManager(SearchManagerType.ONLINE)
+            SearchFactory.getInstance().createSearchManager(SearchManagerType.OFFLINE)
         }
 
         suspend fun getPickupPoints(centerPoint: Order.PickupPoint.Point): Result<List<Order.PickupPoint>> {
@@ -50,67 +42,26 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun getAddressesBy(query: String): Result<List<String>> {
             delay(800)
-            return Result.success(mockDataProvider.addresses.filter { it.lowercase().contains(query.lowercase()) })
+            return Result.success(mockDataProvider.addresses.filter {
+                it.lowercase().contains(query.lowercase())
+            })
         }
 
         suspend fun getPickupPointsBy(
             query: String,
-            areaPoint: Point
-        ): Result<List<MapItem>> {
-//            val suggestSession = searchManager.createSuggestSession()
-//            val suggestOptions = SuggestOptions().setSuggestTypes(SuggestType.GEO.value)
-//
-//            suggestSession.suggest("кафе", BoundingBox(map.visibleRegion.bottomLeft, map.visibleRegion.topRight), suggestOptions, object : SuggestSession.SuggestListener {
-//                override fun onResponse(items: MutableList<SuggestItem>) {
-//
-//                }
-//
-//                override fun onResponse(response: SuggestResponse) {
-//                    response.items
-//                    TODO("Not yet implemented")
-//                }
-//
-//                override fun onError(error: Error) {
-//                    showMessage("Ошибка получения подсказок")
-//                }
-//            })
-
-            val searchOptions = SearchOptions().apply {
-                searchTypes = SearchType.GEO.value
-                resultPageSize = 32
-            }
-
-            val geometry = Geometry.fromPoint(areaPoint)
-
-            return suspendCoroutine { continuation ->
-                searchManager.submit(
-                    query,
-                    geometry,
-                    searchOptions,
-                    object : SearchListener {
-                        override fun onSearchResponse(response: Response) {
-                            val resultData = mutableListOf<MapItem>()
-                            response.collection.children.forEach { item ->
-                                val name = item.obj?.name
-                                val point = item.obj?.geometry?.first()?.point
-                                if (name != null && point != null) {
-                                    resultData.add(
-                                        MapItem(name, point)
-                                    )
-                                }
-                            }
-                            continuation.resume(
-                                Result.success(resultData)
-                            )
-                        }
-
-                        override fun onSearchError(fail: Error) {
-                            continuation.resumeWith(
-                                Result.failure(IllegalStateException("see: onSearchError()"))
-                            )
-                        }
-                    })
-            }
+            typeId:Int,
+            centerPoint: Point
+        ): Result<List<Order.PickupPoint>> {
+            delay(1100)
+            val centerPoint = Point(55.7, 37.6) // test
+            return Result.success(mockDataProvider.pickupPoints.filter {
+                it.typeId == typeId
+                    && it.address.lowercase().contains(query.lowercase())
+                        && (it.point.latitude < centerPoint.latitude + 0.5
+                        && it.point.latitude > centerPoint.latitude - 0.5
+                        && it.point.longitude < centerPoint.longitude + 0.5
+                        && it.point.longitude > centerPoint.longitude - 0.5)
+            })
         }
     }
 
@@ -189,7 +140,8 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         ): Result<List<Ad>> {
             delay(2000)
 
-            val ads = mockDataProvider.getNextAdsPage(range, regionId, categoryId, query, resetPage)
+            val ads =
+                mockDataProvider.getNextAdsPage(range, regionId, categoryId, query, resetPage)
             return Result.success(ads)
         }
 

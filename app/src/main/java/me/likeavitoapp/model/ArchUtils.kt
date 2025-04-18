@@ -35,7 +35,7 @@ class UpdatableState<T>(initial: T) {
 
     @Deprecated("Use next()")
     fun post(value: T, scope: CoroutineScope = get.scope(), ifNew: Boolean = false) {
-        if (!ifNew || (ifNew && _value != value)) {
+        if (!ifNew || (_value != value)) {
             debug {
                 println("post: $value")
             }
@@ -51,7 +51,7 @@ class UpdatableState<T>(initial: T) {
     }
 
     fun next(value: T, ifNew: Boolean = false) {
-        if (!ifNew || (ifNew && _value != value)) {
+        if (!ifNew || (_value != value)) {
 //            debug {
 //                println("next: $value")
 //            }

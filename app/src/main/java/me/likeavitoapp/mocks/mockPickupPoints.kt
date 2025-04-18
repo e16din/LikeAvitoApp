@@ -5,7 +5,7 @@ import me.likeavitoapp.model.Order
 fun mockPickupPoints(): List<Order.PickupPoint> = listOf(
         Order.PickupPoint(
             id = 1,
-            typeId = 1,
+            typeId = 2,
             address = "Улица Ленина, 1",
             openingHoursFrom = 9,
             openingHoursTo = 21,

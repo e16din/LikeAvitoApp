@@ -80,6 +80,10 @@ fun mockScreensNavigator() = emptyScreenNavigator
 fun mockMainSet() = MainSet().apply {
     appBackend = AppBackend() // NOTE: you may change it for any test
     init(object : IAppPlatform {
+        override fun getString(resId: Int): String? {
+            return null
+        }
+
         override val appDataStore: IAppPlatform.IAppDataStore
             get() = object : IAppPlatform.IAppDataStore {
                 override suspend fun loadUserId(): Long? {

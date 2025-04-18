@@ -79,7 +79,7 @@ fun SelectDeliveryAddressScreenView(screen: SelectDeliveryAddressScreen, modifie
                 trailingIcon = {
                     if (addressText.text.isNotEmpty()) {
                         IconButton(onClick = {
-                            screen.ClickToClearAddress()
+                            screen.ClickToClearAddressUseCase()
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,

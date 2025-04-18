@@ -48,7 +48,9 @@ class SelectDeliveryAddressScreen(
         }
     }
 
-    fun ClickToClearAddress() {
+    fun ClickToClearAddressUseCase() {
+        recordScenarioStep()
+
         state.query.next(TextFieldValue(""))
         val orderRequest = get.sources().app.activeOrderRequest!!
         orderRequest.deliveryAddress = null
@@ -56,7 +58,11 @@ class SelectDeliveryAddressScreen(
     }
 
     fun ClickToAddressUseCase(address: String) {
-        state.query.next(TextFieldValue(address, TextRange(address.length)))
+        recordScenarioStep()
+
+        ChangeQueryUseCase(
+            TextFieldValue(address, TextRange(address.length))
+        )
     }
 
     fun ClickToCloseUseCase() {

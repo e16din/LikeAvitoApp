@@ -26,9 +26,11 @@ import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 import me.likeavitoapp.log
+import me.likeavitoapp.model.Order
 
 @Composable
 fun YandexMapView(
+    points: List<Order.PickupPoint>,
     areaPoint: State<Point>,
     locationListener: LocationListener,
     onPermissionDenied: () -> Unit

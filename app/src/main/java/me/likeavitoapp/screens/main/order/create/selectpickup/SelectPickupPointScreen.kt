@@ -1,16 +1,17 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.yandex.mapkit.geometry.Point
 import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.MapItem
+import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.model.act
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 
@@ -21,18 +22,26 @@ class SelectPickupPointScreen(
 ) : IScreen {
 
     inner class State {
-        val selectedTypeId = UpdatableState(
+        val typeId = UpdatableState(
             get.sources().app.activeOrderRequest?.pickupPoint?.typeId
                 ?: enabledTypes.first().id
         )
-        val query = UpdatableState("")
+        val query = UpdatableState(TextFieldValue(""))
         val areaPoint = UpdatableState(Point())
-        val suggestions = Worker<List<MapItem>>(emptyList())
+        val points = Worker<List<Order.PickupPoint>>(emptyList())
 
-        val tabIndex = UpdatableState<Int>(0)
+        val tabIndex = UpdatableState(0)
     }
 
     val state = State()
+
+    init {
+        get.sources().app.activeOrderRequest!!.pickupPoint?.address?.let {
+            ChangeQueryUseCase(
+                TextFieldValue(it, TextRange(it.length))
+            )
+        }
+    }
 
     fun PressBackUseCase() {
         recordScenarioStep()
@@ -40,29 +49,39 @@ class SelectPickupPointScreen(
         navigator.backToPrevious()
     }
 
-    fun ChangeQueryUseCase(query: String) {
+    fun ChangeQueryUseCase(query: TextFieldValue) {
         recordScenarioStep(query)
 
         state.query.next(query)
 
-        get.scope().launchWithHandler {
-            state.suggestions.load(loading = {
-                get.sources().backend.mapService.getPickupPointsBy(query, state.areaPoint.value)
-            }, onSuccess = { data ->
-                state.suggestions.output.next(data)
-            })
+        loadPickupPoints()
+    }
+
+    private fun loadPickupPoints() {
+        state.points.act {
+            val result = get.sources().backend.mapService.getPickupPointsBy(
+                state.query.value.text,
+                state.typeId.value,
+                state.areaPoint.value
+            )
+            return@act Pair(result.getOrNull(), result.isSuccess)
         }
     }
 
     fun ClickToClearAddressUseCase() {
-        state.query.next("")
-        state.suggestions.resetWith(emptyList())
+        state.query.next(TextFieldValue(""))
+        val orderRequest = get.sources().app.activeOrderRequest!!
+        orderRequest.pickupPoint = null
+        state.points.resetWith(emptyList())
     }
 
-    fun ClickToPickupPointUseCase(item: MapItem) {
-        state.query.next(item.name)
-        state.suggestions.resetWith(emptyList())
-        state.areaPoint.next(item.point)
+    fun ClickToPickupPointUseCase(point: Order.PickupPoint) {
+        state.query.next(
+            TextFieldValue(point.address, TextRange(point.address.length))
+        )
+        state.areaPoint.next(Point(point.point.latitude, point.point.longitude))
+        val orderRequest = get.sources().app.activeOrderRequest!!
+        orderRequest.pickupPoint = point
     }
 
     fun ChangeAreaPointUseCase(point: Point) {
@@ -74,7 +93,8 @@ class SelectPickupPointScreen(
     fun SelectPickupPointTypeUseCase(typeId: Int) {
         recordScenarioStep()
 
-        state.selectedTypeId.next(typeId)
+        state.typeId.next(typeId)
+        loadPickupPoints()
     }
 
     fun ClickToCloseUseCase() {

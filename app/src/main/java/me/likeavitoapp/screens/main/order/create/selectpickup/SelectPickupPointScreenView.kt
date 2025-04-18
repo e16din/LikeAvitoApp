@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.order.create.selectpickup
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -82,12 +83,13 @@ fun SelectPickupPointScreenProvider(screen: SelectPickupPointScreen) {
 fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modifier) =
     with(screen) {
         val query by screen.state.query.collectAsState()
-        val selectedTypeId by screen.state.selectedTypeId.collectAsState()
+        val selectedTypeId by screen.state.typeId.collectAsState()
         val types = screen.enabledTypes
+        val selectedPoint = get.sources().app.activeOrderRequest!!.pickupPoint
 
         Column(modifier = modifier.fillMaxSize()) {
             val addressText by screen.state.query.collectAsState()
-            val points by screen.state.suggestions.output.collectAsState()
+            val points by screen.state.points.output.collectAsState()
             val tabIndex by screen.state.tabIndex.collectAsState()
 
             Column {
@@ -99,7 +101,7 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
                     label = { Text(stringResource(R.string.enter_address_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        if (addressText.isNotEmpty()) {
+                        if (addressText.text.isNotEmpty()) {
                             IconButton(onClick = {
                                 screen.ClickToClearAddressUseCase()
                             }) {
@@ -147,15 +149,23 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
                 when (tabIndex) {
                     0 -> LazyColumn {
                         items(points) { point ->
-                            Text(
-                                text = point.name,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        screen.ClickToPickupPointUseCase(point)
-                                    }
-                                    .padding(8.dp)
-                            )
+                            Row(Modifier.clickable {
+                                screen.ClickToPickupPointUseCase(point)
+                            }) {
+                                Text(
+                                    text = point.address,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(16.dp)
+                                )
+                                AnimatedVisibility(point == selectedPoint) {
+                                    Icon(
+                                        Icons.Filled.Check,
+                                        "selected",
+                                        modifier = Modifier.padding(12.dp)
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -170,6 +180,7 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
                         }
                         val areaPoint = screen.state.areaPoint.collectAsState()
                         YandexMapView(
+                            points,
                             areaPoint,
                             locationListener,
                             {
