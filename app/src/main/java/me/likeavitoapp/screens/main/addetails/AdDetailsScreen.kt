@@ -22,7 +22,6 @@ class AdDetailsScreen(
         val messages: UpdatableState<List<IMessage>> = UpdatableState(emptyList()),
     ) : BaseAdContainerState()
 
-
     fun PressBackUseCase() {
         recordScenarioStep()
 

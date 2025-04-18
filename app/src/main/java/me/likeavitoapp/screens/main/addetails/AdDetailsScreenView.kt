@@ -161,26 +161,38 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
             overflow = TextOverflow.Ellipsis
         )
 
-        Row(modifier = Modifier) {
+        if (!ad.isOrdered) {
+            Row(modifier = Modifier) {
+                Button(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    onClick = {
+                        screen.ClickToBuyUseCase(ad)
+                    }) {
+                    Text(text = stringResource(R.string.buy_button, ad.price))
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                if (ad.isBargainingEnabled) {
+                    Button(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        onClick = {
+                            screen.ClickToBargainingUseCase(ad)
+                        }) {
+                        Text(text = stringResource(R.string.bargaining_button))
+                    }
+                }
+            }
+        } else {
             Button(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                enabled = false,
                 onClick = {
                     screen.ClickToBuyUseCase(ad)
                 }) {
-                Text(text = "Купить за " + "${ad.price}₽")
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            if (ad.isBargainingEnabled) {
-                Button(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    onClick = {
-                        screen.ClickToBargainingUseCase(ad)
-                    }) {
-                    Text(text = stringResource(R.string.bargaining_button))
-                }
+                Text(stringResource(R.string.ordered_button))
             }
         }
 

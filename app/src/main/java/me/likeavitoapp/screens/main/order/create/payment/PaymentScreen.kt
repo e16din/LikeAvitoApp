@@ -3,6 +3,8 @@ package me.likeavitoapp.screens.main.order.create.payment
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.checkLuhnAlgorithm
 import me.likeavitoapp.develop
 import me.likeavitoapp.format
@@ -76,6 +78,13 @@ class PaymentScreen(
 
             val order = result.getOrNull()
             val isSuccess = order != null
+
+            if (isSuccess) {
+                withContext(Dispatchers.Main) {
+                    get.sources().app.activeOrderRequest = null
+                }
+            }
+
             return@act Pair(Unit, isSuccess).also {
                 if (isSuccess) {
                     get.sources().app.mainScreen.returnToOrdersTab()

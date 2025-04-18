@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -59,8 +61,6 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.measureTextWidth
-import me.likeavitoapp.mocks.MockDataProvider
-import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -99,7 +99,11 @@ fun PaymentScreenProvider(screen: PaymentScreen) {
 fun PaymentScreenView(screen: PaymentScreen, modifier: Modifier) = with(screen) {
     val validationEnabled by state.validationEnabled.collectAsState()
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -272,80 +276,80 @@ private fun PaymentTextField(
 //        val colors = TextFieldDefaults.colors()
 //        CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
         CompositionLocalProvider(LocalTextToolbar provides EmptyTextToolbar) {
-        BasicTextField(
-            modifier = Modifier
-                .padding(top = 4.dp, bottom = 0.dp)
-                .fillMaxWidth(),
-            value = value,
-            textStyle = fieldTextStyle,
-            onValueChange = { newValue ->
-                if (newValue.text.length > example.length) {
-                    return@BasicTextField
-                }
+            BasicTextField(
+                modifier = Modifier
+                    .padding(top = 4.dp, bottom = 0.dp)
+                    .fillMaxWidth(),
+                value = value,
+                textStyle = fieldTextStyle,
+                onValueChange = { newValue ->
+                    if (newValue.text.length > example.length) {
+                        return@BasicTextField
+                    }
 
-                if (newValue.selection.length == 0) {
-                    onValueChange(updatableState.output.value, newValue)
-                }
-            },
-            decorationBox = { innerTextField ->
-                TextFieldDefaults.DecorationBox(
-                    value = value.text,
-                    innerTextField = {
-                        Spacer(Modifier.padding(8.dp))
-                        Box(Modifier) {
-                            Box(
-                                Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 6.dp
-                                    )
-                                    .width(
-                                        requiredWidth
-                                            ?: measureTextWidth(example, fieldTextStyle)
-                                    ),
+                    if (newValue.selection.length == 0) {
+                        onValueChange(updatableState.output.value, newValue)
+                    }
+                },
+                decorationBox = { innerTextField ->
+                    TextFieldDefaults.DecorationBox(
+                        value = value.text,
+                        innerTextField = {
+                            Spacer(Modifier.padding(8.dp))
+                            Box(Modifier) {
+                                Box(
+                                    Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(
+                                            horizontal = 16.dp,
+                                            vertical = 6.dp
+                                        )
+                                        .width(
+                                            requiredWidth
+                                                ?: measureTextWidth(example, fieldTextStyle)
+                                        ),
 
-                                ) {
-                                Box(Modifier.align(Alignment.Center)) {
-                                    innerTextField()
+                                    ) {
+                                    Box(Modifier.align(Alignment.Center)) {
+                                        innerTextField()
+                                    }
                                 }
                             }
-                        }
-                    },
-                    enabled = true,
-                    colors = TextFieldDefaults.colors().copy(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedTextColor = Color.Black,// MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = Color.Black,//MaterialTheme.colorScheme.outline,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    singleLine = true,
-                    visualTransformation = VisualTransformation.None,
-                    contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
-                        top = 0.dp,
-                        bottom = 0.dp,
-                        start = 0.dp,
-                        end = 0.dp,
-                    ),
-                    interactionSource = remember { MutableInteractionSource() }
+                        },
+                        enabled = true,
+                        colors = TextFieldDefaults.colors().copy(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedTextColor = Color.Black,// MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = Color.Black,//MaterialTheme.colorScheme.outline,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
+                            top = 0.dp,
+                            bottom = 0.dp,
+                            start = 0.dp,
+                            end = 0.dp,
+                        ),
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = if (isLastField) ImeAction.Done else ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        localFocusManager.moveFocus(FocusDirection.Down)
+                    }
                 )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = if (isLastField) ImeAction.Done else ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    localFocusManager.moveFocus(FocusDirection.Down)
-                }
             )
-        )
-    }
+        }
 //    }
-  }
+    }
 }
 
 // TODO: create custom TextToolbar

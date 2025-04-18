@@ -35,11 +35,11 @@ inline fun AdsListView(
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1
         }
     }
-    val ads = screen.state.ads.output.collectAsState()
+    val ads by screen.state.ads.output.collectAsState()
 
     if (isAtTheEndOfList
-        && ads.value.size > 0
-        && ads.value.size % AppModel.adsPageSize == 0) {
+        && ads.size > 0
+        && ads.size % AppModel.adsPageSize == 0) {
         screen.ScrollToEndUseCase()
     }
 
@@ -50,14 +50,13 @@ inline fun AdsListView(
             start = 16.dp, top = 12.dp, end = 16.dp, bottom = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp),
-
         ) {
 
         stickyHeader {
             stickyHeaderContent(displayHeader)
         }
 
-        items(items = ads.value.toMutableStateList(), key = { ad -> ad.id }) { ad ->
+        items(items = ads.toMutableStateList(), key = { ad -> ad.id }) { ad ->
             adsListenersMap[ad.id] = ad.isFavorite.collectAsState()
 
             if (ad.isPremium) {

@@ -66,41 +66,38 @@ class SearchScreen(
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        val ads = state.ads.output.value
-        val needToInit = ads.isEmpty()
-        if (needToInit) {
-            work {
-                val platform = get.sources().platform
-                val selectedCategoryId = platform.appDataStore.loadCategoryId()
-                withContext(Dispatchers.Main) {
-                    val categories = get.sources().app.categories
-                    selectedCategoryId?.let { selected ->
-                        categories.firstOrNull { it.id == selected }?.let {
-                            searchSettingsPanel.state.selectedCategory.next(it)
-                        }
+        get.sources().app.loading.next(true)
+        work(onDone = {
+//                val ads = state.ads.output.value
+//                ads.forEach {
+//                    if (it.reservedTimeMs != null) {
+//                        timersMap[it.id] = startReserveTimer(it)
+//                    }
+//                }
+        }) {
+            val platform = get.sources().platform
+            val selectedCategoryId = platform.appDataStore.loadCategoryId()
+            withContext(Dispatchers.Main) {
+                val categories = get.sources().app.categories
+                selectedCategoryId?.let { selected ->
+                    categories.firstOrNull { it.id == selected }?.let {
+                        searchSettingsPanel.state.selectedCategory.next(it)
                     }
-                    state.isCategoriesVisible.next(true)
                 }
-
-                val selectedRegionId = platform.appDataStore.loadRegionId()
-                withContext(Dispatchers.Main) {
-                    selectedRegionId?.let { selected ->
-                        get.sources().app.regions.firstOrNull { it.id == selected }?.let {
-                            searchSettingsPanel.state.selectedRegion.next(it)
-                        }
-                    }
-                    state.isSearchSettingsVisible.next(true)
-                }
-
-                loadAds(resetPage = true)
+                state.isCategoriesVisible.next(true)
             }
 
-        } else {
-            ads.forEach {
-                if (it.reservedTimeMs != null) {
-                    timersMap[it.id] = startReserveTimer(it)
+            val selectedRegionId = platform.appDataStore.loadRegionId()
+            withContext(Dispatchers.Main) {
+                selectedRegionId?.let { selected ->
+                    get.sources().app.regions.firstOrNull { it.id == selected }?.let {
+                        searchSettingsPanel.state.selectedRegion.next(it)
+                    }
                 }
+                state.isSearchSettingsVisible.next(true)
             }
+
+            loadAds(resetPage = true)
         }
     }
 

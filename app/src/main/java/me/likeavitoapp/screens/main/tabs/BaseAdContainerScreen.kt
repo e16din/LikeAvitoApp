@@ -3,15 +3,16 @@ package me.likeavitoapp.screens.main.tabs
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import me.likeavitoapp.R
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
@@ -39,7 +40,7 @@ open class BaseAdContainerScreen(
 
 
     fun ClickToBuyUseCase(ad: Ad) {
-        recordScenarioStep()
+        recordScenarioStep(ad.reservedTimeMs)
 
         val createOrderScreen = CreateOrderScreen(ad, navigator)
         if (ad.reservedTimeMs != null) {
@@ -47,23 +48,22 @@ open class BaseAdContainerScreen(
             return
         }
 
-        get.scope().launchWithHandler {
-            state.reserve.load(loading = {
-                get.sources().backend.orderService.reserve(adId = ad.id)
-            }, onSuccess = { isReserved ->
-                if (isReserved) {
-                    state.reserve.output.next(true)
+        state.reserve.load(onDone = { success ->
+            if (success) {
+                ad.reservedTimeMs = System.currentTimeMillis()
+                timersMap[ad.id] = startReserveTimer(ad)
+                navigator.startScreen(createOrderScreen)
 
-                    ad.reservedTimeMs = System.currentTimeMillis()
+            } else {
 
-                    timersMap[ad.id] = startReserveTimer(ad)
+                get.sources().app.message.next(
+                    get.sources().platform.getString(R.string.ad_always_reserved_message)
+                )
+            }
 
-                    navigator.startScreen(createOrderScreen)
-
-                } else {
-                    state.reserve.fail.next(true)
-                }
-            })
+        }) {
+            val result = get.sources().backend.orderService.reserve(adId = ad.id)
+            return@load Pair(result.getOrNull(), result.isSuccess)
         }
     }
 

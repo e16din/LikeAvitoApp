@@ -195,8 +195,9 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         suspend fun reserve(adId: Long): Result<Boolean> {
             delay(400)
             val testFailId = 2L
+            val testFailId2 = 11L
 
-            if (adId != testFailId) {
+            if (adId != testFailId && adId != testFailId2) {
                 mockDataProvider.ads = mockDataProvider.ads.toMutableStateList().apply {
                     firstOrNull { ad -> ad.id == adId }?.let {
                         it.reservedTimeMs = System.currentTimeMillis()
@@ -204,7 +205,8 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 }
             }
 
-            return mockDataProvider.getSuccessOrFail(adId != testFailId)
+            return mockDataProvider.getSuccessOrFail(adId != testFailId
+                    && adId != testFailId2)
         }
 
         suspend fun order(

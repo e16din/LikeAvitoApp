@@ -106,7 +106,9 @@ class MockDataProvider {
 
     fun createOrder(adId: Long, type: Order.Type, state: Order.State = Order.State.Active): Order {
         return Order(
-            ad = ads.first { it.id == adId },
+            ad = ads.first { it.id == adId }.apply {
+                isOrdered = true
+            },
             type = type,
             state = state,
             id = 0,
@@ -131,7 +133,8 @@ class MockDataProvider {
         log("getNextAdsPage")
         log("range: $range")
         val filterCondition: (Ad) -> Boolean = { it ->
-            ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
+            !it.isOrdered
+                    && ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
                     && ((regionId == null || regionId == 0) || it.regionId == regionId)
                     && ((query == null || query.isEmpty()) || it.title.contains(
                 query,

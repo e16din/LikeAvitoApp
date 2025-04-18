@@ -146,6 +146,7 @@ data class OrderRequest(
     val type: Type,
     var pickupPoint: PickupPoint? = null,
     var deliveryAddress: String? = null,
+    var completed: Boolean = false
 )
 
 data class Order(
