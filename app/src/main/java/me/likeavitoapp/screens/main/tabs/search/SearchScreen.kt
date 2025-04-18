@@ -4,9 +4,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.Debouncer
 import me.likeavitoapp.developer.primitives.work
+import me.likeavitoapp.get
 import me.likeavitoapp.inverse
 import me.likeavitoapp.log
-import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.PriceRange
@@ -14,7 +14,7 @@ import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
-import me.likeavitoapp.model.act
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -37,7 +37,7 @@ class SearchScreen(
 
     fun loadAds(resetPage: Boolean, afterAll: () -> Unit = {}) {
         log("loadAds")
-        state.ads.act(onDone = { afterAll() }) {
+        state.ads.load(onDone = { afterAll() }) {
             val from = if (searchSettingsPanel.state.priceFrom.value.isEmpty())
                 0
             else
@@ -59,7 +59,7 @@ class SearchScreen(
             val newAds = result.getOrNull()
 
             val list = if (!resetPage) state.ads.output.value + (newAds ?: emptyList()) else newAds
-            return@act Pair(list, result.isSuccess)
+            return@load Pair(list, result.isSuccess)
         }
     }
 
@@ -184,12 +184,12 @@ class SearchScreen(
                         state.searchTips.resetWith(emptyList())
                         return@Debouncer
                     }
-                    state.searchTips.act {
+                    state.searchTips.load {
                         val result = get.sources().backend.adsService.getSearchTips(
                             query = searchBar.state.query.value
                         )
 
-                        return@act Pair(result.getOrNull(), result.isSuccess)
+                        return@load Pair(result.getOrNull(), result.isSuccess)
                     }
                 }
 

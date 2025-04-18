@@ -166,7 +166,11 @@ fun Context.launchCustomTabs(
             .build()
     ) {
         intent.setPackage("com.android.chrome")
-        launchUrl(this@launchCustomTabs, url.toUri())
+        try {
+            launchUrl(this@launchCustomTabs, url.toUri())
+        } catch (e: Exception) { // ignore if it is without Chrome browser
+            e.printStackTrace()
+        }
     }
 }
 

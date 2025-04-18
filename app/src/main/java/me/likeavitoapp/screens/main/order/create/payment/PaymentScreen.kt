@@ -9,9 +9,7 @@ import me.likeavitoapp.format
 import me.likeavitoapp.get
 import me.likeavitoapp.isDigitsOnly
 import me.likeavitoapp.log
-import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker

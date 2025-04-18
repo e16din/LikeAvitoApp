@@ -7,7 +7,7 @@ import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
 import me.likeavitoapp.model.Worker
-import me.likeavitoapp.model.act
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
 
 class EditProfileScreen(
@@ -58,7 +58,7 @@ class EditProfileScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        state.updateUser.act(onDone = { newUser ->
+        state.updateUser.load(onDone = { newUser ->
             get.sources().app.user.next(newUser)
         }) {
             val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
@@ -72,7 +72,7 @@ class EditProfileScreen(
                 whatsapp = state.user.contacts.whatsapp,
                 email = state.user.contacts.email,
             )
-            return@act Pair(userResult.getOrNull(), userResult.isSuccess)
+            return@load Pair(userResult.getOrNull(), userResult.isSuccess)
         }
     }
 }

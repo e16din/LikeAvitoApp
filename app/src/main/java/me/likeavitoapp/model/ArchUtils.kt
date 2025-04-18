@@ -127,9 +127,7 @@ class Worker<T>(initial: T) {
     fun hasFail() = fail.value
 }
 
-// NOTE: act - действуй!
-// (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
-inline fun <T> Worker<T>.act(
+inline fun <T> Worker<T>.load(
     crossinline onDone: (T) -> Unit = {},
     crossinline task: suspend () -> Pair<T?, Boolean>
 ) {
@@ -142,7 +140,15 @@ inline fun <T> Worker<T>.act(
         }
     }
 
+    this.act(onDone, task)
+}
 
+// NOTE: act - действуй!
+// (кандидат run() отпал, слишком заезжено и много переопределений что может вызывать путаницу)
+inline fun <T> Worker<T>.act(
+    crossinline onDone: (T) -> Unit = {},
+    crossinline task: suspend () -> Pair<T?, Boolean>
+) {
     working.next(true)
     work(onDone = { result ->
         val data = result.first ?: output.value

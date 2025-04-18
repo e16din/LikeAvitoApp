@@ -8,7 +8,7 @@ import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
-import me.likeavitoapp.model.act
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
 
@@ -42,9 +42,9 @@ class SelectDeliveryAddressScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         orderRequest.deliveryAddress = address.text.ifEmpty { null }
 
-        state.addresses.act {
+        state.addresses.load {
             val result = get.sources().backend.mapService.getAddressesBy(address.text)
-            return@act Pair(result.getOrNull(), result.isSuccess)
+            return@load Pair(result.getOrNull(), result.isSuccess)
         }
     }
 

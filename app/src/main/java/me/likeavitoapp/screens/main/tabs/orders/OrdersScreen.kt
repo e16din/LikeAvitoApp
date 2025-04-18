@@ -8,7 +8,7 @@ import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
-import me.likeavitoapp.model.act
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
@@ -27,25 +27,24 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        state.activeOrders.act {
+        state.activeOrders.load {
             val result = get.sources().backend.orderService.getActiveOrders()
 
             result.getOrNull()?.let { orders ->
                 orders.forEach { order ->
-                    order.ad.newMessagesCount.act {
+                    order.ad.newMessagesCount.load {
                         val result = get.sources().backend.adsService.getNewMessagesCount()
-                        return@act Pair(result.getOrNull() ?: 0, result.isSuccess)
+                        return@load Pair(result.getOrNull() ?: 0, result.isSuccess)
                     }
                 }
             }
 
-
-            return@act Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
+            return@load Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
         }
 
-        state.archivedOrders.act {
+        state.archivedOrders.load {
             val result = get.sources().backend.orderService.getArchivedOrders()
-            return@act Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
+            return@load Pair(result.getOrNull() ?: emptyList(), result.isSuccess)
         }
     }
 
