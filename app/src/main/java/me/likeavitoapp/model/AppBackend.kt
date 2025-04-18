@@ -35,39 +35,22 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             delay(3000)
             onUpdate(
                 listOf(
-                    mockDataProvider.createMessage(userId, chatWithUserId, "Привет!"),
-                    mockDataProvider.createMessage(
-                        userId,
-                        chatWithUserId,
-                        "Ты еще продаешь эту штуковину?"
-                    ),
+                    mockDataProvider.createMessage(chatWithUserId, "Прицениваюсь пока"),
                 )
             )
 
             delay(12000)
             onUpdate(
                 listOf(
-                    mockDataProvider.createMessage(
-                        userId,
-                        chatWithUserId,
-                        "Скинь 500р. - сразу заберу"
-                    )
+                    mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу")
                 )
             )
 
             delay(9000)
             onUpdate(
                 listOf(
-                    mockDataProvider.createMessage(
-                        userId,
-                        chatWithUserId,
-                        "Договорились"
-                    ),
-                    mockDataProvider.createMessage(
-                        userId,
-                        chatWithUserId,
-                        "Покупаю"
-                    ),
+                    mockDataProvider.createMessage(chatWithUserId, "Договорились"),
+                    mockDataProvider.createMessage(chatWithUserId, "Покупаю"),
                 )
             )
         }
@@ -79,7 +62,25 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         ): Result<TextMessage> {
             delay(300)
             return Result.success(
-                mockDataProvider.createMessage(fromUserId, toUserId, message, true)
+                mockDataProvider.createMessage(fromUserId, message)
+            )
+        }
+
+       suspend fun loadAllMessages(
+            userId: Long,
+            chatWithUserId: Long,
+        ): Result<List<TextMessage>> {
+            delay(500)
+            return Result.success(
+                listOf(
+                    mockDataProvider.createMessage(chatWithUserId, "Привет!"),
+                    mockDataProvider.createMessage(
+                        chatWithUserId,
+                        "Ты еще продаешь эту штуковину?"
+                    ),
+                    mockDataProvider.createMessage(userId, "Да, продаю"),
+                    mockDataProvider.createMessage(userId, "Покупаешь?"),
+                )
             )
         }
     }

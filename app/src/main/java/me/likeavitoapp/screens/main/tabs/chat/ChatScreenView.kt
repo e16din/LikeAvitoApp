@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
@@ -36,6 +37,7 @@ import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.DetailsTopBar
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
@@ -48,7 +50,14 @@ fun ChatScreenProvider(screen: ChatScreen) {
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        ChatScreenView(screen)
+        DetailsTopBar(
+            title = screen.ad.title,
+            onBack = {
+                screen.PressBackUseCase()
+            },
+        ) { innerPadding ->
+            ChatScreenView(screen, Modifier.padding(innerPadding))
+        }
     }
 
     BackHandler {
@@ -57,29 +66,40 @@ fun ChatScreenProvider(screen: ChatScreen) {
 }
 
 @Composable
-fun ChatScreenView(screen: ChatScreen) {
+fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
     val messageText = screen.state.message.collectAsState()
     val messages = screen.state.messages
+    val userId = screen.state.userId
+    val scrollToEnd = screen.state.scrollToEnd.collectAsState()
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollToEnd) {
+        if (messages.size > 0) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
+            .imePadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            userScrollEnabled = true,
+            state = listState,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+
             items(messages, key = { it.id }) { message ->
-                TextMessageView(message)
+                TextMessageView(message.userId == userId, message)
             }
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top
         ) {
             BasicTextField(
@@ -106,38 +126,56 @@ fun ChatScreenView(screen: ChatScreen) {
 }
 
 @Composable
-fun TextMessageView(message: IMessage) {
+fun TextMessageView(isMy:Boolean, message: IMessage) {
     Column(Modifier.fillMaxWidth()) {
         when {
             message is PreviewTextMessage -> {
                 Box(
                     Modifier
+                        .padding(start = 64.dp)
                         .clip(RoundedCornerShape(50, 50, 0, 50))
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .padding(vertical = 6.dp, horizontal = 12.dp)
                         .align(Alignment.End),
                 ) {
-                    Text(text = message.text, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Text(
+                        text = message.text,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 }
             }
 
             message is TextMessage -> {
                 Box(
                     Modifier
-                        .clip(RoundedCornerShape(if(message.isMy) 50 else 0, 50, if(message.isMy) 0 else 50, 50))
-                        .background(if(message.isMy)
+                        .padding(
+                            start = if (isMy) 64.dp else 0.dp,
+                            end = if (isMy) 0.dp else 64.dp
+                        )
+                        .clip(
+                            RoundedCornerShape(
+                                if (isMy) 50 else 0,
+                                50,
+                                if (isMy) 0 else 50,
+                                50
+                            )
+                        )
+                        .background(
+                            if (isMy)
+                                MaterialTheme.colorScheme.secondaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        .padding(vertical = 8.dp, horizontal = 16.dp)
+                        .align(if (isMy) Alignment.End else Alignment.Start),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    Text(
+                        text = message.text,
+                        color = if (!isMy)
                             MaterialTheme.colorScheme.secondaryContainer
                         else
                             MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        .padding(vertical = 8.dp, horizontal = 16.dp)
-                        .align(if(message.isMy) Alignment.End else Alignment.Start),
-                    contentAlignment = Alignment.TopEnd
-                ) {
-                    Text(text = message.text, color = if(!message.isMy)
-                        MaterialTheme.colorScheme.secondaryContainer
-                    else
-                        MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }
@@ -156,6 +194,6 @@ fun ChatScreenPreview() {
     )
 
     LikeAvitoAppTheme {
-        ChatScreenView(screen)
+        ChatScreenView(screen, Modifier)
     }
 }

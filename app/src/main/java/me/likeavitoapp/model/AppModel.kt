@@ -185,11 +185,13 @@ data class Order(
 
 interface IMessage : ISource {
     val text: String
+    val userId: Long
 }
 
 var previewCount = -1L
 data class PreviewTextMessage(
     override val text: String,
+    override val userId: Long,
     var loading: Boolean,
     override val id: Long = previewCount,
 ) : IMessage {
@@ -201,10 +203,9 @@ data class PreviewTextMessage(
 data class TextMessage(
     override val text: String,
     override val id: Long,
-    val userId: Long,
+    override val userId: Long,
     val isNew: Boolean = true,
-    val dateMs: Long,
-    val isMy: Boolean
+    val dateMs: Long
 ) : IMessage
 
 

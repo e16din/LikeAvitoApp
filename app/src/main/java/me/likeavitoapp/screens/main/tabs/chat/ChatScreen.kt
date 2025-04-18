@@ -20,20 +20,38 @@ class ChatScreen(
 ) : IScreen {
 
     class State(
+        val userId: Long = get.sources().app.user.value!!.id,
         val messages: SnapshotStateList<IMessage> = SnapshotStateList(),
-        val message: UpdatableState<String> = UpdatableState("")
+        val message: UpdatableState<String> = UpdatableState(""),
+        val scrollToEnd: UpdatableState<Boolean> = UpdatableState(false)
     )
 
     val state = State()
 
     fun StartScreenUseCase() {
         recordScenarioStep()
+
+        get.sources().app.loading.next(true)
         work {
             val user = get.sources().app.user.value!!
+
+
+            val result = get.sources().backend.messagesService.loadAllMessages(
+                user.id, ad.owner.id
+            )
+            withContext(Dispatchers.Main) {
+                get.sources().app.loading.next(false)
+                result.getOrNull()?.let {
+                    state.messages.addAll(it)
+                    state.scrollToEnd.next(true)
+                }
+            }
+
             get.sources().backend.messagesService
                 .listenChatUpdates(user.id, ad.owner.id) { newMessages ->
                     withContext(Dispatchers.Main) {
                         state.messages.addAll(newMessages)
+                        state.scrollToEnd.next(true)
                     }
                 }
         }
@@ -48,14 +66,17 @@ class ChatScreen(
     fun ClickToSendUseCase() {
         recordScenarioStep()
 
+        val userId = get.sources().app.user.value!!.id
+
         val text = state.message.value
-        val preview = PreviewTextMessage(text, true)
+        val preview = PreviewTextMessage(text, userId, true)
         state.messages.add(preview)
         state.message.next("")
 
+
         work<Unit> {
             val result = get.sources().backend.messagesService.sendMessage(
-                get.sources().app.user.value!!.id,
+                userId,
                 ad.owner.id,
                 text
             )
@@ -63,6 +84,7 @@ class ChatScreen(
                 withContext(Dispatchers.Main) {
                     state.messages.remove(preview)
                     state.messages.add(it)
+                    state.scrollToEnd.next(true)
                 }
             }
         }

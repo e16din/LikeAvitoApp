@@ -180,20 +180,17 @@ class MockDataProvider {
 
     var messagesCounter = 0L
     fun createMessage(
-        fromUserId: Long,
-        toUserId: Long,
-        message: String,
-        isMy: Boolean = false
+        userId: Long,
+        message: String
     ): TextMessage {
         messagesCounter++
 
         return TextMessage(
             text = message,
             id = messagesCounter,
-            userId = toUserId,
+            userId = userId,
             isNew = false,
-            dateMs = System.currentTimeMillis(),
-            isMy = isMy
+            dateMs = System.currentTimeMillis()
         )
     }
 
