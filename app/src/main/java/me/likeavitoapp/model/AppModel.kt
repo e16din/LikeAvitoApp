@@ -169,6 +169,7 @@ data class Order(
         Active,
         Archived
     }
+
     data class PickupPoint(
         override val id: Long,
         val typeId: Int,
@@ -183,27 +184,29 @@ data class Order(
 }
 
 interface IMessage : ISource {
-    val dateMs: Long
-    val isNew: Boolean
-    val isMy: Boolean
+    val text: String
+}
+
+var previewCount = -1L
+data class PreviewTextMessage(
+    override val text: String,
+    var loading: Boolean,
+    override val id: Long = previewCount,
+) : IMessage {
+    init {
+        previewCount--
+    }
 }
 
 data class TextMessage(
-    val text: String,
+    override val text: String,
     override val id: Long,
-    override val isNew: Boolean = true,
-    override val dateMs: Long,
-    override val isMy: Boolean
+    val userId: Long,
+    val isNew: Boolean = true,
+    val dateMs: Long,
+    val isMy: Boolean
 ) : IMessage
 
-data class OfferMessage(
-    val newPrice: Int,
-    val isConsentReceived: Boolean,
-    override val id: Long,
-    override val dateMs: Long,
-    override val isNew: Boolean = true,
-    override val isMy: Boolean
-) : IMessage
 
 data class MapItem(val name: String, val point: Point)
 

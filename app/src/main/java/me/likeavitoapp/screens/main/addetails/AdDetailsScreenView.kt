@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.mocks.MockDataProvider
-import me.likeavitoapp.model.OfferMessage
 import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -200,10 +199,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
             Text(stringResource(R.string.new_messages_label, screen.state.messages.value.size))
             Column {
                 screen.state.messages.value.filter { it.isNew }.forEach {
-                    when (it) {
-                        is TextMessage -> Text(it.text)
-                        is OfferMessage -> Text("offer: ${it.newPrice}")
-                    }
+                    Text(it.text)
                 }
             }
             OutlinedButton(

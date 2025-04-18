@@ -19,11 +19,70 @@ class AppBackend(val client: HttpClient = HttpClient()) {
     var adsService = AdsService()
     var orderService = OrderService()
     var mapService = MapService()
+    var messagesService = MessagesService()
 
 
     private var mockDataProvider = MockDataProvider()
 
     data class LoginResult(val user: User, val token: String)
+
+    inner class MessagesService {
+        suspend fun listenChatUpdates(
+            userId: Long,
+            chatWithUserId: Long,
+            onUpdate: suspend (List<TextMessage>) -> Unit
+        ) {
+            delay(3000)
+            onUpdate(
+                listOf(
+                    mockDataProvider.createMessage(userId, chatWithUserId, "Привет!"),
+                    mockDataProvider.createMessage(
+                        userId,
+                        chatWithUserId,
+                        "Ты еще продаешь эту штуковину?"
+                    ),
+                )
+            )
+
+            delay(12000)
+            onUpdate(
+                listOf(
+                    mockDataProvider.createMessage(
+                        userId,
+                        chatWithUserId,
+                        "Скинь 500р. - сразу заберу"
+                    )
+                )
+            )
+
+            delay(9000)
+            onUpdate(
+                listOf(
+                    mockDataProvider.createMessage(
+                        userId,
+                        chatWithUserId,
+                        "Договорились"
+                    ),
+                    mockDataProvider.createMessage(
+                        userId,
+                        chatWithUserId,
+                        "Покупаю"
+                    ),
+                )
+            )
+        }
+
+        suspend fun sendMessage(
+            fromUserId: Long,
+            toUserId: Long,
+            message: String
+        ): Result<TextMessage> {
+            delay(300)
+            return Result.success(
+                mockDataProvider.createMessage(fromUserId, toUserId, message, true)
+            )
+        }
+    }
 
     inner class MapService {
         val searchManager by lazy {
@@ -49,14 +108,14 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun getPickupPointsBy(
             query: String,
-            typeId:Int,
+            typeId: Int,
             centerPoint: Point
         ): Result<List<Order.PickupPoint>> {
             delay(1100)
             val centerPoint = Point(55.7, 37.6) // test
             return Result.success(mockDataProvider.pickupPoints.filter {
                 it.typeId == typeId
-                    && it.address.lowercase().contains(query.lowercase())
+                        && it.address.lowercase().contains(query.lowercase())
                         && (it.point.latitude < centerPoint.latitude + 0.5
                         && it.point.latitude > centerPoint.latitude - 0.5
                         && it.point.longitude < centerPoint.longitude + 0.5
@@ -72,9 +131,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             delay(1500)
             if (username == "ss@ss.ss" && password == "123456") {
                 val userId = 0L
+                val user = mockDataProvider.users.first { it.id == userId }
+                mockDataProvider.activeUser = user
+
                 return Result.success(
                     LoginResult(
-                        user = mockDataProvider.users.first { it.id == userId },
+                        user = user,
                         token = mockDataProvider.token
                     )
                 )
@@ -85,12 +147,17 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun logout(): Result<Boolean> {
             delay(300)
+            mockDataProvider.activeUser = null
+
             return Result.success(true)
         }
 
         suspend fun getUser(userId: Long): Result<User> {
             delay(1000)
-            return Result.success(mockDataProvider.users.first { it.id == userId })
+            val user = mockDataProvider.users.first { it.id == userId }
+            mockDataProvider.activeUser = user
+
+            return Result.success(user)
         }
 
         suspend fun postPhoto(photoBase64: String): Result<String> { //todo: return url on prod
@@ -205,8 +272,10 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 }
             }
 
-            return mockDataProvider.getSuccessOrFail(adId != testFailId
-                    && adId != testFailId2)
+            return mockDataProvider.getSuccessOrFail(
+                adId != testFailId
+                        && adId != testFailId2
+            )
         }
 
         suspend fun order(

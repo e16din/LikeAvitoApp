@@ -68,5 +68,6 @@
     <string name="buy_button">Купить за %1$d₽</string>
     <string name="ordered_button">Куплено</string>
     <string name="ad_always_reserved_message">Товар уже оформляется другим пользователем.</string>
+    <string name="send_button">Отправить</string>
 
 </resources>

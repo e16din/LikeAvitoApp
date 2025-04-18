@@ -9,11 +9,13 @@ import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
+import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
 import kotlin.math.min
 
 class MockDataProvider {
+    var activeUser: User? = null
     var token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
     var users = listOf(
         User(
@@ -174,6 +176,25 @@ class MockDataProvider {
         }
         log("result: $result")
         return result
+    }
+
+    var messagesCounter = 0L
+    fun createMessage(
+        fromUserId: Long,
+        toUserId: Long,
+        message: String,
+        isMy: Boolean = false
+    ): TextMessage {
+        messagesCounter++
+
+        return TextMessage(
+            text = message,
+            id = messagesCounter,
+            userId = toUserId,
+            isNew = false,
+            dateMs = System.currentTimeMillis(),
+            isMy = isMy
+        )
     }
 
 }

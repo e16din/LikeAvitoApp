@@ -91,6 +91,7 @@ inline fun CoroutineScope.launchWithHandler(
 @Composable
 fun isPreviewMode(): Boolean = runCatching { get.sources().app }.isFailure
 
+@Deprecated("Just remove it :)")
 fun log(text: Any, tag: String = "debug: ") {
     if (develop) {
         println("$tag$text")

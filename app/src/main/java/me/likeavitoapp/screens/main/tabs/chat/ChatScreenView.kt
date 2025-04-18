@@ -1,37 +1,50 @@
 package me.likeavitoapp.screens.main.tabs.chat
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.mocks.MockDataProvider
+import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.IMessage
-import me.likeavitoapp.model.OfferMessage
+import me.likeavitoapp.model.PreviewTextMessage
 import me.likeavitoapp.model.TextMessage
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun ChatScreenProvider(screen: ChatScreen) {
+
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -45,7 +58,7 @@ fun ChatScreenProvider(screen: ChatScreen) {
 
 @Composable
 fun ChatScreenView(screen: ChatScreen) {
-    var messageText = screen.state.message.collectAsState()
+    val messageText = screen.state.message.collectAsState()
     val messages = screen.state.messages
 
     Column(
@@ -58,14 +71,16 @@ fun ChatScreenView(screen: ChatScreen) {
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(messages) { message ->
-                MessageItem(message)
+            items(messages, key = { it.id }) { message ->
+                TextMessageView(message)
             }
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding(),
+            verticalAlignment = Alignment.Top
         ) {
             BasicTextField(
                 value = messageText.value,
@@ -84,33 +99,51 @@ fun ChatScreenView(screen: ChatScreen) {
                     screen.ClickToSendUseCase()
                 }
             }) {
-                Text("Отправить")
+                Text(stringResource(R.string.send_button))
             }
         }
     }
 }
 
 @Composable
-fun MessageItem(message: IMessage) {
-    when (message) {
-        is TextMessage -> TextMessageView(message)
-        is OfferMessage -> OfferMessageView(message)
-    }
-}
+fun TextMessageView(message: IMessage) {
+    Column(Modifier.fillMaxWidth()) {
+        when {
+            message is PreviewTextMessage -> {
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(50, 50, 0, 50))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(vertical = 6.dp, horizontal = 12.dp)
+                        .align(Alignment.End),
+                ) {
+                    Text(text = message.text, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                }
+            }
 
-@Composable
-fun TextMessageView(message: TextMessage) {
-    Text(text = message.text)
-}
-
-@Composable
-fun OfferMessageView(message: OfferMessage) {
-    val displayText = if (message.isMy) {
-        "Куплю за: ${message.newPrice}"
-    } else {
-        "Продам за: ${message.newPrice}"
+            message is TextMessage -> {
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(if(message.isMy) 50 else 0, 50, if(message.isMy) 0 else 50, 50))
+                        .background(if(message.isMy)
+                            MaterialTheme.colorScheme.secondaryContainer
+                        else
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        .padding(vertical = 8.dp, horizontal = 16.dp)
+                        .align(if(message.isMy) Alignment.End else Alignment.Start),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    Text(text = message.text, color = if(!message.isMy)
+                        MaterialTheme.colorScheme.secondaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+        }
     }
-    Text(text = displayText)
+
 }
 
 @Preview

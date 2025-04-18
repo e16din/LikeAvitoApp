@@ -113,15 +113,15 @@ fun FavoritesScreenView(screen: FavoritesScreen) {
                 }
             }
 
-            items(items = ads.value, key = { ad ->
-                ad.id
-            }) { ad ->
+            items(items = ads.value, key = { ad -> ad.id }) { ad ->
                 AdView(
                     ad = ad,
                     screen = screen,
-                    modifier = Modifier.animateItem().clickable {
-                        screen.ClickToAdUseCase(ad)
-                    },
+                    modifier = Modifier
+                        .animateItem()
+                        .clickable {
+                            screen.ClickToAdUseCase(ad)
+                        },
                     isFavorite = ad.isFavorite.collectAsState(),
                     timerLabel = ad.timerLabel.collectAsState()
                 )
