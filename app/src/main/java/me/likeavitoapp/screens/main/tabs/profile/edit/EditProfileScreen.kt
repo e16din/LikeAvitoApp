@@ -58,11 +58,15 @@ class EditProfileScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
+
         state.updateUser.load(onDone = { newUser ->
             get.sources().app.user.next(newUser)
         }) {
-            val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
-            get.sources().backend.userService.postPhoto(photoBase64)
+
+            if (state.photo != null) {
+                val photoBase64 = Base64.encodeToString(state.photo, Base64.DEFAULT)
+                get.sources().backend.userService.postPhoto(photoBase64)
+            }
 
             val userResult = get.sources().backend.userService.updateUser(
                 userId = state.user.id,

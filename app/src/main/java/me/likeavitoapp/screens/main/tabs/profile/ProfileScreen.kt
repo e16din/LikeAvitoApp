@@ -3,31 +3,41 @@ package me.likeavitoapp.screens.main.tabs.profile
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import me.likeavitoapp.model.UnauthorizedException
 import me.likeavitoapp.get
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
+import me.likeavitoapp.model.Chat
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.UnauthorizedException
 import me.likeavitoapp.model.User
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 
 
 class ProfileScreen(
     val navigator: ScreensNavigator,
-    user: User = get.sources().app.user.value!!
+    val user: User = get.sources().app.user.value!!
 ) : IScreen {
 
     class State(
-        val user: User,
-        val logout: Worker<Unit> = Worker(Unit)
-        )
+        val logout: Worker<Unit> = Worker(Unit),
+        val chats: Worker<List<Chat>> = Worker(listOf()),
+    )
 
-    val state = State(user)
+    val state = State()
 
-    fun ClickToContactUseCase(label:String, value: String) {
+    fun StartScreenUseCase() {
+        state.chats.load {
+            val result = get.sources().backend.messagesService.getActiveChats()
+            return@load Pair(result.getOrNull(), result.isSuccess)
+        }
+    }
+
+    fun ClickToContactUseCase(label: String, value: String) {
         recordScenarioStep()
 
         val clipboard = get.appContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -59,6 +69,14 @@ class ProfileScreen(
                 throw UnauthorizedException()
             })
         }
+    }
+
+    fun ClickToChatUseCase(chat: Chat) {
+        recordScenarioStep()
+
+        navigator.startScreen(
+            ChatScreen(chat.ad, navigator)
+        )
     }
 
 }

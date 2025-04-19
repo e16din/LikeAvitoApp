@@ -4,6 +4,7 @@ import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
+import me.likeavitoapp.model.Chat
 import me.likeavitoapp.model.Contacts
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.PickupPointType
@@ -48,6 +49,46 @@ class MockDataProvider {
     )
     var lastDeliveryAddresses = mutableListOf<String>()
     var pickupPoints = mockPickupPoints()
+
+    val chats = mutableListOf(
+        Chat(
+            id = 99,
+            ad = ads[30],
+            messages = listOf(
+                createMessage(mockOwners[10].id, "Товар еще в наличии?"),
+                createMessage(activeUser?.id ?: 0, "Да")
+            )
+        ),
+        Chat(
+            id = 100,
+            ad = ads[27],
+            listOf(
+                createMessage(mockOwners[26].id, "Привет!"),
+                createMessage(
+                    mockOwners[26].id,
+                    "Ты еще продаешь эту штуковину?"
+                ),
+                createMessage(activeUser?.id ?: 0, "Да, продаю"),
+                createMessage(activeUser?.id ?: 0, "Покупаешь?"),
+            )
+        ),
+        Chat(
+            id = 101,
+            ad = ads[29],
+            messages = listOf(
+                createMessage(mockOwners[11].id, "Бла бла бла\n\nбла"),
+                createMessage(activeUser?.id ?: 0, "Бла бла"),
+                createMessage(mockOwners[11].id, "Бла")
+            )
+        ),
+        Chat(
+            id = 102,
+            ad = ads[28],
+            messages = listOf(
+                createMessage(mockOwners[12].id, "Покупаю, сейчас оплачу")
+            )
+        )
+    )
 
     init {
         repeat(5) {

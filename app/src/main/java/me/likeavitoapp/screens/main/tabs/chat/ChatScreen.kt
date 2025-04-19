@@ -1,6 +1,7 @@
 package me.likeavitoapp.screens.main.tabs.chat
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.work
@@ -10,18 +11,21 @@ import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.PreviewTextMessage
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
 
 
 class ChatScreen(
     val ad: Ad,
-    val navigator: ScreensNavigator
+    val navigator: ScreensNavigator,
+    val initialMessages: List<TextMessage>? = null
 ) : IScreen {
 
-    class State(
+    inner class State(
         val userId: Long = get.sources().app.user.value!!.id,
-        val messages: SnapshotStateList<IMessage> = SnapshotStateList(),
+        val messages: SnapshotStateList<IMessage> = initialMessages?.toMutableStateList()
+            ?: SnapshotStateList(),
         val message: UpdatableState<String> = UpdatableState(""),
         val scrollToEnd: UpdatableState<Boolean> = UpdatableState(false)
     )
@@ -33,22 +37,20 @@ class ChatScreen(
 
         get.sources().app.loading.next(true)
         work {
-            val user = get.sources().app.user.value!!
+            if (initialMessages == null) {
+                val result = get.sources().backend.messagesService.loadChat(ad.id)
+                withContext(Dispatchers.Main) {
+                    get.sources().app.loading.next(false)
 
-
-            val result = get.sources().backend.messagesService.loadAllMessages(
-                user.id, ad.owner.id
-            )
-            withContext(Dispatchers.Main) {
-                get.sources().app.loading.next(false)
-                result.getOrNull()?.let {
-                    state.messages.addAll(it)
-                    state.scrollToEnd.next(true)
+                    result.getOrNull()?.let {
+                        state.messages.addAll(it.messages)
+                        state.scrollToEnd.next(true)
+                    }
                 }
             }
 
             get.sources().backend.messagesService
-                .listenChatUpdates(user.id, ad.owner.id) { newMessages ->
+                .listenChatUpdates(ad.id) { newMessages ->
                     withContext(Dispatchers.Main) {
                         state.messages.addAll(newMessages)
                         state.scrollToEnd.next(true)
@@ -76,8 +78,7 @@ class ChatScreen(
 
         work<Unit> {
             val result = get.sources().backend.messagesService.sendMessage(
-                userId,
-                ad.owner.id,
+                ad.id,
                 text
             )
             result.getOrNull()?.let {

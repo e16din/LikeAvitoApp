@@ -1,21 +1,29 @@
 package me.likeavitoapp.screens.main.tabs.profile
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,15 +32,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.R
 import me.likeavitoapp.get
+import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -45,6 +55,10 @@ import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 
 @Composable
 fun ProfileScreenProvider(screen: ProfileScreen, tabsNavigator: ScreensNavigator) {
+
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -63,8 +77,9 @@ fun ProfileScreenProvider(screen: ProfileScreen, tabsNavigator: ScreensNavigator
 
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
-    val logoutLoading = screen.state.logout.working.collectAsState()
-    val photoUrl = screen.state.user.photoUrl.collectAsState()
+    val logoutLoading by screen.state.logout.working.collectAsState()
+    val photoUrl by screen.user.photoUrl.collectAsState()
+    val chats by screen.state.chats.output.collectAsState()
 
     Column(
         modifier = Modifier
@@ -78,12 +93,12 @@ fun ProfileScreenView(screen: ProfileScreen) {
                         .padding(16.dp)
                         .size(64.dp)
                         .clip(CircleShape),
-                    url = photoUrl.value
+                    url = photoUrl
                 )
 
                 Text(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp),
-                    text = screen.state.user.name,
+                    text = screen.user.name,
                     style = AppTypography.headlineLarge
                 )
             }
@@ -110,28 +125,28 @@ fun ProfileScreenView(screen: ProfileScreen) {
             style = AppTypography.titleLarge
         )
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            screen.state.user.contacts.phone?.let {
+            screen.user.contacts.phone?.let {
                 ContactItem(
                     label = stringResource(R.string.phone_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.state.user.contacts.email?.let {
+            screen.user.contacts.email?.let {
                 ContactItem(
                     label = stringResource(R.string.email_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.state.user.contacts.whatsapp?.let {
+            screen.user.contacts.whatsapp?.let {
                 ContactItem(
                     label = stringResource(R.string.whatsapp_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.state.user.contacts.telegram?.let {
+            screen.user.contacts.telegram?.let {
                 ContactItem(
                     label = stringResource(R.string.telegram_title),
                     value = it,
@@ -140,8 +155,45 @@ fun ProfileScreenView(screen: ProfileScreen) {
             }
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
+        HorizontalDivider(thickness = 1.dp)
+        Text(
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+            text = stringResource(R.string.chat_label),
+            style = AppTypography.titleLarge
+        )
 
+        LazyColumn(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(chats, key = { it.id }) { chat ->
+                Card(
+                    Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            screen.ClickToChatUseCase(chat)
+                        }) {
+                    Column(Modifier.padding(vertical = 8.dp, horizontal = 24.dp)) {
+                        Row {
+                            Icon(Icons.Default.ShoppingCart, "ad")
+                            Text(chat.ad.title, Modifier.padding(horizontal = 12.dp))
+                        }
+                        Row {
+                            Icon(Icons.Default.Person, "person")
+                            Text(chat.ad.owner.name, Modifier.padding(horizontal = 12.dp))
+                        }
+                        Row {
+                            Icon(Icons.Default.Email, "last message")
+                            Text(chat.messages.last().text, Modifier.padding(horizontal = 12.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
         Button(
             onClick = {
                 screen.ClickToLogoutUseCase()
@@ -151,7 +203,7 @@ fun ProfileScreenView(screen: ProfileScreen) {
                 .padding(vertical = 16.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            if (logoutLoading.value) {
+            if (logoutLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
             } else {
                 Text(text = stringResource(R.string.logout_button))

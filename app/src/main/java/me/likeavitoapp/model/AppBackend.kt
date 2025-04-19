@@ -28,60 +28,73 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
     inner class MessagesService {
         suspend fun listenChatUpdates(
-            userId: Long,
-            chatWithUserId: Long,
+            addId: Long,
             onUpdate: suspend (List<TextMessage>) -> Unit
         ) {
             delay(3000)
-            onUpdate(
-                listOf(
-                    mockDataProvider.createMessage(chatWithUserId, "Прицениваюсь пока"),
-                )
-            )
+            val chatWithUserId = mockDataProvider.chats.first { it.ad.id == addId }.ad.owner.id
+            if (addId == 28L) {
 
-            delay(12000)
-            onUpdate(
-                listOf(
-                    mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу")
+                onUpdate(
+                    listOf(
+                        mockDataProvider.createMessage(chatWithUserId, "Прицениваюсь пока"),
+                    )
                 )
-            )
 
-            delay(9000)
-            onUpdate(
-                listOf(
-                    mockDataProvider.createMessage(chatWithUserId, "Договорились"),
-                    mockDataProvider.createMessage(chatWithUserId, "Покупаю"),
+                delay(12000)
+                onUpdate(
+                    listOf(
+                        mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу")
+                    )
                 )
-            )
+
+                delay(9000)
+                onUpdate(
+                    listOf(
+                        mockDataProvider.createMessage(chatWithUserId, "Договорились"),
+                        mockDataProvider.createMessage(chatWithUserId, "Покупаю"),
+                    )
+                )
+
+            } else {
+                onUpdate(
+                    listOf(
+                        mockDataProvider.createMessage(chatWithUserId, "Бла бла бла"),
+                    )
+                )
+            }
         }
 
         suspend fun sendMessage(
-            fromUserId: Long,
-            toUserId: Long,
+            chatId: Long,
             message: String
         ): Result<TextMessage> {
             delay(300)
             return Result.success(
-                mockDataProvider.createMessage(fromUserId, message)
+                mockDataProvider.createMessage(
+                    mockDataProvider.activeUser!!.id,
+                    message
+                )
             )
         }
 
-       suspend fun loadAllMessages(
-            userId: Long,
-            chatWithUserId: Long,
-        ): Result<List<TextMessage>> {
+        suspend fun loadChat(adId: Long): Result<Chat> {
             delay(500)
             return Result.success(
-                listOf(
-                    mockDataProvider.createMessage(chatWithUserId, "Привет!"),
-                    mockDataProvider.createMessage(
-                        chatWithUserId,
-                        "Ты еще продаешь эту штуковину?"
-                    ),
-                    mockDataProvider.createMessage(userId, "Да, продаю"),
-                    mockDataProvider.createMessage(userId, "Покупаешь?"),
-                )
+                mockDataProvider.chats.firstOrNull() { it.ad.id == adId }
+                    ?: Chat(
+                        id = 99,
+                        ad = mockDataProvider.ads.first { it.id == adId },
+                        messages = listOf()
+                    ).apply {
+                        mockDataProvider.chats.add(this)
+                    }
             )
+        }
+
+        suspend fun getActiveChats(): Result<List<Chat>> {
+            delay(460)
+            return Result.success(mockDataProvider.chats)
         }
     }
 

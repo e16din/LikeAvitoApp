@@ -182,12 +182,19 @@ data class Order(
     }
 }
 
+data class Chat(
+    override val id: Long,
+    val ad:Ad,
+    val messages: List<TextMessage>
+) : ISource
+
 interface IMessage : ISource {
     val text: String
     val userId: Long
 }
 
 var previewCount = -1L
+
 data class PreviewTextMessage(
     override val text: String,
     override val userId: Long,

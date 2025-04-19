@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +47,6 @@ import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.ClosableMessage
 import me.likeavitoapp.screens.DetailsTopBar
-import me.likeavitoapp.screens.main.order.ChatView
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.backgroundLight
 
@@ -57,7 +55,7 @@ import me.likeavitoapp.ui.theme.backgroundLight
 fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
     Surface(modifier = Modifier.fillMaxSize()) {
         DetailsTopBar(
-            title = screen.state.ad.title,
+            title = screen.ad.title,
             onBack = {
                 screen.PressBackUseCase()
             },
@@ -79,8 +77,9 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
 
 @Composable
 fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(screen.state) {
-    val favoriteSelected by screen.state.ad.isFavorite.collectAsState()
-    val timerLabel = ad.timerLabel.collectAsState(AdDetailsScreen::class)
+    val favoriteSelected by screen.ad.isFavorite.collectAsState()
+    val timerLabel = screen.ad.timerLabel.collectAsState(AdDetailsScreen::class)
+    val ad = screen.ad
 
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         Box {
@@ -192,24 +191,6 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
                 }) {
                 Text(stringResource(R.string.ordered_button))
             }
-        }
-
-        if (screen.state.messages.value.isNotEmpty()) {
-            Text(stringResource(R.string.new_messages_label, screen.state.messages.value.size))
-            Column {
-                screen.state.messages.value.filter { it.isNew }.forEach {
-                    Text(it.text)
-                }
-            }
-            OutlinedButton(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    screen.ClickToOpenChatUseCase()
-                }) {
-                Text(stringResource(R.string.move_to_chat_button))
-            }
-
-            ChatView()
         }
     }
 }
