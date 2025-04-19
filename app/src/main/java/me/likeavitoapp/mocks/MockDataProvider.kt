@@ -133,7 +133,6 @@ class MockDataProvider {
         pageSize: Int = AppModel.adsPageSize
     ): List<Ad> {
         log("getNextAdsPage")
-        log("range: $range")
         val filterCondition: (Ad) -> Boolean = { it ->
             !it.isOrdered
                     && ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
@@ -146,7 +145,6 @@ class MockDataProvider {
         }
 
         val filtered = ads.filter(filterCondition)
-        log("filtered: $filtered")
 
         val maxPages = 20
         if (resetPage || pageCounter > maxPages) {
@@ -166,15 +164,12 @@ class MockDataProvider {
             (pageCounter - 1) * pageSize + pageSize,
             filtered.size
         )) {
-            log("i: $i")
             val ad = filtered[i]
             if (!paged.contains(ad.id)) {
-                log("ad.id: ${ad.id}")
                 paged.add(ad.id)
                 result.add(ad)
             }
         }
-        log("result: $result")
         return result
     }
 

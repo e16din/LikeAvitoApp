@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.mocks.MockDataProvider
-import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator

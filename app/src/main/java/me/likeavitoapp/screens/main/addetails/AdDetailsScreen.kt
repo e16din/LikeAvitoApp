@@ -1,11 +1,9 @@
 package me.likeavitoapp.screens.main.addetails
 
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.UpdatableState
-
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen

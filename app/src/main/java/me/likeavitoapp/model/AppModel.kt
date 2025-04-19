@@ -67,7 +67,6 @@ class ScreensNavigator(initialScreen: IScreen = InitialScreen, val tag: String =
     }
 
     fun backToPrevious() {
-        log("$tag.screens: $screens")
         screens.removeAt(screens.lastIndex)
         screen.next(screens.last())
         log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
