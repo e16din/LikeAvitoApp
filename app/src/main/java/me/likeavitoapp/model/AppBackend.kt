@@ -34,32 +34,31 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             delay(3000)
             val chatWithUserId = mockDataProvider.chats.first { it.ad.id == addId }.ad.owner.id
             if (addId == 28L) {
-
                 onUpdate(
                     listOf(
-                        mockDataProvider.createMessage(chatWithUserId, "Прицениваюсь пока"),
+                        mockDataProvider.createMessage(chatWithUserId, "Прицениваюсь пока", true),
                     )
                 )
 
                 delay(12000)
                 onUpdate(
                     listOf(
-                        mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу")
+                        mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу", true)
                     )
                 )
 
                 delay(9000)
                 onUpdate(
                     listOf(
-                        mockDataProvider.createMessage(chatWithUserId, "Договорились"),
-                        mockDataProvider.createMessage(chatWithUserId, "Покупаю"),
+                        mockDataProvider.createMessage(chatWithUserId, "Договорились", true),
+                        mockDataProvider.createMessage(chatWithUserId, "Покупаю", true),
                     )
                 )
 
             } else {
                 onUpdate(
                     listOf(
-                        mockDataProvider.createMessage(chatWithUserId, "Бла бла бла"),
+                        mockDataProvider.createMessage(chatWithUserId, "Бла бла бла", true),
                     )
                 )
             }

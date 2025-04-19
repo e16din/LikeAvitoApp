@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.main.tabs.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +39,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
@@ -175,18 +179,48 @@ fun ProfileScreenView(screen: ProfileScreen) {
                         .clickable {
                             screen.ClickToChatUseCase(chat)
                         }) {
-                    Column(Modifier.padding(vertical = 8.dp, horizontal = 24.dp)) {
-                        Row {
-                            Icon(Icons.Default.ShoppingCart, "ad")
-                            Text(chat.ad.title, Modifier.padding(horizontal = 12.dp))
+                    Box {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp, horizontal = 24.dp)
+                        ) {
+                            Row {
+                                Icon(Icons.Default.ShoppingCart, "ad")
+                                Text(
+                                    chat.ad.title,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 12.dp)
+                                )
+                            }
+                            Row(Modifier.padding(top = 4.dp)) {
+                                Icon(Icons.Default.Person, "person")
+                                Text(chat.ad.owner.name, Modifier.padding(horizontal = 12.dp))
+                            }
+
+                            Row(Modifier.padding(top = 6.dp)) {
+                                Icon(Icons.Default.Email, "last message")
+                                OutlinedCard(Modifier.padding(horizontal = 8.dp)) {
+                                    Text(
+                                        chat.messages.last().text,
+                                        Modifier.padding(horizontal = 12.dp)
+                                    )
+                                }
+                            }
                         }
-                        Row {
-                            Icon(Icons.Default.Person, "person")
-                            Text(chat.ad.owner.name, Modifier.padding(horizontal = 12.dp))
-                        }
-                        Row {
-                            Icon(Icons.Default.Email, "last message")
-                            Text(chat.messages.last().text, Modifier.padding(horizontal = 12.dp))
+
+                        val newCount = chat.messages.count { it.isNew }
+                        if (newCount > 0) {
+                            Text(
+                                "$newCount",
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Red)
+                                    .padding(horizontal = 8.dp)
+                                    .align(Alignment.TopEnd)
+                            )
                         }
                     }
                 }

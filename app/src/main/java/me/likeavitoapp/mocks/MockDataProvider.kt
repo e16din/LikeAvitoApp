@@ -78,14 +78,14 @@ class MockDataProvider {
             messages = listOf(
                 createMessage(mockOwners[11].id, "Бла бла бла\n\nбла"),
                 createMessage(activeUser?.id ?: 0, "Бла бла"),
-                createMessage(mockOwners[11].id, "Бла")
+                createMessage(mockOwners[11].id, "Бла", true)
             )
         ),
         Chat(
             id = 102,
             ad = ads[28],
             messages = listOf(
-                createMessage(mockOwners[12].id, "Покупаю, сейчас оплачу")
+                createMessage(mockOwners[12].id, "Покупаю, сейчас оплачу", true)
             )
         )
     )
@@ -217,7 +217,8 @@ class MockDataProvider {
     var messagesCounter = 0L
     fun createMessage(
         userId: Long,
-        message: String
+        message: String,
+        isNew: Boolean = false
     ): TextMessage {
         messagesCounter++
 
@@ -225,7 +226,7 @@ class MockDataProvider {
             text = message,
             id = messagesCounter,
             userId = userId,
-            isNew = false,
+            isNew = isNew,
             dateMs = System.currentTimeMillis()
         )
     }
