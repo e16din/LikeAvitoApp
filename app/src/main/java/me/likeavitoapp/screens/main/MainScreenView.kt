@@ -161,7 +161,7 @@ fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
 private fun BoxScope.TabsView(screen: MainScreen) {
     val tabScreen = screen.tabsRootScreen.navigator.screen.collectAsState()
 
-    log("Tab: ${tabScreen.value.className()}")
+    log("Tab: ${tabScreen.value?.className()}")
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -31,6 +31,8 @@ class ProfileScreen(
     val state = State()
 
     fun StartScreenUseCase() {
+        recordScenarioStep()
+
         state.chats.load {
             val result = get.sources().backend.messagesService.getActiveChats()
             return@load Pair(result.getOrNull(), result.isSuccess)
@@ -49,7 +51,7 @@ class ProfileScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            EditProfileScreen(navigator)
+            EditProfileScreen(navigator),
         )
     }
 
@@ -75,7 +77,13 @@ class ProfileScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            ChatScreen(chat.ad, navigator)
+            ChatScreen(chat.ad, navigator),
+            onResume = {
+                val current = state.chats.output.value
+                state.chats.output.next(emptyList())
+                state.chats.output.next(current)
+                // = update isNew states
+            }
         )
     }
 

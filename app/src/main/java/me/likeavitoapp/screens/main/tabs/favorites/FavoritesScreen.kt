@@ -3,15 +3,14 @@ package me.likeavitoapp.screens.main.tabs.favorites
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import me.likeavitoapp.get
 import me.likeavitoapp.inverse
 import me.likeavitoapp.launchWithHandler
 import me.likeavitoapp.load
-import me.likeavitoapp.get
 import me.likeavitoapp.model.Ad
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-
+import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.tabs.BaseAdContainerScreen
@@ -78,7 +77,7 @@ class FavoritesScreen(
             AdDetailsScreen(
                 ad = ad,
                 navigator = navigator
-            )
+            ),
         )
     }
 
@@ -107,6 +106,6 @@ class FavoritesScreen(
     fun ClickToMoveToAdsUseCase() {
         val searchScreen =
             tabsNavigator.getScreenOrNull(SearchScreen::class)!! // NOTE: please throw NPE if it is null here
-        tabsNavigator.startScreen(searchScreen, clearAll = true)
+        tabsNavigator.startScreen(searchScreen, clearAll = true,)
     }
 }

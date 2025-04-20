@@ -105,7 +105,7 @@ class SearchScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            AdDetailsScreen(ad, navigator)
+            AdDetailsScreen(ad, navigator),
         )
     }
 

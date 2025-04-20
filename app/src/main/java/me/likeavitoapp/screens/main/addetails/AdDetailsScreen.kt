@@ -32,7 +32,7 @@ class AdDetailsScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            PhotoScreen(url, navigator)
+            PhotoScreen(url, navigator),
         )
     }
 }

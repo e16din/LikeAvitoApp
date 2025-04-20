@@ -5,13 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.Worker
 
 
 class CreateAdScreen(
     val input: Input = Input(),
     val state: State = State(),
+    val navigator: ScreensNavigator? = null,
     ) : IScreen {
 
     class Input {

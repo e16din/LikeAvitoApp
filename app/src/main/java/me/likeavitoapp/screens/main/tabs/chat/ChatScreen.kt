@@ -3,6 +3,7 @@ package me.likeavitoapp.screens.main.tabs.chat
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
@@ -55,7 +56,24 @@ class ChatScreen(
                         state.messages.addAll(newMessages)
                         state.scrollToEnd.next(true)
                     }
+
+                    updateNewMessages(newMessages)
                 }
+        }
+
+        updateNewMessages(state.messages)
+    }
+
+    private fun updateNewMessages(newMessages: List<IMessage>) {
+        work {
+            delay(5 * 1000)
+            withContext(Dispatchers.Main) {
+                newMessages.forEach {
+                    if (it is TextMessage) {
+                        it.isNew = false
+                    }
+                }
+            }
         }
     }
 

@@ -116,7 +116,7 @@ class SelectPickupPointScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         if (orderRequest.pickupPoint != null) {
             navigator.startScreen(
-                PaymentScreen(navigator)
+                PaymentScreen(navigator),
             )
         } else {
             get.sources().app.message.next(

@@ -2,7 +2,6 @@ package me.likeavitoapp.screens.main
 
 import me.likeavitoapp.className
 import me.likeavitoapp.model.IScreen
-import me.likeavitoapp.model.InitialScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
@@ -14,9 +13,7 @@ import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 
 
 class MainScreen() : IScreen {
-
     val state = State()
-
     val navigator = ScreensNavigator(tag = className())
 
     val searchScreen = SearchScreen(navigator)
@@ -26,8 +23,6 @@ class MainScreen() : IScreen {
 
     val tabsRootScreen = TabsRootScreen()
 
-    var initialTabScreen: IScreen = searchScreen
-
     class State {}
 
 
@@ -35,28 +30,28 @@ class MainScreen() : IScreen {
 
     fun StartScreenUseCase() {
         if (!tabsRootScreen.navigator.hasScreen()) {
-            tabsRootScreen.navigator.startScreen(initialTabScreen)
+            tabsRootScreen.navigator.startScreen(searchScreen,)
         }
     }
 
     fun ClickToSearchUseCase() {
-        tabsRootScreen.navigator.startScreen(searchScreen)
+        tabsRootScreen.navigator.startScreen(searchScreen,)
     }
 
     fun ClickToFavoritesUseCase() {
-        tabsRootScreen.navigator.startScreen(favoritesScreen)
+        tabsRootScreen.navigator.startScreen(favoritesScreen,)
     }
 
     fun ClickToCreateAdUseCase() {
-        navigator.startScreen(CreateAdScreen())
+        navigator.startScreen(CreateAdScreen(),)
     }
 
     fun ClickToCartUseCase() {
-        tabsRootScreen.navigator.startScreen(ordersScreen)
+        tabsRootScreen.navigator.startScreen(ordersScreen,)
     }
 
     fun ClickToProfileUseCase() {
-        tabsRootScreen.navigator.startScreen(profileScreen)
+        tabsRootScreen.navigator.startScreen(profileScreen,)
     }
 
     fun PressBackUseCase() {
@@ -77,7 +72,7 @@ class MainScreen() : IScreen {
     }
 
     fun returnToOrdersTab() {
-        navigator.startScreen(InitialScreen, clearAll = true)
-        tabsRootScreen.navigator.startScreen(ordersScreen)
+        navigator.reset()
+        tabsRootScreen.navigator.startScreen(ordersScreen,)
     }
 }

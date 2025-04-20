@@ -44,7 +44,7 @@ open class BaseAdContainerScreen(
 
         val createOrderScreen = CreateOrderScreen(ad, navigator)
         if (ad.reservedTimeMs != null) {
-            navigator.startScreen(createOrderScreen)
+            navigator.startScreen(createOrderScreen,)
             return
         }
 
@@ -52,7 +52,7 @@ open class BaseAdContainerScreen(
             if (success) {
                 ad.reservedTimeMs = System.currentTimeMillis()
                 timersMap[ad.id] = startReserveTimer(ad)
-                navigator.startScreen(createOrderScreen)
+                navigator.startScreen(createOrderScreen,)
 
             } else {
 
@@ -91,7 +91,7 @@ open class BaseAdContainerScreen(
         recordScenarioStep(ad)
 
         navigator.startScreen(
-            ChatScreen(ad, navigator)
+            ChatScreen(ad, navigator),
         )
     }
 

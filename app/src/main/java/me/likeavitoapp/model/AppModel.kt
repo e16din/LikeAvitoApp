@@ -38,24 +38,26 @@ class AppModel {
     }
 }
 
-object InitialScreen : IScreen
 
-class ScreensNavigator(initialScreen: IScreen = InitialScreen, val tag: String = "") {
-    val screens = mutableListOf(initialScreen)
-    val screen = UpdatableState(initialScreen)
+class ScreensNavigator(val tag: String = "") {
+    val screens = mutableListOf<IScreen>()
+    val screen = UpdatableState<IScreen?>(null)
+    var onResume: (() -> Unit)? = null
 
     fun startScreen(
         screen: IScreen,
         clearAll: Boolean = false,
-        clearAfterFirst: Boolean = false
+        clearAfterFirst: Boolean = false,
+        onResume: (() -> Unit)? = null
     ) {
+        this.onResume = onResume
+
         if (clearAll) {
             screens.clear()
         }
-        if (screens.size > 1 && clearAfterFirst) {
-            val first = screens[1]
+        if (screens.size > 0 && clearAfterFirst) {
+            val first = screens[0]
             screens.clear()
-            screens.add(InitialScreen)
             screens.add(first)
         }
 
@@ -67,9 +69,19 @@ class ScreensNavigator(initialScreen: IScreen = InitialScreen, val tag: String =
     }
 
     fun backToPrevious() {
-        screens.removeAt(screens.lastIndex)
-        screen.next(screens.last())
-        log("$tag.backToPrevious: ${screen.value.javaClass.simpleName}")
+        val last = screens.removeAt(screens.lastIndex) // pop
+
+        if (screens.size == 0) {
+            screen.next(null)
+            log("$tag.backToPrevious: null")
+
+        } else {
+            val prev = screens.last()
+            screen.next(prev)
+            log("$tag.backToPrevious: ${prev.javaClass.simpleName}")
+        }
+
+        onResume?.invoke()
     }
 
     inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
@@ -78,7 +90,12 @@ class ScreensNavigator(initialScreen: IScreen = InitialScreen, val tag: String =
 
     fun hasScreen(): Boolean {
         val last = screens.lastOrNull()
-        return last != null && last !is InitialScreen
+        return last != null
+    }
+
+    fun reset() {
+        screens.clear()
+        screen.next(null)
     }
 }
 
@@ -184,7 +201,7 @@ data class Order(
 
 data class Chat(
     override val id: Long,
-    val ad:Ad,
+    val ad: Ad,
     val messages: List<TextMessage>
 ) : ISource
 
@@ -210,7 +227,7 @@ data class TextMessage(
     override val text: String,
     override val id: Long,
     override val userId: Long,
-    val isNew: Boolean = true,
+    var isNew: Boolean = true,
     val dateMs: Long
 ) : IMessage
 

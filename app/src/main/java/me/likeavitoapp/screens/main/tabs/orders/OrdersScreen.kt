@@ -58,7 +58,7 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         recordScenarioStep(order)
 
         navigator.startScreen(
-            AdDetailsScreen(order.ad, navigator)
+            AdDetailsScreen(order.ad, navigator),
         )
     }
 
@@ -66,7 +66,7 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         recordScenarioStep(order)
 
         navigator.startScreen(
-            ChatScreen(order.ad, navigator)
+            ChatScreen(order.ad, navigator),
         )
     }
 

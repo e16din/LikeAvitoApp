@@ -63,7 +63,7 @@ class SplashScreen(val navigator: ScreensNavigator) : IScreen {
                             app.mainScreen = it
                         }
                     else
-                        AuthScreen(navigator = navigator)
+                        AuthScreen(navigator = navigator),
                 )
             }
         }

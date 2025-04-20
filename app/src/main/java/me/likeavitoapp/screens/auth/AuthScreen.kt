@@ -97,7 +97,7 @@ class AuthScreen(val navigator: ScreensNavigator) : IScreen {
 
                     val mainScreen = MainScreen()
                     get.sources().app.mainScreen = mainScreen
-                    navigator.startScreen(mainScreen)
+                    navigator.startScreen(mainScreen,)
                 }
 
             } else {

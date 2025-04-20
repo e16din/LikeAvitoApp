@@ -77,7 +77,7 @@ class SelectDeliveryAddressScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         if (orderRequest.deliveryAddress != null) {
             navigator.startScreen(
-                PaymentScreen(navigator)
+                PaymentScreen(navigator),
             )
 
         } else {

@@ -25,12 +25,12 @@ class RootScreen() : IScreen {
         recordScenarioStep()
 
         if (state.isStarted) {
-            navigator.startScreen(navigator.screens.last())
+            navigator.startScreen(navigator.screens.last(),)
 
         } else {
             state.isStarted = true
             navigator.startScreen(
-                SplashScreen(navigator = navigator)
+                SplashScreen(navigator = navigator),
             )
         }
     }
@@ -40,7 +40,7 @@ class RootScreen() : IScreen {
 
         navigator.startScreen(
             screen = AuthScreen(navigator),
-            clearAll = true
+            clearAll = true,
         )
 
         get.scope().launchWithHandler {

@@ -57,7 +57,7 @@ class CreateOrderScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            SelectDeliveryAddressScreen(navigator)
+            SelectDeliveryAddressScreen(navigator),
         )
     }
 
@@ -70,7 +70,7 @@ class CreateOrderScreen(
                     ad.enabledPickupPointTypes.contains(it.id)
                 },
                 navigator
-            )
+            ),
         )
     }
 
