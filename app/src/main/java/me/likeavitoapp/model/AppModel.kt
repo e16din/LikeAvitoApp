@@ -2,7 +2,11 @@ package me.likeavitoapp.model
 
 
 import com.yandex.mapkit.geometry.Point
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.className
+import me.likeavitoapp.developer.primitives.work
+import me.likeavitoapp.get
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.Order.Type
@@ -28,12 +32,24 @@ class AppModel {
     val loading = UpdatableState(false)
     val message = UpdatableState<String?>(null)
 
+    val newMessagesCount = UpdatableState(0)
+
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
 
     fun onLogoutException() {
         if (rootScreen.navigator.screen.value !is AuthScreen) {
             rootScreen.LogoutUseCase()
+        }
+    }
+
+    fun updateNewMessagesIndicator() {
+        work {
+            val result = get.sources().backend.messagesService.getAllNewMessagesCount()
+            val count = result.getOrNull() ?: 0
+            withContext(Dispatchers.Main) {
+                get.sources().app.newMessagesCount.next(count)
+            }
         }
     }
 }

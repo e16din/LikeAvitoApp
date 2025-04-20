@@ -209,10 +209,10 @@ fun ProfileScreenView(screen: ProfileScreen) {
                             }
                         }
 
-                        val newCount = chat.messages.count { it.isNew }
-                        if (newCount > 0) {
+                        val newMessagesCount = chat.messages.count { it.isNew }
+                        if (newMessagesCount > 0) {
                             Text(
-                                "$newCount",
+                                "$newMessagesCount",
                                 color = Color.White,
                                 modifier = Modifier
                                     .padding(8.dp)

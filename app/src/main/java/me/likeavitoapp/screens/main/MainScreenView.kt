@@ -28,17 +28,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.className
-import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.log
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
@@ -54,10 +56,10 @@ import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAd
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
-import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
@@ -106,6 +108,8 @@ val tabBarHeight = 58.dp
 
 @Composable
 fun MainScreenView(screen: MainScreen) {
+    val newMessagesCount by get.sources().app.newMessagesCount.collectAsState()
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -125,6 +129,19 @@ fun MainScreenView(screen: MainScreen) {
                     .offset(y = (16).dp)
             ) {
                 ButtonCreateNewView(screen)
+            }
+
+            if (newMessagesCount > 0) {
+                Text(
+                    "$newMessagesCount",
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(top = 18.dp, end = 8.dp)
+                        .clip(CircleShape)
+                        .background(Color.Red)
+                        .padding(horizontal = 8.dp)
+                        .align(Alignment.TopEnd)
+                )
             }
         }
     }
@@ -272,9 +289,11 @@ private fun BoxScope.TabsView(screen: MainScreen) {
         }
 
         // Profile
-        Column(
-            modifier = modifier
-                .weight(1f)
+        Box(modifier = modifier
+            .weight(1f)
+            ) {
+
+            Column(Modifier.fillMaxWidth()
                 .background(
                     if (tabScreen.value is ProfileScreen)
                         primaryLight else secondaryContainerLight
@@ -282,20 +301,21 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .clickable {
                     screen.ClickToProfileUseCase()
 
-                }, horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.size(8.dp))
-            Icon(
-                Icons.Rounded.Person,
-                contentDescription = "profile",
-                tint = onSecondaryContainerLight
-            )
-            Text(
-                text = stringResource(R.string.profile_tab),
-                fontSize = 9.sp,
-                maxLines = 1,
-                color = onSecondaryContainerLight
-            )
+                },
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(modifier = Modifier.size(8.dp))
+                Icon(
+                    Icons.Rounded.Person,
+                    contentDescription = "profile",
+                    tint = onSecondaryContainerLight
+                )
+                Text(
+                    text = stringResource(R.string.profile_tab),
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    color = onSecondaryContainerLight
+                )
+            }
         }
     }
 }

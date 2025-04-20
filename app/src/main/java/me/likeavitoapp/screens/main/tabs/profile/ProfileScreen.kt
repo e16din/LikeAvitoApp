@@ -82,6 +82,8 @@ class ProfileScreen(
                 val current = state.chats.output.value
                 state.chats.output.next(emptyList())
                 state.chats.output.next(current)
+
+                get.sources().app.updateNewMessagesIndicator()
                 // = update isNew states
             }
         )

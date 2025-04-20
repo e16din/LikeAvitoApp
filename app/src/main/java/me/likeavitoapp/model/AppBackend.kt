@@ -43,7 +43,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
                 delay(12000)
                 onUpdate(
                     listOf(
-                        mockDataProvider.createMessage(chatWithUserId, "Скинь 500р. - сразу заберу", true)
+                        mockDataProvider.createMessage(
+                            chatWithUserId,
+                            "Скинь 500р. - сразу заберу",
+                            true
+                        )
                     )
                 )
 
@@ -94,6 +98,16 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         suspend fun getActiveChats(): Result<List<Chat>> {
             delay(460)
             return Result.success(mockDataProvider.chats)
+        }
+
+        suspend fun getAllNewMessagesCount(): Result<Int> {
+            delay(200)
+            var counter = 0
+            mockDataProvider.chats.forEach { chat ->
+                val count = chat.messages.count { it.isNew }
+                counter += count
+            }
+            return Result.success(counter)
         }
     }
 
