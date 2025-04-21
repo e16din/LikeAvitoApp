@@ -172,12 +172,33 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
                 Spacer(Modifier.weight(1f))
 
                 if (ad.isBargainingEnabled) {
-                    Button(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        onClick = {
-                            screen.ClickToBargainingUseCase(ad)
-                        }) {
-                        Text(text = stringResource(R.string.bargaining_button))
+                    Box(modifier = Modifier) {
+                        val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
+
+                        Button(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            onClick = {
+                                screen.ClickToBargainingUseCase(ad)
+                            }) {
+                            Text(text = stringResource(R.string.bargaining_button))
+                        }
+
+                        if (newMessagesCounters.size > 0) {
+                            val pair = newMessagesCounters.firstOrNull { it.first == screen.ad.id }
+                            val count = pair?.second ?: 0
+                            if (count > 0) {
+                                Text(
+                                    "$count",
+                                    color = Color.White,
+                                    modifier = Modifier
+                                        .padding(end = 6.dp, top = 4.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Red)
+                                        .padding(horizontal = 8.dp)
+                                        .align(Alignment.TopEnd)
+                                )
+                            }
+                        }
                     }
                 }
             }
