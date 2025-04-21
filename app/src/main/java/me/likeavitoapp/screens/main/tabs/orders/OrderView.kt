@@ -3,6 +3,7 @@ package me.likeavitoapp.screens.main.tabs.orders
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +20,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,6 +42,7 @@ import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
@@ -195,31 +199,54 @@ fun OrderView(
             }
 
             if (order.state == Order.State.Active) {
-                Row(
+                Box(
                     modifier = Modifier
                         .align(Alignment.End)
-                        .padding(start = 16.dp, end = 8.dp, bottom = 12.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .clickable {
-                            screen.ClickToMessagesUseCase(order)
-                        }
                 ) {
-                    Text(
-                        text = if (newMessagesCount.value > 0)
-                            stringResource(R.string.new_messages_label, newMessagesCount.value)
-                        else
-                            stringResource(R.string.move_to_chat_label),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier,
-                    )
-                    Icon(
-                        modifier = Modifier.padding(start = 12.dp),
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "messageIcon",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
+                    val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
+
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 8.dp, bottom = 12.dp, top = 16.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clickable {
+                                screen.ClickToMessagesUseCase(order)
+                            }
+                    ) {
+                        Text(
+                            text = if (newMessagesCount.value > 0)
+                                stringResource(R.string.new_messages_label, newMessagesCount.value)
+                            else
+                                stringResource(R.string.move_to_chat_button),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier,
+                        )
+                        Icon(
+                            modifier = Modifier.padding(start = 12.dp),
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "messageIcon",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+                    if (newMessagesCounters.size > 0) {
+                        val pair = newMessagesCounters.firstOrNull { it.first == order.ad.id }
+                        val count = pair?.second ?: 0
+                        if (count > 0) {
+                            Text(
+                                "$count",
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(end = 2.dp, top = 8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Red)
+                                    .padding(horizontal = 8.dp)
+                                    .align(Alignment.TopEnd)
+                            )
+                        }
+                    }
                 }
             }
         }

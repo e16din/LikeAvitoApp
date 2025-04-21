@@ -32,7 +32,7 @@ class AppModel {
     val loading = UpdatableState(false)
     val message = UpdatableState<String?>(null)
 
-    val newMessagesCount = UpdatableState(0)
+    val newMessagesCount = UpdatableState(listOf<Pair<Long, Int>>()) // <adId, count>
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
@@ -46,9 +46,9 @@ class AppModel {
     fun updateNewMessagesIndicator() {
         work {
             val result = get.sources().backend.messagesService.getAllNewMessagesCount()
-            val count = result.getOrNull() ?: 0
+            val pairs = result.getOrNull() ?: emptyList()
             withContext(Dispatchers.Main) {
-                get.sources().app.newMessagesCount.next(count)
+                get.sources().app.newMessagesCount.next(pairs)
             }
         }
     }

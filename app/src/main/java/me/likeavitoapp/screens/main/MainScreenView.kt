@@ -108,7 +108,7 @@ val tabBarHeight = 58.dp
 
 @Composable
 fun MainScreenView(screen: MainScreen) {
-    val newMessagesCount by get.sources().app.newMessagesCount.collectAsState()
+    val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -131,9 +131,13 @@ fun MainScreenView(screen: MainScreen) {
                 ButtonCreateNewView(screen)
             }
 
-            if (newMessagesCount > 0) {
+            if (newMessagesCounters.size > 0) {
+                var count = 0
+                newMessagesCounters.forEach {
+                    count += it.second
+                }
                 Text(
-                    "$newMessagesCount",
+                    "${count}",
                     color = Color.White,
                     modifier = Modifier
                         .padding(top = 18.dp, end = 8.dp)

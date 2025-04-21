@@ -100,14 +100,15 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(mockDataProvider.chats)
         }
 
-        suspend fun getAllNewMessagesCount(): Result<Int> {
+        suspend fun getAllNewMessagesCount(): Result<List<Pair<Long, Int>>> {
             delay(200)
-            var counter = 0
+
+            val result = mutableListOf<Pair<Long, Int>>()
             mockDataProvider.chats.forEach { chat ->
                 val count = chat.messages.count { it.isNew }
-                counter += count
+                result.add(Pair(chat.ad.id, count))
             }
-            return Result.success(counter)
+            return Result.success(result)
         }
     }
 
