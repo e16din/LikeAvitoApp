@@ -203,14 +203,16 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         ): Result<User> {
             delay(2000)
             return Result.success(mockDataProvider.users.first { it.id == userId }
-                .apply {
-                    this.name = name
-
-                    this.contacts.email = email
-                    this.contacts.whatsapp = whatsapp
-                    this.contacts.telegram = telegram
-                    this.contacts.phone = phone
-                })
+                .copy(
+                    name = name,
+                    contacts = Contacts(
+                        email = email,
+                        whatsapp = whatsapp,
+                        telegram = telegram,
+                        phone = phone
+                    )
+                )
+            )
         }
     }
 

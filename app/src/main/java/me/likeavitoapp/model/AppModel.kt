@@ -55,9 +55,12 @@ class AppModel {
 }
 
 
-class ScreensNavigator(val tag: String = "") {
-    val screens = mutableListOf<IScreen>()
-    val screen = UpdatableState<IScreen?>(null)
+class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
+    val screens = if(initialScreen!= null)
+        mutableListOf(initialScreen)
+    else
+        mutableListOf()
+    val screen = UpdatableState(initialScreen)
     var onResume: (() -> Unit)? = null
 
     fun startScreen(
@@ -81,7 +84,7 @@ class ScreensNavigator(val tag: String = "") {
         screens.add(screen)
 
         log("screens: $screens")
-        this@ScreensNavigator.screen.post(screen)
+        this@ScreensNavigator.screen.next(screen)
     }
 
     fun backToPrevious() {
@@ -122,7 +125,7 @@ data class User(
     var name: String,
     var contacts: Contacts,
     var ownAds: List<Ad>,
-    var photoUrl: UpdatableState<String>
+    var photoUrl: String
 )
 
 data class Contacts(

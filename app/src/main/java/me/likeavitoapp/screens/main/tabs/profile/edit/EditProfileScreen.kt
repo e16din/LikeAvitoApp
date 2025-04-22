@@ -103,7 +103,6 @@ class EditProfileScreen(
                 get.sources().backend.userService.postPhoto(photoBase64)
             }
 
-
             val userResult = get.sources().backend.userService.updateUser(
                 userId = get.sources().app.user.value!!.id,
                 name = state.name.value,

@@ -39,9 +39,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
-import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.log
 import me.likeavitoapp.get
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
@@ -103,7 +102,6 @@ inline fun SearchSettingsPanelView(
                         .focusRequester(focusRequester)
                         .onFocusChanged {
                             if (it.isFocused) {
-                                log("isFocused: ${it.isFocused}")
                                 onFocus()
                             }
                         },

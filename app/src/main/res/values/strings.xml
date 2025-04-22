@@ -69,5 +69,6 @@
     <string name="ad_always_reserved_message">Товар уже оформляется другим пользователем.</string>
     <string name="send_button">Отправить</string>
     <string name="chat_label">Переписка</string>
+    <string name="add_new_ad_title">Добавить объявление</string>
 
 </resources>

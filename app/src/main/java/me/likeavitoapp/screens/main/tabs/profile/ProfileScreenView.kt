@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
@@ -82,7 +81,8 @@ fun ProfileScreenProvider(screen: ProfileScreen, tabsNavigator: ScreensNavigator
 @Composable
 fun ProfileScreenView(screen: ProfileScreen) {
     val logoutLoading by screen.state.logout.working.collectAsState()
-    val photoUrl by screen.user.photoUrl.collectAsState()
+    val userVal = get.sources().app.user.collectAsState()
+    val user = userVal.value!!
     val chats by screen.state.chats.output.collectAsState()
 
     Column(
@@ -97,12 +97,12 @@ fun ProfileScreenView(screen: ProfileScreen) {
                         .padding(16.dp)
                         .size(64.dp)
                         .clip(CircleShape),
-                    url = photoUrl
+                    url = user.photoUrl
                 )
 
                 Text(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp),
-                    text = screen.user.name,
+                    text = user.name,
                     style = AppTypography.headlineLarge
                 )
             }
@@ -129,28 +129,28 @@ fun ProfileScreenView(screen: ProfileScreen) {
             style = AppTypography.titleLarge
         )
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            screen.user.contacts.phone?.let {
+            user.contacts.phone?.let {
                 ContactItem(
                     label = stringResource(R.string.phone_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.user.contacts.email?.let {
+            user.contacts.email?.let {
                 ContactItem(
                     label = stringResource(R.string.email_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.user.contacts.whatsapp?.let {
+            user.contacts.whatsapp?.let {
                 ContactItem(
                     label = stringResource(R.string.whatsapp_title),
                     value = it,
                     screen = screen
                 )
             }
-            screen.user.contacts.telegram?.let {
+            user.contacts.telegram?.let {
                 ContactItem(
                     label = stringResource(R.string.telegram_title),
                     value = it,
@@ -273,8 +273,7 @@ fun ProfileScreenPreview() {
     LikeAvitoAppTheme {
         ProfileScreenView(
             ProfileScreen(
-                navigator = mockScreensNavigator(),
-                user = MockDataProvider().users.first()
+                navigator = mockScreensNavigator()
             )
         )
     }

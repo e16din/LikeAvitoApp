@@ -26,17 +26,13 @@ class MainScreen() : IScreen {
     val profileScreen = ProfileScreen(navigator = navigator)
     val ordersScreen = OrdersScreen(navigator)
 
-    val tabsRootScreen = TabsRootScreen()
+    val tabsRootScreen = TabsRootScreen(searchScreen)
 
 
     // UseCases:
 
     fun StartScreenUseCase() {
         recordScenarioStep()
-
-        if (!tabsRootScreen.navigator.hasScreen()) {
-            tabsRootScreen.navigator.startScreen(searchScreen)
-        }
 
         get.sources().app.updateNewMessagesIndicator()
     }
@@ -56,7 +52,7 @@ class MainScreen() : IScreen {
     fun ClickToCreateAdUseCase() {
         recordScenarioStep()
 
-        navigator.startScreen(CreateAdScreen())
+        navigator.startScreen(CreateAdScreen(navigator))
     }
 
     fun ClickToCartUseCase() {

@@ -6,13 +6,10 @@ import androidx.compose.runtime.produceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.likeavitoapp.R
 import me.likeavitoapp.developer.primitives.debug
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 
 
@@ -78,15 +75,12 @@ class UpdatableState<T>(initial: T) {
 @Composable
 fun <T : R, R> UpdatableState<T>.collectAsState(
     key: KClass<*> = Unit::class,
-    initial: R = this.value,
-    context: CoroutineContext = EmptyCoroutineContext
+    initial: R = this.value
 ): State<R> = produceState(initial, this.value) {
-    if (context == EmptyCoroutineContext) {
-        listen(key) { value = it }
-
-    } else withContext(context) {
-        listen(key) { value = it }
+    listen(key) {
+        this@produceState.value = it
     }
+
 }
 
 // NOTE: У приложения всегда есть несколько источников данных.

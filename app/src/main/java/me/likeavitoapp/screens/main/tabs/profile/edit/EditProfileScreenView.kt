@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,28 +83,26 @@ fun EditProfileScreenProvider(screen: EditProfileScreen) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
-    val activity = LocalActivity.current
-    val pickMedia = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
-        uri?.let {
-            try {
-                val bytes =
-                    (activity as MainActivity).contentResolver.openInputStream(uri)?.readBytes()
-                screen.ChangeUserPhotoUseCase(bytes)
-
-            } catch (error: IOException) {
-                error.log()
-                screen.ChangeUserPhotoUseCase(null)
-            }
-        }
-    }
-
     val avatarPickerEnabled by screen.state.avatarPickerEnabled.collectAsState()
-    val photoUrl = get.sources().app.user.value!!.photoUrl.collectAsState()
 
     Box(modifier = modifier) {
-        ContentView(screen, photoUrl)
+        ContentView(screen)
 
         if (avatarPickerEnabled) {
+            val activity = LocalActivity.current
+            val pickMedia = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
+                uri?.let {
+                    try {
+                        val bytes =
+                            (activity as MainActivity).contentResolver.openInputStream(uri)?.readBytes()
+                        screen.ChangeUserPhotoUseCase(bytes)
+
+                    } catch (error: IOException) {
+                        error.log()
+                        screen.ChangeUserPhotoUseCase(null)
+                    }
+                }
+            }
             pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
     }
@@ -113,9 +110,10 @@ fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
 
 @Composable
 private fun ContentView(
-    screen: EditProfileScreen,
-    photoUrl: State<String>
+    screen: EditProfileScreen
 ) {
+    val user = get.sources().app.user.collectAsState().value!!
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(Modifier.clickable {
@@ -126,7 +124,7 @@ private fun ContentView(
                         .padding(16.dp)
                         .size(64.dp)
                         .clip(CircleShape),
-                    url = photoUrl.value
+                    url = user.photoUrl
                 )
 
                 Icon(

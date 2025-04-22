@@ -27,7 +27,7 @@ class MockDataProvider {
                 email = "a.kundryukov@gmail.com"
             ),
             ownAds = emptyList(),
-            photoUrl = UpdatableState("https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp")
+            photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
         )
     )
 

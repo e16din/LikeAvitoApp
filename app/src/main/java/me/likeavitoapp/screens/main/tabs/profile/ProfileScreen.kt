@@ -3,14 +3,14 @@ package me.likeavitoapp.screens.main.tabs.profile
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.launchWithHandler
-import me.likeavitoapp.load
 import me.likeavitoapp.model.Chat
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UnauthorizedException
-import me.likeavitoapp.model.User
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
@@ -19,8 +19,7 @@ import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
 
 
 class ProfileScreen(
-    val navigator: ScreensNavigator,
-    val user: User = get.sources().app.user.value!!
+    val navigator: ScreensNavigator
 ) : IScreen {
 
     class State(
@@ -64,12 +63,15 @@ class ProfileScreen(
     fun ClickToLogoutUseCase() {
         recordScenarioStep()
 
-        get.scope().launchWithHandler {
-            state.logout.load(loading = {
-                return@load get.sources().backend.userService.logout()
-            }, onSuccess = { success ->
-                throw UnauthorizedException()
-            })
+        get.sources().app.loading.next(true)
+        work {
+            val result = get.sources().backend.userService.logout()
+
+            if (result.isSuccess) {
+                withContext(Dispatchers.Main) {
+                    throw UnauthorizedException()
+                }
+            }
         }
     }
 

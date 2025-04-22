@@ -1,13 +1,13 @@
 package me.likeavitoapp.screens.main.tabs
 
 import androidx.compose.runtime.Composable
-import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
-import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
-import me.likeavitoapp.screens.main.tabs.orders.OrdersScreenProvider
+import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreenProvider
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreenProvider
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
 import me.likeavitoapp.screens.main.tabs.profile.ProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
