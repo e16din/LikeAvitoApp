@@ -27,6 +27,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +39,6 @@ import me.likeavitoapp.MainActivity
 import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.log
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
@@ -99,13 +99,13 @@ fun EditProfileScreenView(screen: EditProfileScreen, modifier: Modifier) {
         }
     }
 
-    val userPickerEnabled = screen.state.userPickerEnabled.collectAsState()
-    val photoUrl = screen.state.user.photoUrl.collectAsState()
+    val avatarPickerEnabled by screen.state.avatarPickerEnabled.collectAsState()
+    val photoUrl = get.sources().app.user.value!!.photoUrl.collectAsState()
 
     Box(modifier = modifier) {
         ContentView(screen, photoUrl)
 
-        if (userPickerEnabled.value) {
+        if (avatarPickerEnabled) {
             pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
     }
@@ -140,15 +140,15 @@ private fun ContentView(
                 )
             }
 
+            val name by screen.state.name.collectAsState()
             TextField(
-                value = screen.state.user.name,
-                onValueChange = {
-
+                value = name,
+                onValueChange = { value ->
+                    screen.ChangeUserNameUseCase(value)
                 },
                 modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             )
         }
-
 
         Spacer(Modifier.size(24.dp))
 
@@ -158,37 +158,43 @@ private fun ContentView(
             text = stringResource(R.string.contacts_title),
             style = AppTypography.titleLarge
         )
+        val phone = screen.state.phone.collectAsState()
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            screen.state.user.contacts.phone?.let {
+            phone.value?.let {
                 TextField(
                     value = it,
                     label = { Text(stringResource(R.string.phone_title)) },
                     onValueChange = {
-
+                        screen.ChangePhoneUseCase(it)
                     })
             }
-            screen.state.user.contacts.email?.let {
+            val email = screen.state.email.collectAsState()
+            email.value?.let {
                 TextField(
                     value = it,
                     label = { Text(stringResource(R.string.email_title)) },
                     onValueChange = {
-
+                        screen.ChangeEmailUseCase(it)
                     })
             }
-            screen.state.user.contacts.whatsapp?.let {
+
+            val whatsapp = screen.state.whatsapp.collectAsState()
+            whatsapp.value?.let {
                 TextField(
                     value = it,
                     label = { Text(stringResource(R.string.whatsapp_title)) },
                     onValueChange = {
-
+                        screen.ChangeWhatsappUseCase(it)
                     })
             }
-            screen.state.user.contacts.telegram?.let {
+
+            val telegram = screen.state.telegram.collectAsState()
+            telegram.value?.let {
                 TextField(
                     value = it,
                     label = { Text(stringResource(R.string.telegram_title)) },
                     onValueChange = {
-
+                        screen.ChangeTelegramUseCase(it)
                     })
             }
         }
@@ -202,8 +208,7 @@ fun EditProfileScreenPreview() {
     LikeAvitoAppTheme {
         EditProfileScreenView(
             EditProfileScreen(
-                navigator = mockScreensNavigator(),
-                user = MockDataProvider().users.first()
+                navigator = mockScreensNavigator()
             ),
             Modifier
         )
