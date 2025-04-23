@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,24 +26,35 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.io.IOException
 import me.likeavitoapp.MainActivity
@@ -103,16 +115,44 @@ fun CreateAdScreenProvider(screen: CreateAdScreen) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        val title by screen.state.title.collectAsState()
-        TextField(
+    val title by screen.state.title.collectAsState()
+    val description by screen.state.description.collectAsState()
+    val address by screen.state.address.collectAsState()
+    val price by screen.state.price.collectAsState()
+
+    val descriptionFocusRequester = remember { FocusRequester() }
+    val localFocusManager = LocalFocusManager.current
+
+    Column(
+        modifier = modifier
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+    ) {
+
+        OutlinedTextField(
             value = title,
             onValueChange = { value ->
                 screen.ChangeTitleUseCase(value)
             },
-            modifier = Modifier.padding(top = 16.dp, start = 16.dp),
+            label = {
+                Text(stringResource(R.string.title_label))
+            },
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth(),
+            maxLines = 2,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    descriptionFocusRequester.requestFocus()
+                }
+            )
         )
 
 
@@ -127,12 +167,12 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
 
         val screenWidth = get.sources().platform.screenWidthDp
 
-        val scrollToEnd by screen.state.scrollToEnd.collectAsState()
+        val scrollToEnd by screen.state.scrollPhotosToEnd.collectAsState()
         val listState = rememberLazyListState()
 
         LaunchedEffect(scrollToEnd) {
             if (scrollToEnd) {
-                screen.state.scrollToEnd.next(false)
+                screen.state.scrollPhotosToEnd.next(false)
                 listState.scrollToItem(photos.size - 1)
             }
         }
@@ -211,125 +251,148 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
         HorizontalDivider()
 
         Spacer(Modifier.height(4.dp))
+
+        OutlinedTextField(
+            value = description,
+            onValueChange = { value ->
+                screen.ChangeDescriptionUseCase(value)
+            },
+            label = {
+                Text(stringResource(R.string.description_label))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .focusRequester(descriptionFocusRequester),
+            minLines = 6,
+            maxLines = 6,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+
+                }
+            )
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        HorizontalDivider()
+
+        Spacer(Modifier.height(4.dp))
+
+        val isBargainingEnabled by screen.state.isBargainingEnabled.collectAsState()
+        Row(
+            Modifier.clickable {
+                screen.ClickToIsBargainingUseCase()
+            }
+        ) {
+            Checkbox(
+                checked = isBargainingEnabled,
+                onCheckedChange = {
+                    screen.ChangeIsBargainingUseCase(it)
+                }
+            )
+            Text(
+                stringResource(R.string.bargaining_enabled_checkbox),
+                Modifier
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+
+        val isDeliveryEnabled by screen.state.isDeliveryEnabled.collectAsState()
+        Row(
+            Modifier.clickable {
+                screen.ClickToIsDeliveryUseCase()
+            }
+        ) {
+            Checkbox(
+                checked = isDeliveryEnabled,
+                onCheckedChange = {
+                    screen.ChangeIsDeliveryUseCase(it)
+                }
+            )
+            Text(
+                stringResource(R.string.bargaining_enabled_checkbox),
+                Modifier
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        HorizontalDivider()
+
+        Spacer(Modifier.height(4.dp))
+
+        OutlinedTextField(
+            value = address,
+            onValueChange = { value ->
+                screen.ChangeAddressUseCase(value)
+            },
+            label = {
+                Text(stringResource(R.string.address_label))
+            },
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth(),
+            maxLines = 2,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    localFocusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        HorizontalDivider()
+
+        Spacer(Modifier.height(4.dp))
+
+        OutlinedTextField(
+            value = price.toString(),
+            onValueChange = { value ->
+                screen.ChangePriceUseCase(value)
+            },
+            label = {
+                Text(stringResource(R.string.price_label))
+            },
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth(),
+            maxLines = 2,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Decimal
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    localFocusManager.moveFocus(FocusDirection.Exit)
+                }
+            )
+        )
+
+        Spacer(Modifier.size(8.dp))
+
+        OutlinedButton(
+            onClick = {
+                screen.ClickToCreateAdUseCase()
+            },
+            Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(stringResource(R.string.create_ad_button))
+        }
     }
 
 }
-
-//        Box {
-//
-//            Text(
-//                modifier = Modifier
-//                    .align(Alignment.BottomCenter)
-//                    .padding(8.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .background(
-//                        backgroundLight
-//                    )
-//                    .padding(vertical = 4.dp, horizontal = 12.dp),
-//                text = "${pagerState.currentPage + 1} / ${pagerState.pageCount}"
-//            )
-//        }
-//
-//        IconButton(
-//            modifier = Modifier
-//                .align(Alignment.TopEnd)
-//                .padding(12.dp)
-//                .clip(CircleShape)
-//                .background(Color.Transparent),
-//            onClick = {
-//                screen.ClickToFavoriteUseCase(ad)
-//            }
-//        ) {
-//            Icon(
-//                imageVector = if (favoriteSelected)
-//                    Icons.Default.Favorite
-//                else
-//                    Icons.Default.FavoriteBorder,
-//                contentDescription = "favorite",
-//                modifier = Modifier.size(32.dp),
-//                tint = Color.Red
-//            )
-//        }
-//    }
-//
-//    AnimatedVisibility(timerLabel.value.isNotEmpty() && timerLabel.value != "00:00") {
-//        ClosableMessage(
-//            text = stringResource(R.string.continue_order_label, timerLabel.value),
-//            onCloseClick = {
-//                screen.ClickToCloseTimerLabel(ad)
-//            },
-//            modifier = Modifier
-//                .align(Alignment.CenterHorizontally)
-//                .padding(vertical = 16.dp, horizontal = 16.dp)
-//                .clickable {
-//                    screen.ClickToBuyUseCase(ad)
-//                }
-//        )
-//    }
-//
-//    Text(
-//        text = ad.description,
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
-//        maxLines = 3,
-//        overflow = TextOverflow.Ellipsis
-//    )
-//
-//    if (!ad.isOrdered) {
-//        Row(modifier = Modifier) {
-//            Button(
-//                modifier = Modifier
-//                    .padding(horizontal = 16.dp, vertical = 8.dp),
-//                onClick = {
-//                    screen.ClickToBuyUseCase(ad)
-//                }) {
-//                Text(text = stringResource(R.string.buy_button, ad.price))
-//            }
-//
-//            Spacer(Modifier.weight(1f))
-//
-//            if (ad.isBargainingEnabled) {
-//                Box(modifier = Modifier) {
-//                    val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
-//
-//                    Button(
-//                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-//                        onClick = {
-//                            screen.ClickToBargainingUseCase(ad)
-//                        }) {
-//                        Text(text = stringResource(R.string.bargaining_button))
-//                    }
-//
-//                    if (newMessagesCounters.size > 0) {
-//                        val pair = newMessagesCounters.firstOrNull { it.first == screen.ad.id }
-//                        val count = pair?.second ?: 0
-//                        if (count > 0) {
-//                            Text(
-//                                "$count",
-//                                color = Color.White,
-//                                modifier = Modifier
-//                                    .padding(end = 6.dp, top = 4.dp)
-//                                    .clip(CircleShape)
-//                                    .background(Color.Red)
-//                                    .padding(horizontal = 8.dp)
-//                                    .align(Alignment.TopEnd)
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    } else {
-//        Button(
-//            modifier = Modifier
-//                .padding(horizontal = 16.dp, vertical = 8.dp),
-//            enabled = false,
-//            onClick = {
-//                screen.ClickToBuyUseCase(ad)
-//            }) {
-//            Text(stringResource(R.string.ordered_button))
-//        }
-//    }
-//}
-//}

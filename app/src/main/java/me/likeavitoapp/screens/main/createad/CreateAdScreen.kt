@@ -1,15 +1,13 @@
 package me.likeavitoapp.screens.main.createad
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import me.likeavitoapp.get
+import me.likeavitoapp.inverse
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
-import me.likeavitoapp.model.Worker
 import me.likeavitoapp.recordScenarioStep
 
 
@@ -19,15 +17,21 @@ class CreateAdScreen(
 
     class State {
         val title = UpdatableState("")
+        val description = UpdatableState("")
+        val address = UpdatableState("")
+        val price = UpdatableState(0)
+        val category = UpdatableState<Category?>(null)
+
         val photos = mutableStateListOf<ByteArray?>() // <file path>
         val imagePickerEnabled = UpdatableState(false)
-        val scrollToEnd = UpdatableState(false)
+        val scrollPhotosToEnd = UpdatableState(false)
+        val isBargainingEnabled = UpdatableState(false)
+        val isDeliveryEnabled = UpdatableState(false)
 
-        var adCreated by mutableStateOf(Worker(false))
-        var exitDialog by mutableStateOf(false)
+        var exitDialogEnabled = UpdatableState(false)
     }
 
-    val state: State = State()
+    val state = State()
 
     fun StartScreenUseCase() {
         recordScenarioStep()
@@ -43,6 +47,13 @@ class CreateAdScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
+        createAd()
+    }
+
+    fun ChangeDescriptionUseCase(description: String) {
+        recordScenarioStep()
+
+        state.description.next(description)
     }
 
     fun ChangeTitleUseCase(title: String) {
@@ -67,7 +78,7 @@ class CreateAdScreen(
         state.imagePickerEnabled.next(false)
         bytes?.let {
             state.photos.add(it)
-            state.scrollToEnd.next(true)
+            state.scrollPhotosToEnd.next(true)
         }
     }
 
@@ -77,22 +88,73 @@ class CreateAdScreen(
         state.photos.remove(bytes)
     }
 
-    class Input {
-        var onTitleChanged: (title: String) -> Unit = {}
-        var onDescriptionChanged: (title: String) -> Unit = {}
-        var onPriceChanged: (price: Int) -> Unit = {}
-        var onAddPhotoClick: () -> Unit = {}
-        var onContactsChanged: (price: Int) -> Unit = {}
-        var onPremiumStatusChanged: (isPremium: Boolean) -> Unit = {}
-        var onAddressChanged: (address: Ad.Address) -> Unit = {}
-        var onCategoryChanged: (category: Category) -> Unit = {}
-        var onDeliveryEnableChanged: (enable: Boolean) -> Unit = {}
-        var onPickupEnableChanged: (enable: Boolean) -> Unit = {}
+    fun ChangeIsBargainingUseCase(enabled: Boolean) {
+        recordScenarioStep(enabled)
 
-        var onBackClick: () -> Unit = {}
-        var onDoneClick: () -> Unit = {}
+        state.isBargainingEnabled.next(enabled)
     }
 
-    // UseCases:
+    fun ClickToIsBargainingUseCase() {
+        recordScenarioStep()
 
+        state.isBargainingEnabled.inverse()
+    }
+
+    fun ClickToIsDeliveryUseCase() {
+        recordScenarioStep()
+
+        state.isDeliveryEnabled.inverse()
+    }
+
+    fun ChangeIsDeliveryUseCase(enabled: Boolean) {
+        recordScenarioStep(enabled)
+
+        state.isDeliveryEnabled.next(enabled)
+    }
+
+    fun ChangePriceUseCase(price: String) {
+        recordScenarioStep(price)
+
+        state.price.next(price.toInt())
+    }
+
+    fun ChangeAddressUseCase(address: String) {
+        recordScenarioStep(address)
+
+        state.isDeliveryEnabled.next(address)
+    }
+
+    fun ClickToCreateAdUseCase() {
+        recordScenarioStep()
+
+        createAd()
+    }
+
+    private fun checkIsValid(): Boolean {
+        return false
+    }
+    
+    private fun createAd() {
+        if (checkIsValid()) {
+            val newAd = Ad(
+                id = TODO(),
+                title = TODO(),
+                description = TODO(),
+                photoUrls = TODO(),
+                contacts = TODO(),
+                price = TODO(),
+                isBargainingEnabled = TODO(),
+                isPremium = TODO(),
+                categoryId = TODO(),
+                regionId = TODO(),
+                address = TODO(),
+                isPickupEnabled = TODO(),
+                isDeliveryEnabled = TODO(),
+                enabledPickupPointTypes = TODO(),
+                owner = TODO(),
+                reservedTimeMs = TODO()
+            )
+            get.sources().backend.adsService.createAd(newAd)
+        }
+    }
 }

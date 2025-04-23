@@ -71,5 +71,11 @@
     <string name="chat_label">Переписка</string>
     <string name="add_new_ad_title">Добавить объявление</string>
     <string name="add_photo_button">Добавить фото</string>
+    <string name="title_label">Название</string>
+    <string name="description_label">Описание</string>
+    <string name="bargaining_enabled_checkbox">Торг уместен</string>
+    <string name="address_label">Адрес</string>
+    <string name="price_label">Цена</string>
+    <string name="create_ad_button">Создать объявление</string>
 
 </resources>
