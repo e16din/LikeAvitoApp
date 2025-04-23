@@ -23,13 +23,13 @@ class ChatScreen(
     val initialMessages: List<TextMessage>? = null
 ) : IScreen {
 
-    inner class State(
-        val userId: Long = get.sources().app.user.value!!.id,
-        val messages: SnapshotStateList<IMessage> = initialMessages?.toMutableStateList()
-            ?: SnapshotStateList(),
-        val message: UpdatableState<String> = UpdatableState(""),
-        val scrollToEnd: UpdatableState<Boolean> = UpdatableState(false)
-    )
+    inner class State {
+        val userId = get.sources().app.user.value!!.id
+        val messages = initialMessages?.toMutableStateList<IMessage>()
+            ?: SnapshotStateList()
+        val message = UpdatableState("")
+        val scrollToEnd = UpdatableState(false)
+    }
 
     val state = State()
 
@@ -86,13 +86,14 @@ class ChatScreen(
     fun ClickToSendUseCase() {
         recordScenarioStep()
 
+        state.scrollToEnd.next(true)
+
         val userId = get.sources().app.user.value!!.id
 
         val text = state.message.value
         val preview = PreviewTextMessage(text, userId, true)
         state.messages.add(preview)
         state.message.next("")
-
 
         work<Unit> {
             val result = get.sources().backend.messagesService.sendMessage(
@@ -103,7 +104,6 @@ class ChatScreen(
                 withContext(Dispatchers.Main) {
                     state.messages.remove(preview)
                     state.messages.add(it)
-                    state.scrollToEnd.next(true)
                 }
             }
         }

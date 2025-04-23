@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,15 +70,16 @@ fun ChatScreenProvider(screen: ChatScreen) {
 
 @Composable
 fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
-    val messageText = screen.state.message.collectAsState()
+    val messageText by screen.state.message.collectAsState()
     val messages = screen.state.messages
     val userId = screen.state.userId
-    val scrollToEnd = screen.state.scrollToEnd.collectAsState()
+    val scrollToEnd by screen.state.scrollToEnd.collectAsState()
     val listState = rememberLazyListState()
 
     LaunchedEffect(scrollToEnd) {
-        if (messages.size > 0) {
-            listState.animateScrollToItem(messages.size - 1)
+        if (scrollToEnd) {
+            screen.state.scrollToEnd.next(false)
+            listState.scrollToItem(messages.size - 1)
         }
     }
 
@@ -90,11 +94,15 @@ fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
             modifier = Modifier.weight(1f),
             userScrollEnabled = true,
             state = listState,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.Bottom,
         ) {
 
             items(messages, key = { it.id }) { message ->
                 TextMessageView(message.userId == userId, message)
+            }
+
+            item {
+                Spacer(Modifier.height(16.dp))
             }
         }
 
@@ -103,7 +111,7 @@ fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
             verticalAlignment = Alignment.Top
         ) {
             BasicTextField(
-                value = messageText.value,
+                value = messageText,
                 onValueChange = { text ->
                     screen.ChangeMessageUseCase(text)
                 },
@@ -115,7 +123,7 @@ fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
             )
 
             Button(onClick = {
-                if (messageText.value.isNotBlank()) {
+                if (messageText.isNotBlank()) {
                     screen.ClickToSendUseCase()
                 }
             }) {
@@ -126,13 +134,13 @@ fun ChatScreenView(screen: ChatScreen, modifier: Modifier) {
 }
 
 @Composable
-fun TextMessageView(isMy:Boolean, message: IMessage) {
+fun TextMessageView(isMy: Boolean, message: IMessage) {
     Column(Modifier.fillMaxWidth()) {
         when {
             message is PreviewTextMessage -> {
                 Box(
                     Modifier
-                        .padding(start = 64.dp)
+                        .padding(start = 64.dp, top = 6.dp)
                         .clip(RoundedCornerShape(50, 50, 0, 50))
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .padding(vertical = 6.dp, horizontal = 12.dp)
@@ -150,7 +158,8 @@ fun TextMessageView(isMy:Boolean, message: IMessage) {
                     Modifier
                         .padding(
                             start = if (isMy) 64.dp else 0.dp,
-                            end = if (isMy) 0.dp else 64.dp
+                            end = if (isMy) 0.dp else 64.dp,
+                            top = 6.dp
                         )
                         .clip(
                             RoundedCornerShape(
