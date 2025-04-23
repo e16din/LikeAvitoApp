@@ -14,13 +14,15 @@ import me.likeavitoapp.log
 @Composable
 fun ActualAsyncImage(
     modifier: Modifier = Modifier,
-    url: String,
-    contentScale:ContentScale = ContentScale.FillWidth) {
+    url: String? = null,
+    byteArray: ByteArray? = null,
+    contentScale: ContentScale = ContentScale.FillWidth
+) {
     AsyncImage(
         modifier = modifier,
         model = ImageRequest
             .Builder(LocalContext.current)
-            .data(url)
+            .data(url ?: byteArray)
             .placeholder(R.drawable.placeholder)
             .error(R.drawable.placeholder)
             .build(),

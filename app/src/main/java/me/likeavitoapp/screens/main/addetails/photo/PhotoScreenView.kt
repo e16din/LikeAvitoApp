@@ -23,6 +23,7 @@ import coil3.request.ImageRequest
 import coil3.request.error
 import coil3.request.placeholder
 import me.likeavitoapp.R
+import me.likeavitoapp.get
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -46,9 +47,8 @@ fun PhotoScreenView(screen: PhotoScreen) {
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp.value
-    val screenHeight = configuration.screenHeightDp.dp.value
+    val screenWidth = get.sources().platform.screenWidthDp
+    val screenHeight =  get.sources().platform.screenHeightDp
 
     AsyncImage(
         contentDescription = "photo",

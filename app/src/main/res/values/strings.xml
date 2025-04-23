@@ -70,5 +70,6 @@
     <string name="send_button">Отправить</string>
     <string name="chat_label">Переписка</string>
     <string name="add_new_ad_title">Добавить объявление</string>
+    <string name="add_photo_button">Добавить фото</string>
 
 </resources>

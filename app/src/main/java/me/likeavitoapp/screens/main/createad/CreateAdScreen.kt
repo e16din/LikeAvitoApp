@@ -1,20 +1,81 @@
 package me.likeavitoapp.screens.main.createad
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
+import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
+import me.likeavitoapp.recordScenarioStep
 
 
 class CreateAdScreen(
-    val input: Input = Input(),
-    val state: State = State(),
-    val navigator: ScreensNavigator? = null,
-    ) : IScreen {
+    val navigator: ScreensNavigator
+) : IScreen {
+
+    class State {
+        val title = UpdatableState("")
+        val photos = mutableStateListOf<ByteArray?>() // <file path>
+        val imagePickerEnabled = UpdatableState(false)
+        val scrollToEnd = UpdatableState(false)
+
+        var adCreated by mutableStateOf(Worker(false))
+        var exitDialog by mutableStateOf(false)
+    }
+
+    val state: State = State()
+
+    fun StartScreenUseCase() {
+        recordScenarioStep()
+
+    }
+
+    fun PressBackUseCase() {
+        recordScenarioStep()
+
+        navigator.backToPrevious()
+    }
+
+    fun ClickToDoneUseCase() {
+        recordScenarioStep()
+
+    }
+
+    fun ChangeTitleUseCase(title: String) {
+        recordScenarioStep()
+
+        state.title.next(title)
+    }
+
+    fun ClickToAddPhotoUseCase() {
+        recordScenarioStep()
+
+        state.imagePickerEnabled.next(true)
+
+        // test
+//        state.photos.add(null)
+//        state.scrollToEnd.next(true)
+    }
+
+    fun ChangePhotosUseCase(bytes: ByteArray?) {
+        recordScenarioStep(bytes)
+
+        state.imagePickerEnabled.next(false)
+        bytes?.let {
+            state.photos.add(it)
+            state.scrollToEnd.next(true)
+        }
+    }
+
+    fun ClickToRemovePhotoUseCase(bytes: ByteArray?) {
+        recordScenarioStep(bytes)
+
+        state.photos.remove(bytes)
+    }
 
     class Input {
         var onTitleChanged: (title: String) -> Unit = {}
@@ -32,16 +93,6 @@ class CreateAdScreen(
         var onDoneClick: () -> Unit = {}
     }
 
-    class State {
-        var adCreated by mutableStateOf(Worker(false))
-        var exitDialog by mutableStateOf(false)
-    }
-
     // UseCases:
 
-    fun PressBackUseCase() {
-        if (state.exitDialog != true) {
-            state.exitDialog = true
-        }
-    }
 }

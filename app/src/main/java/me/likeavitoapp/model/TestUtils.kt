@@ -1,5 +1,7 @@
 package me.likeavitoapp.model
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.MainSet
 import me.likeavitoapp.get
@@ -117,5 +119,8 @@ fun mockMainSet() = MainSet().apply {
                 override suspend fun clear() {
                 }
             }
+        override var screenWidthDp = 0
+        override var screenHeightDp = 0
+
     }, CoroutineScope(get.defaultContext))
 }

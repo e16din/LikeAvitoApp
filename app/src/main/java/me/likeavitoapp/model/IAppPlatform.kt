@@ -5,6 +5,9 @@ interface IAppPlatform {
 
     val appDataStore: IAppDataStore
 
+    var screenWidthDp: Int
+    var screenHeightDp: Int
+
     interface IAppDataStore {
         suspend fun saveUserId(id: Long)
         suspend fun loadUserId(): Long?

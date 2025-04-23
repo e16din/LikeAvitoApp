@@ -17,6 +17,9 @@ class AppPlatform : IAppPlatform, Application() {
 
     override val appDataStore = AuthDataStore()
 
+    override var screenWidthDp: Int = 0
+    override var screenHeightDp: Int = 0
+
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
     inner class AuthDataStore() : IAppPlatform.IAppDataStore {
