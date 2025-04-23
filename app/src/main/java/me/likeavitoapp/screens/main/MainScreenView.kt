@@ -183,152 +183,150 @@ fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
 }
 
 @Composable
-private fun TabsView(screen: MainScreen) {
+private fun BoxScope.TabsView(screen: MainScreen) {
     val tabScreen = screen.tabsRootScreen.navigator.screen.collectAsState()
 
     log("Tab: ${tabScreen.value?.className()}")
-    Box(Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(tabBarHeight)
-                .background(secondaryContainerLight)
-                .align(Alignment.BottomStart),
-            verticalAlignment = Alignment.Bottom,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(tabBarHeight)
+            .background(secondaryContainerLight)
+            .align(Alignment.BottomStart),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        val modifier = Modifier
+        // Search
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is SearchScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable(onClick = {
+                    screen.ClickToSearchUseCase()
+
+                }), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val modifier = Modifier
-            // Search
-            Column(
-                modifier = modifier
-                    .weight(1f)
-                    .background(
-                        if (tabScreen.value is SearchScreen)
-                            primaryLight else secondaryContainerLight
-                    )
-                    .clickable(onClick = {
-                        screen.ClickToSearchUseCase()
-
-                    }), horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.size(8.dp))
-                Icon(
-                    Icons.Rounded.Search,
-                    contentDescription = "search",
-                    tint = onSecondaryContainerLight
-                )
-                Text(
-                    text = stringResource(R.string.search_tab),
-                    fontSize = 9.sp,
-                    maxLines = 1,
-                    color = onSecondaryContainerLight
-                )
-            }
-
-            // Favorites
-            Column(
-                modifier = modifier
-                    .weight(1f)
-                    .background(
-                        if (tabScreen.value is FavoritesScreen)
-                            primaryLight else secondaryContainerLight
-                    )
-                    .clickable(onClick = {
-                        screen.ClickToFavoritesUseCase()
-                    }), horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.size(8.dp))
-                Icon(
-                    Icons.Rounded.Favorite,
-                    contentDescription = "favorite",
-                    tint = onSecondaryContainerLight
-                )
-                Text(
-                    text = stringResource(R.string.favorite_tab),
-                    fontSize = 9.sp,
-                    maxLines = 1,
-                    color = onSecondaryContainerLight
-                )
-            }
-
-            // CreateAd Stub
-            Box(
-                modifier = Modifier
-                    .weight(0.45f)
-                    .background(
-                        if (tabScreen.value is FavoritesScreen)
-                            primaryLight else secondaryContainerLight
-                    )
-                    .height(tabBarHeight)
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.Search,
+                contentDescription = "search",
+                tint = onSecondaryContainerLight
             )
-            Box(
-                modifier = Modifier
-                    .weight(0.45f)
-                    .background(
-                        if (tabScreen.value is OrdersScreen)
-                            primaryLight else secondaryContainerLight
-                    )
-                    .height(tabBarHeight)
+            Text(
+                text = stringResource(R.string.search_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
             )
+        }
 
-            // Cart
+        // Favorites
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is FavoritesScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable(onClick = {
+                    screen.ClickToFavoritesUseCase()
+                }), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.Favorite,
+                contentDescription = "favorite",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.favorite_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
+        }
+
+        // CreateAd Stub
+        Box(
+            modifier = Modifier
+                .weight(0.45f)
+                .background(
+                    if (tabScreen.value is FavoritesScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .height(tabBarHeight)
+        )
+        Box(
+            modifier = Modifier
+                .weight(0.45f)
+                .background(
+                    if (tabScreen.value is OrdersScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .height(tabBarHeight)
+        )
+
+        // Cart
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is OrdersScreen)
+                        primaryLight else secondaryContainerLight
+                )
+                .clickable {
+                    screen.ClickToCartUseCase()
+
+                }, horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Icon(
+                Icons.Rounded.ShoppingCart,
+                contentDescription = "cart",
+                tint = onSecondaryContainerLight
+            )
+            Text(
+                text = stringResource(R.string.cart_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = onSecondaryContainerLight
+            )
+        }
+
+        // Profile
+        Box(
+            modifier = modifier
+                .weight(1f)
+        ) {
+
             Column(
-                modifier = modifier
-                    .weight(1f)
+                Modifier
+                    .fillMaxWidth()
                     .background(
-                        if (tabScreen.value is OrdersScreen)
+                        if (tabScreen.value is ProfileScreen)
                             primaryLight else secondaryContainerLight
                     )
                     .clickable {
-                        screen.ClickToCartUseCase()
+                        screen.ClickToProfileUseCase()
 
-                    }, horizontalAlignment = Alignment.CenterHorizontally
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.size(8.dp))
                 Icon(
-                    Icons.Rounded.ShoppingCart,
-                    contentDescription = "cart",
+                    Icons.Rounded.Person,
+                    contentDescription = "profile",
                     tint = onSecondaryContainerLight
                 )
                 Text(
-                    text = stringResource(R.string.cart_tab),
+                    text = stringResource(R.string.profile_tab),
                     fontSize = 9.sp,
                     maxLines = 1,
                     color = onSecondaryContainerLight
                 )
-            }
-
-            // Profile
-            Box(
-                modifier = modifier
-                    .weight(1f)
-            ) {
-
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            if (tabScreen.value is ProfileScreen)
-                                primaryLight else secondaryContainerLight
-                        )
-                        .clickable {
-                            screen.ClickToProfileUseCase()
-
-                        },
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(
-                        Icons.Rounded.Person,
-                        contentDescription = "profile",
-                        tint = onSecondaryContainerLight
-                    )
-                    Text(
-                        text = stringResource(R.string.profile_tab),
-                        fontSize = 9.sp,
-                        maxLines = 1,
-                        color = onSecondaryContainerLight
-                    )
-                }
             }
         }
     }
