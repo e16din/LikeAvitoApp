@@ -47,8 +47,14 @@ import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
 import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
-import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreenProvider
+import me.likeavitoapp.screens.main.createad.CreateAdStepsScreen
+import me.likeavitoapp.screens.main.createad.steps.CategoryStepScreen
+import me.likeavitoapp.screens.main.createad.steps.CategoryStepsScreenProvider
+import me.likeavitoapp.screens.main.createad.steps.DescriptionStepScreen
+import me.likeavitoapp.screens.main.createad.steps.DescriptionStepScreenProvider
+import me.likeavitoapp.screens.main.createad.steps.FinalStepScreen
+import me.likeavitoapp.screens.main.createad.steps.FinalStepScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
 import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
@@ -98,7 +104,11 @@ fun MainScreenProvider(screen: MainScreen) {
                 is SelectPickupPointScreen -> SelectPickupPointScreenProvider(this)
                 is SelectDeliveryAddressScreen -> SelectDeliveryAddressScreenProvider(this)
                 is PaymentScreen -> PaymentScreenProvider(this)
-                is CreateAdScreen -> CreateAdScreenProvider(this)
+                // Create New Ad:
+                is CreateAdStepsScreen -> CreateAdScreenProvider(this)
+                is DescriptionStepScreen -> DescriptionStepScreenProvider(this)
+                is CategoryStepScreen -> CategoryStepsScreenProvider(this)
+                is FinalStepScreen -> FinalStepScreenProvider(this)
             }
         }
     }

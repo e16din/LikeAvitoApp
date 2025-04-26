@@ -62,47 +62,44 @@ fun SelectDeliveryAddressScreenProvider(screen: SelectDeliveryAddressScreen) {
 
 @Composable
 fun SelectDeliveryAddressScreenView(screen: SelectDeliveryAddressScreen, modifier: Modifier) = with(screen) {
-    val query by screen.state.query.collectAsState()
-
     Column(modifier = modifier.fillMaxSize()) {
+        val query by screen.state.query.collectAsState()
         val addressText by screen.state.query.collectAsState()
-        val addresses by screen.state.addresses.output.collectAsState()
 
-        Column {
-            TextField(
-                value = query,
-                onValueChange = { newText ->
-                    screen.ChangeQueryUseCase(newText)
-                },
-                label = { Text(stringResource(R.string.enter_address_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    if (addressText.text.isNotEmpty()) {
-                        IconButton(onClick = {
-                            screen.ClickToClearAddressUseCase()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Очистить",
-                                tint = Color.Gray
-                            )
-                        }
+        TextField(
+            value = query,
+            onValueChange = { newText ->
+                screen.ChangeQueryUseCase(newText)
+            },
+            label = { Text(stringResource(R.string.enter_address_label)) },
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                if (addressText.text.isNotEmpty()) {
+                    IconButton(onClick = {
+                        screen.ClickToClearAddressUseCase()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Очистить",
+                            tint = Color.Gray
+                        )
                     }
                 }
-            )
+            }
+        )
 
-            LazyColumn {
-                items(addresses) { address ->
-                    Text(
-                        text = address,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                screen.ClickToAddressUseCase(address)
-                            }
-                            .padding(8.dp)
-                    )
-                }
+        val addresses by screen.state.addresses.output.collectAsState()
+        LazyColumn {
+            items(addresses) { address ->
+                Text(
+                    text = address,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            screen.ClickToAddressUseCase(address)
+                        }
+                        .padding(8.dp)
+                )
             }
         }
     }

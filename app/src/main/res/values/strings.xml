@@ -77,5 +77,18 @@
     <string name="address_label">Адрес</string>
     <string name="price_label">Цена</string>
     <string name="create_ad_button">Создать объявление</string>
+    <string name="about_premium_label">Премиум сообщение выгодно выделяется на фоне других и имеет больший процент просмотров.</string>
+    <string name="about_delivery_label">Доставка до двери покупателя.</string>
+    <string name="category_label">Категория</string>
+    <string name="next_button">Дальше</string>
+    <string name="create_ad_success_message">Объявление успешно создано.</string>
+    <string name="autoupdate_checkbox">Автообновление</string>
+    <string name="autoupdate_label">Объявление будет активно 21 день, обновлять автоматически?</string>
+    <string name="free_label">Даром</string>
+    <string name="price_with_value_label">Цена: </string>
+    <string name="fill_the_field_message">Поле \"%1$s\" обязательно для заполнения</string>
+    <string name="title_arg">Название</string>
+    <string name="descriptio_arg">Описание</string>
+    <string name="photo_arg">Фото</string>
 
 </resources>

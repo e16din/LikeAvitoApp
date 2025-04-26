@@ -281,10 +281,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             mockDataProvider.searchTips.add(0, tip)
         }
 
-        suspend fun createAd(newAd: Ad): Result<Boolean> {
+        suspend fun createAd(data: CreateAdRequest): Result<Boolean> {
             delay(400)
             return Result.failure(Exception())
         }
+
     }
 
     // NOTE: this is mock for an example

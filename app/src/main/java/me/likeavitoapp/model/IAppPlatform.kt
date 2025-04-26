@@ -2,6 +2,7 @@ package me.likeavitoapp.model
 
 interface IAppPlatform {
     fun getString(resId: Int): String?
+    fun getString(resId: Int, vararg formatArgs:Any): String?
 
     val appDataStore: IAppDataStore
 

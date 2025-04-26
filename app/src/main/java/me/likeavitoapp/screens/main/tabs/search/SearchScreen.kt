@@ -238,8 +238,6 @@ class SearchScreen(
         val state = State()
 
         inner class State(
-            var categories: List<Category> = get.sources().app.categories,
-            val regions: List<Region> = get.sources().app.regions,
             var enabled: UpdatableState<Boolean> = UpdatableState(false),
             var selectedCategory: UpdatableState<Category?> = UpdatableState(null),
             var selectedRegion: UpdatableState<Region?> = UpdatableState(null),

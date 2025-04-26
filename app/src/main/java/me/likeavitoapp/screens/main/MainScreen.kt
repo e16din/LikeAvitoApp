@@ -5,7 +5,7 @@ import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.createad.CreateAdScreen
+import me.likeavitoapp.screens.main.createad.CreateAdStepsScreen
 import me.likeavitoapp.screens.main.tabs.TabsRootScreen
 import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
 import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
@@ -52,7 +52,7 @@ class MainScreen() : IScreen {
     fun ClickToCreateAdUseCase() {
         recordScenarioStep()
 
-        navigator.startScreen(CreateAdScreen(navigator))
+        navigator.startScreen(CreateAdStepsScreen(navigator))
     }
 
     fun ClickToCartUseCase() {

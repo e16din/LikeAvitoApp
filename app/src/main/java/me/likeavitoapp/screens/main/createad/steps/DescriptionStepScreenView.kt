@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.createad
+package me.likeavitoapp.screens.main.createad.steps
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -68,7 +68,7 @@ import me.likeavitoapp.ui.theme.backgroundLight
 
 
 @Composable
-fun CreateAdScreenProvider(screen: CreateAdScreen) {
+fun DescriptionStepScreenProvider(screen: DescriptionStepScreen) {
     LaunchedEffect(Unit) {
         screen.StartScreenUseCase()
     }
@@ -85,7 +85,7 @@ fun CreateAdScreenProvider(screen: CreateAdScreen) {
                 },
                 withDoneButton = true
             ) { innerPadding ->
-                CreateAdScreenView(screen, Modifier.padding(innerPadding))
+                DescriptionStepScreenView(screen, Modifier.padding(innerPadding))
             }
         }
 
@@ -117,12 +117,7 @@ fun CreateAdScreenProvider(screen: CreateAdScreen) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen) {
-    val title by screen.state.title.collectAsState()
-    val description by screen.state.description.collectAsState()
-    val address by screen.state.address.collectAsState()
-    val price by screen.state.price.collectAsState()
-
+fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier) = with(screen) {
     val descriptionFocusRequester = remember { FocusRequester() }
     val localFocusManager = LocalFocusManager.current
 
@@ -131,7 +126,7 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
             .imePadding()
             .verticalScroll(rememberScrollState())
     ) {
-
+        val title by screen.state.title.collectAsState()
         OutlinedTextField(
             value = title,
             onValueChange = { value ->
@@ -252,6 +247,7 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
 
         Spacer(Modifier.height(4.dp))
 
+        val description by screen.state.description.collectAsState()
         OutlinedTextField(
             value = description,
             onValueChange = { value ->
@@ -303,95 +299,17 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
             )
         }
 
-        val isDeliveryEnabled by screen.state.isDeliveryEnabled.collectAsState()
-        Row(
-            Modifier.clickable {
-                screen.ClickToIsDeliveryUseCase()
-            }
-        ) {
-            Checkbox(
-                checked = isDeliveryEnabled,
-                onCheckedChange = {
-                    screen.ChangeIsDeliveryUseCase(it)
-                }
-            )
-            Text(
-                stringResource(R.string.bargaining_enabled_checkbox),
-                Modifier
-                    .padding(horizontal = 8.dp)
-                    .align(Alignment.CenterVertically)
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(4.dp))
-
-        OutlinedTextField(
-            value = address,
-            onValueChange = { value ->
-                screen.ChangeAddressUseCase(value)
-            },
-            label = {
-                Text(stringResource(R.string.address_label))
-            },
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth(),
-            maxLines = 2,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Text
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    localFocusManager.moveFocus(FocusDirection.Down)
-                }
-            )
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(4.dp))
-
-        OutlinedTextField(
-            value = price.toString(),
-            onValueChange = { value ->
-                screen.ChangePriceUseCase(value)
-            },
-            label = {
-                Text(stringResource(R.string.price_label))
-            },
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth(),
-            maxLines = 2,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Decimal
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    localFocusManager.moveFocus(FocusDirection.Exit)
-                }
-            )
-        )
-
         Spacer(Modifier.size(8.dp))
 
-        OutlinedButton(
+        Button(
             onClick = {
-                screen.ClickToCreateAdUseCase()
+                screen.ClickToNextUseCase()
             },
             Modifier
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Text(stringResource(R.string.create_ad_button))
+            Text(stringResource(R.string.next_button))
         }
     }
 

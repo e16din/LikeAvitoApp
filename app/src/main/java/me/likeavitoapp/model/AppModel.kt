@@ -28,6 +28,7 @@ class AppModel {
     var pickupPointTypes = listOf<PickupPointType>()
 
     var activeOrderRequest: OrderRequest? = null
+    var activeCreateAdRequest: CreateAdRequest? = null
 
     val loading = UpdatableState(false)
     val message = UpdatableState<String?>(null)
@@ -52,11 +53,15 @@ class AppModel {
             }
         }
     }
+
+    fun pay(onDone: (success:Boolean)->Unit){
+        onDone(false)
+    }
 }
 
 
 class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
-    val screens = if(initialScreen!= null)
+    val screens = if (initialScreen != null)
         mutableListOf(initialScreen)
     else
         mutableListOf()
@@ -175,6 +180,17 @@ data class Region(val name: String, val id: Int)
 data class PriceRange(var from: Int = 0, var to: Int = -1)
 
 data class PickupPointType(val name: String, val id: Int)
+
+data class CreateAdRequest(
+    var categoryId: Int?,
+    var selectedTypes: List<Int>,
+    var address: String?,
+    var title: String?,
+    var description: String?,
+    var photos: List<ByteArray>,
+    var isBargainingEnabled: Boolean,
+    var completed: Boolean
+)
 
 data class OrderRequest(
     var ad: Ad,

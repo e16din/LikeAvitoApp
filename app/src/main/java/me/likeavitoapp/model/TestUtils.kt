@@ -1,7 +1,5 @@
 package me.likeavitoapp.model
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import me.likeavitoapp.MainSet
 import me.likeavitoapp.get
@@ -83,6 +81,10 @@ fun mockMainSet() = MainSet().apply {
     appBackend = AppBackend() // NOTE: you may change it for any test
     init(object : IAppPlatform {
         override fun getString(resId: Int): String? {
+            return null
+        }
+
+        override fun getString(resId: Int, vararg formatArgs: Any): String? {
             return null
         }
 

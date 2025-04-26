@@ -3,6 +3,7 @@ package me.likeavitoapp.screens.main.order.create.selectpickup
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -84,7 +86,6 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
     with(screen) {
         val query by screen.state.query.collectAsState()
         val selectedTypeId by screen.state.typeId.collectAsState()
-        val types = screen.enabledTypes
         val selectedPoint = get.sources().app.activeOrderRequest!!.pickupPoint
 
         Column(modifier = modifier.fillMaxSize()) {
@@ -115,7 +116,8 @@ fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modif
                     }
                 )
 
-                Row {
+                val types = screen.enabledTypes
+                Row(Modifier.horizontalScroll(rememberScrollState())) {
                     types.forEach { type ->
                         Chip(
                             startIcon = {

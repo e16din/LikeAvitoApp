@@ -57,8 +57,8 @@ inline fun SearchSettingsPanelView(
     val categoryMenuEnabled by panel.state.categoryMenuEnabled.collectAsState()
     val regionMenuEnabled by panel.state.regionMenuEnabled.collectAsState()
 
-    val categories = panel.state.categories
-    val regions = panel.state.regions
+    val categories = get.sources().app.categories
+    val regions = get.sources().app.regions
 
     val category by panel.state.selectedCategory.collectAsState()
     val region by panel.state.selectedRegion.collectAsState()
