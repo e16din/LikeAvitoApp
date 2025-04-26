@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,29 +34,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.io.IOException
 import me.likeavitoapp.MainActivity
 import me.likeavitoapp.R
@@ -118,7 +123,7 @@ fun DescriptionStepScreenProvider(screen: DescriptionStepScreen) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier) = with(screen) {
-    val descriptionFocusRequester = remember { FocusRequester() }
+    val photosFocusRequester = remember { FocusRequester() }
     val localFocusManager = LocalFocusManager.current
 
     Column(
@@ -133,7 +138,7 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
                 screen.ChangeTitleUseCase(value)
             },
             label = {
-                Text(stringResource(R.string.title_label))
+                Text(stringResource(R.string.title_arg))
             },
             modifier = Modifier
                 .padding(top = 16.dp, start = 16.dp, end = 16.dp)
@@ -145,17 +150,13 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
             ),
             keyboardActions = KeyboardActions(
                 onNext = {
-                    descriptionFocusRequester.requestFocus()
+                    photosFocusRequester.requestFocus()
                 }
             )
         )
 
 
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(12.dp))
 
 
         val photos = screen.state.photos
@@ -172,80 +173,112 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
             }
         }
 
-        Column {
-            val height = 210.dp
-            LazyRow(
+        var photoCardFocusEnabled by remember { mutableStateOf(false) }
+        Box(
+            Modifier
+                .focusable()
+                .onFocusChanged {
+                    photoCardFocusEnabled = it.isFocused
+                }
+                .focusRequester(photosFocusRequester)) {
+
+
+            OutlinedCard(
                 modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp)
                     .fillMaxWidth()
-                    .height(height)
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                state = listState,
-                contentPadding = PaddingValues(start = 8.dp)
+                    .focusable()
+                    .onFocusChanged {
+                        photoCardFocusEnabled = it.isFocused
+                    },
+                shape = RoundedCornerShape(2)
             ) {
-                itemsIndexed(photos) { index, bytes ->
-                    Box {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            AnimatedVisibility(true) {
-                                ActualAsyncImage(
+                Column(
+                    Modifier.padding(10.dp)
+                ) {
+                    val height = 210.dp
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(height),
+//                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                        state = listState,
+                        contentPadding = PaddingValues(start = 8.dp)
+                    ) {
+                        itemsIndexed(photos) { index, bytes ->
+                            Box {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    AnimatedVisibility(true) {
+                                        ActualAsyncImage(
+                                            modifier = Modifier
+                                                .padding(end = 4.dp)
+                                                .width((screenWidth * 0.75f).dp)
+                                                .height(height),
+                                            byteArray = bytes
+                                        )
+                                    }
+                                }
+
+                                Text(
                                     modifier = Modifier
-                                        .padding(end = 4.dp)
-                                        .width((screenWidth * 0.75f).dp)
-                                        .height(height),
-                                    byteArray = bytes
+                                        .align(Alignment.BottomCenter)
+                                        .padding(8.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            backgroundLight
+                                        )
+                                        .padding(vertical = 4.dp, horizontal = 12.dp),
+                                    text = "${index + 1} / ${photos.size}"
+                                )
+
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "clear",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .padding(12.dp)
+                                        .align(Alignment.TopEnd)
+                                        .clip(CircleShape)
+                                        .size(24.dp)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .padding(4.dp)
+                                        .clickable {
+                                            screen.ClickToRemovePhotoUseCase(bytes)
+                                        },
                                 )
                             }
                         }
+                    }
 
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(8.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    backgroundLight
-                                )
-                                .padding(vertical = 4.dp, horizontal = 12.dp),
-                            text = "${index + 1} / ${photos.size}"
-                        )
+                    Spacer(Modifier.size(8.dp))
 
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "clear",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .align(Alignment.TopEnd)
-                                .clip(CircleShape)
-                                .size(24.dp)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(4.dp)
-                                .clickable {
-                                    screen.ClickToRemovePhotoUseCase(bytes)
-                                },
-                        )
+                    OutlinedButton(
+                        onClick = {
+                            screen.ClickToAddPhotoUseCase()
+                        },
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(stringResource(R.string.add_photo_button))
                     }
                 }
             }
 
-            Spacer(Modifier.size(8.dp))
-
-            OutlinedButton(
-                onClick = {
-                    screen.ClickToAddPhotoUseCase()
-                },
-                Modifier
-                    .padding(horizontal = 16.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Text(stringResource(R.string.add_photo_button))
-            }
+            Text(
+                text = stringResource(R.string.photo_arg),
+                color = if (photoCardFocusEnabled)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.outline,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .padding(start = 36.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+            )
         }
 
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(12.dp))
 
         val description by screen.state.description.collectAsState()
         OutlinedTextField(
@@ -254,12 +287,11 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
                 screen.ChangeDescriptionUseCase(value)
             },
             label = {
-                Text(stringResource(R.string.description_label))
+                Text(stringResource(R.string.description_arg))
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .focusRequester(descriptionFocusRequester),
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
             minLines = 6,
             maxLines = 6,
             keyboardOptions = KeyboardOptions(
@@ -268,22 +300,20 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
             ),
             keyboardActions = KeyboardActions(
                 onNext = {
-
+                    localFocusManager.clearFocus()
                 }
             )
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(12.dp))
 
         val isBargainingEnabled by screen.state.isBargainingEnabled.collectAsState()
         Row(
-            Modifier.clickable {
-                screen.ClickToIsBargainingUseCase()
-            }
+            Modifier
+                .clickable {
+                    screen.ClickToIsBargainingUseCase()
+                }
+                .padding(16.dp)
         ) {
             Checkbox(
                 checked = isBargainingEnabled,
@@ -311,6 +341,8 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
         ) {
             Text(stringResource(R.string.next_button))
         }
+
+        Spacer(Modifier.size(24.dp))
     }
 
 }

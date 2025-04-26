@@ -111,7 +111,7 @@ class DescriptionStepScreen(
         val fieldName = if (state.title.value.isEmpty()) {
             get.sources().platform.getString(R.string.title_arg)
         } else if (state.description.value.isEmpty()) {
-            get.sources().platform.getString(R.string.descriptio_arg)
+            get.sources().platform.getString(R.string.description_arg)
         } else if (state.photos.isEmpty()) {
             get.sources().platform.getString(R.string.photo_arg)
         } else {
