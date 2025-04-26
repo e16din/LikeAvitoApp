@@ -254,6 +254,7 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
 
                     OutlinedButton(
                         onClick = {
+                            photosFocusRequester.requestFocus()
                             screen.ClickToAddPhotoUseCase()
                         },
                         Modifier

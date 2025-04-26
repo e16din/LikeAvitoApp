@@ -59,7 +59,6 @@ class AppModel {
     }
 }
 
-
 class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
     val screens = if (initialScreen != null)
         mutableListOf(initialScreen)
