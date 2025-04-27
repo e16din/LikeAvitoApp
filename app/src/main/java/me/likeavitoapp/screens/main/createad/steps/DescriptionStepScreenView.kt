@@ -33,7 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -69,6 +68,7 @@ import me.likeavitoapp.log
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.ActualAsyncImage
+import me.likeavitoapp.screens.CheckBoxLabel
 import me.likeavitoapp.ui.theme.backgroundLight
 
 
@@ -309,25 +309,12 @@ fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier)
         Spacer(Modifier.height(12.dp))
 
         val isBargainingEnabled by screen.state.isBargainingEnabled.collectAsState()
-        Row(
-            Modifier
-                .clickable {
-                    screen.ClickToIsBargainingUseCase()
-                }
-                .padding(16.dp)
-        ) {
-            Checkbox(
-                checked = isBargainingEnabled,
-                onCheckedChange = {
-                    screen.ChangeIsBargainingUseCase(it)
-                }
-            )
-            Text(
-                stringResource(R.string.bargaining_enabled_checkbox),
-                Modifier
-                    .padding(horizontal = 8.dp)
-                    .align(Alignment.CenterVertically)
-            )
+        CheckBoxLabel(
+            modifier = Modifier.padding(start = 16.dp),
+            label = stringResource(R.string.bargaining_enabled_checkbox),
+            checked = isBargainingEnabled
+        ) { checked ->
+            screen.ChangeIsBargainingUseCase(checked)
         }
 
         Spacer(Modifier.size(8.dp))

@@ -75,6 +75,7 @@
     <string name="description_label">Описание</string>
     <string name="bargaining_enabled_checkbox">Торг уместен</string>
     <string name="address_label">Адрес</string>
+    <string name="address_arg">Адрес</string>
     <string name="price_label">Цена</string>
     <string name="create_ad_button">Создать объявление</string>
     <string name="about_premium_label">Премиум сообщение выгодно выделяется на фоне других и имеет больший процент просмотров.</string>
@@ -90,5 +91,7 @@
     <string name="title_arg">Название</string>
     <string name="description_arg">Описание</string>
     <string name="photo_arg">Фото</string>
+    <string name="category_arg">Категория</string>
+    <string name="possible_pickup_points_arg">Пункты выдачи</string>
 
 </resources>

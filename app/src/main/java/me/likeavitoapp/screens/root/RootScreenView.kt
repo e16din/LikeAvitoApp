@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
@@ -96,6 +97,7 @@ fun RootScreenView(screen: RootScreen) {
                 Box {
                     Text(
                         text = message!!,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.align(Alignment.Center)
                     )
 

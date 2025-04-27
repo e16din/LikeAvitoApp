@@ -6,14 +6,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -22,13 +27,16 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
-import me.likeavitoapp.get
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.ActionTopBar
 
@@ -65,7 +73,8 @@ fun CategoryStepsScreenProvider(screen: CategoryStepScreen) {
 @Composable
 fun CategoryStepScreenView(screen: CategoryStepScreen, modifier: Modifier) = with(screen) {
     val selectedCategoryId by screen.state.selectedCategoryId.collectAsState()
-    val categories = get.sources().app.categories
+    val categories by screen.state.categories.collectAsState()
+    val localFocusManager = LocalFocusManager.current
 
     Column(modifier = modifier.fillMaxSize()) {
         val query by screen.state.query.collectAsState()
@@ -89,7 +98,18 @@ fun CategoryStepScreenView(screen: CategoryStepScreen, modifier: Modifier) = wit
                         )
                     }
                 }
-            }
+            },
+            maxLines = 1,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    localFocusManager.clearFocus()
+                }
+            )
         )
 
         LazyColumn {
@@ -109,6 +129,23 @@ fun CategoryStepScreenView(screen: CategoryStepScreen, modifier: Modifier) = wit
                             "selected",
                             modifier = Modifier.padding(12.dp)
                         )
+                    }
+                }
+            }
+
+            item {
+                Column(Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.size(24.dp))
+
+                    Button(
+                        onClick = {
+                            screen.ClickToNextUseCase()
+                        },
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(stringResource(R.string.next_button))
                     }
                 }
             }

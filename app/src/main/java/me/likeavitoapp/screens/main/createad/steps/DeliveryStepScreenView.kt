@@ -1,28 +1,46 @@
 package me.likeavitoapp.screens.main.createad.steps
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import me.likeavitoapp.R
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.screens.ActionTopBar
+import me.likeavitoapp.screens.CheckBoxLabel
 
 
 @Composable
@@ -58,32 +76,87 @@ fun DeliveryStepScreenView(screen: DeliveryStepScreen, modifier: Modifier) = wit
     val types by screen.state.types.collectAsState()
     val selectedTypes = screen.state.selectedTypes
 
-    Column {
-        Column {
-            types.forEach { type ->
-                Row(
-                    Modifier.clickable {
-                        screen.SelectEnabledPointsType(type.id)
-                    }
+    val localFocusManager = LocalFocusManager.current
+    val typesFocusRequester = remember { FocusRequester() }
+    Column(modifier) {
+        var focusEnabled by remember { mutableStateOf(false) }
+        Box(
+            Modifier
+                .padding(top = 16.dp)
+                .focusable()
+                .onFocusChanged {
+                    focusEnabled = it.isFocused
+                }
+                .focusRequester(typesFocusRequester)) {
+
+
+            OutlinedCard(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                    .fillMaxWidth()
+                    .focusable()
+                    .onFocusChanged {
+                        focusEnabled = it.isFocused
+                    },
+                shape = RoundedCornerShape(2)
+            ) {
+                Column(
+                    Modifier.padding(10.dp)
                 ) {
-                    Checkbox(
-                        checked = selectedTypes.contains(type.id),
-                        onCheckedChange = {
-                            screen.SelectEnabledPointsType(type.id)
+                    types.forEach { type ->
+                       CheckBoxLabel(
+                           label = type.name,
+                           checked = selectedTypes.contains(type.id)
+                       ) { checked ->
+                           screen.ChangeEnabledPointsType(type.id, checked)
                         }
-                    )
-                    Text(
-                        stringResource(R.string.bargaining_enabled_checkbox),
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .align(Alignment.CenterVertically)
-                    )
+                    }
                 }
             }
+
+            Text(
+                text = stringResource(R.string.possible_pickup_points_arg),
+                color = if (focusEnabled)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.outline,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .padding(start = 36.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+            )
         }
 
-        val address by screen.state.address.collectAsState()
+        Spacer(Modifier.height(12.dp))
 
+        val address by screen.state.address.collectAsState()
+        val ownerAddressId = 0
+        OutlinedTextField(
+            value = address,
+            enabled = selectedTypes.contains(ownerAddressId),
+            onValueChange = { value ->
+                screen.ChangeAddressUseCase(value)
+            },
+            label = {
+                Text(stringResource(R.string.address_arg))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+            minLines = 1,
+            maxLines = 6,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    localFocusManager.clearFocus()
+                }
+            )
+        )
+
+        Spacer(Modifier.height(12.dp))
 
         Spacer(Modifier.size(24.dp))
 

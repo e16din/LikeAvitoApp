@@ -119,7 +119,7 @@ fun FinalStepScreenView(screen: FinalStepScreen, modifier: Modifier) = with(scre
         Spacer(Modifier.height(4.dp))
 
         val price by screen.state.price.collectAsState()
-        val priceText = if(price == 0) stringResource(R.string.free_label) else "$price"
+        val priceText = /*if(price == 0) stringResource(R.string.free_label) else */"$price"
         Text(stringResource(R.string.price_with_value_label, priceText))
 
 

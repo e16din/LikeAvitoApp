@@ -3,7 +3,6 @@ package me.likeavitoapp.screens.main.createad.steps
 import androidx.compose.runtime.mutableStateListOf
 import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.inverse
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -93,12 +92,6 @@ class DescriptionStepScreen(
         recordScenarioStep(enabled)
 
         state.isBargainingEnabled.next(enabled)
-    }
-
-    fun ClickToIsBargainingUseCase() {
-        recordScenarioStep()
-
-        state.isBargainingEnabled.inverse()
     }
 
     fun ClickToNextUseCase() {

@@ -1,5 +1,6 @@
 package me.likeavitoapp.screens.main.createad.steps
 
+import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
@@ -13,6 +14,7 @@ class CategoryStepScreen(
 
     class State {
         val query = UpdatableState("")
+        val categories = UpdatableState(get.sources().app.categories)
 
         val selectedCategoryId = UpdatableState(
             get.sources().app.activeCreateAdRequest?.categoryId
@@ -41,23 +43,43 @@ class CategoryStepScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        get.sources().app.activeCreateAdRequest?.categoryId =
-            state.selectedCategoryId.value
+        val categoryId = state.selectedCategoryId.value
 
-        navigator.startScreen(
-            DeliveryStepScreen(navigator)
-        )
+        if (categoryId == null) {
+            val fieldName = get.sources().platform.getString(R.string.category_arg)
+            get.sources().app.message.next(
+                get.sources().platform.getString(R.string.fill_the_field_message, fieldName)
+            )
+
+        } else {
+            get.sources().app.activeCreateAdRequest?.categoryId = categoryId
+            navigator.startScreen(
+                DeliveryStepScreen(navigator)
+            )
+        }
     }
 
     fun ChangeQueryUseCase(query: String) {
         recordScenarioStep(query)
 
         state.query.next(query)
+
+        state.categories.next(
+            get.sources().app.categories.filter {
+                it.name.lowercase().contains(query.lowercase())
+            }
+        )
     }
 
     fun ClickToClearQueryUseCase() {
         recordScenarioStep()
 
-        state.query.next("")
+        ChangeQueryUseCase("")
+    }
+
+    fun ClickToNextUseCase() {
+        recordScenarioStep()
+
+        ClickToDoneUseCase()
     }
 }
