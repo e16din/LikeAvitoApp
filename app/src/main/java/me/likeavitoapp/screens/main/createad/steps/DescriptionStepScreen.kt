@@ -41,7 +41,7 @@ class DescriptionStepScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigator.backToPrevious()
+        get.sources().app.mainScreen.returnToActiveTab()
     }
 
     fun ClickToDoneUseCase() {

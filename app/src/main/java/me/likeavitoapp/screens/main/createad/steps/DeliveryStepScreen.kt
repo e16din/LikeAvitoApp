@@ -33,7 +33,7 @@ class DeliveryStepScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigator.backToPrevious()
+        get.sources().app.mainScreen.returnToActiveTab()
     }
 
     fun ClickToDoneUseCase() {

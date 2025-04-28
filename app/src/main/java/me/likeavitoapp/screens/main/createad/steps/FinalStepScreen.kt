@@ -5,7 +5,6 @@ import kotlinx.coroutines.withContext
 import me.likeavitoapp.R
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.inverse
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
@@ -32,7 +31,7 @@ class FinalStepScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigator.backToPrevious()
+        get.sources().app.mainScreen.returnToActiveTab()
     }
 
     fun ClickToDoneUseCase() {
@@ -48,24 +47,10 @@ class FinalStepScreen(
         }
     }
 
-    fun ClickToIsPremiumUseCase() {
-        recordScenarioStep()
-
-        state.isPremiumEnabled.inverse()
-        updatePrice()
-    }
-
     fun ChangeIsPremiumUseCase(enabled: Boolean) {
         recordScenarioStep(enabled)
 
         state.isPremiumEnabled.next(enabled)
-        updatePrice()
-    }
-
-    fun ClickToIsAutoupdateUseCase() {
-        recordScenarioStep()
-
-        state.isAutoupdateEnabled.inverse()
         updatePrice()
     }
 
@@ -80,7 +65,8 @@ class FinalStepScreen(
         var sum = 0
         if (state.isPremiumEnabled.value) {
             sum += 300
-        } else {
+        }
+        if(state.isAutoupdateEnabled.value){
             sum += 90
         }
 

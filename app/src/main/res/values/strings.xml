@@ -86,12 +86,15 @@
     <string name="autoupdate_checkbox">Автообновление</string>
     <string name="autoupdate_label">Объявление будет активно 21 день, обновлять автоматически?</string>
     <string name="free_label">Даром</string>
-    <string name="price_with_value_label">Цена: </string>
+    <string name="price_with_value_label">Цена: %1$s</string>
     <string name="fill_the_field_message">Поле \"%1$s\" обязательно для заполнения</string>
     <string name="title_arg">Название</string>
     <string name="description_arg">Описание</string>
     <string name="photo_arg">Фото</string>
     <string name="category_arg">Категория</string>
     <string name="possible_pickup_points_arg">Пункты выдачи</string>
+    <string name="premium_checkbox">Премиум объявление</string>
+    <string name="premium_label">Премиум</string>
+    <string name="autoupdate_card_label">Автоматическое обновление</string>
 
 </resources>

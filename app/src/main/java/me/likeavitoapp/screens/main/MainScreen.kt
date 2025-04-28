@@ -90,4 +90,8 @@ class MainScreen() : IScreen {
         navigator.reset()
         tabsRootScreen.navigator.startScreen(ordersScreen)
     }
+
+    fun returnToActiveTab() {
+        navigator.reset()
+    }
 }

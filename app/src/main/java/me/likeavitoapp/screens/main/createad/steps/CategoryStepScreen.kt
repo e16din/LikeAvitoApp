@@ -31,7 +31,7 @@ class CategoryStepScreen(
     fun PressBackUseCase() {
         recordScenarioStep()
 
-        navigator.backToPrevious()
+        get.sources().app.mainScreen.returnToActiveTab()
     }
 
     fun SelectCategoryIdUseCase(categoryId: Int) {
