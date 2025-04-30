@@ -1,9 +1,5 @@
 package me.likeavitoapp.screens.main.createad.steps
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import me.likeavitoapp.R
-import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
@@ -23,34 +19,12 @@ class FinalStepScreen(
 
     val state = State()
 
-    fun StartScreenUseCase() {
-        recordScenarioStep()
-
-    }
-
-    fun PressBackUseCase() {
-        recordScenarioStep()
-
-        get.sources().app.mainScreen.returnToActiveTab()
-    }
-
-    fun ClickToDoneUseCase() {
-        recordScenarioStep()
-
-        if (state.price.value == 0) {
-            createAd()
-
-        } else {
-            get.sources().app.pay { success ->
-                createAd()
-            }
-        }
-    }
 
     fun ChangeIsPremiumUseCase(enabled: Boolean) {
         recordScenarioStep(enabled)
 
         state.isPremiumEnabled.next(enabled)
+        get.sources().app.activeCreateAdRequest!!.isPremiumEnabled = enabled
         updatePrice()
     }
 
@@ -58,6 +32,7 @@ class FinalStepScreen(
         recordScenarioStep(enabled)
 
         state.isAutoupdateEnabled.next(enabled)
+        get.sources().app.activeCreateAdRequest!!.isAutoupdateEnabled = enabled
         updatePrice()
     }
 
@@ -71,36 +46,7 @@ class FinalStepScreen(
         }
 
         state.price.next(sum)
-    }
-
-    fun ClickToCreateAdUseCase() {
-        recordScenarioStep()
-
-        ClickToDoneUseCase()
-    }
-
-    private fun checkIsValid(): Boolean {
-        return false
-    }
-
-    private fun createAd() {
-        if (checkIsValid()) {
-            get.sources().app.loading.next(true)
-            work {
-                val result = get.sources().backend.adsService.createAd(
-                    get.sources().app.activeCreateAdRequest!!
-                )
-                withContext(Dispatchers.Main) {
-                    get.sources().app.loading.next(false)
-                    if (result.getOrNull() == true) {
-
-                        get.sources().app.message.next(
-                            get.sources().platform.getString(R.string.create_ad_success_message)
-                        )
-                    }
-                }
-            }
-        }
+        get.sources().app.activeCreateAdRequest!!.price = sum
     }
 
 }

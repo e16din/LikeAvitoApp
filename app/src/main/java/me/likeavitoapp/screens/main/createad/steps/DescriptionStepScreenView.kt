@@ -1,6 +1,5 @@
 package me.likeavitoapp.screens.main.createad.steps
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -8,13 +7,11 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -24,20 +21,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,33 +53,182 @@ import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.log
 import me.likeavitoapp.model.collectAsState
-import me.likeavitoapp.screens.ActionTopBar
 import me.likeavitoapp.screens.ActualAsyncImage
 import me.likeavitoapp.screens.CheckBoxLabel
 import me.likeavitoapp.screens.OutlinedCardLabel
 import me.likeavitoapp.ui.theme.backgroundLight
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun DescriptionStepScreenProvider(screen: DescriptionStepScreen) {
-    LaunchedEffect(Unit) {
-        screen.StartScreenUseCase()
-    }
+fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier) = with(screen) {
+    val photosFocusRequester = remember { FocusRequester() }
+    val localFocusManager = LocalFocusManager.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            ActionTopBar(
-                title = stringResource(R.string.add_new_ad_title),
-                onDone = {
-                    screen.ClickToDoneUseCase()
+    Box {
+        Column(
+            modifier = modifier
+                .imePadding()
+        ) {
+            val title by screen.state.title.collectAsState()
+            OutlinedTextField(
+                value = title,
+                onValueChange = { value ->
+                    screen.ChangeTitleUseCase(value)
                 },
-                onClose = {
-                    screen.PressBackUseCase()
+                label = {
+                    Text(stringResource(R.string.title_arg))
                 },
-                withDoneButton = true
-            ) { innerPadding ->
-                DescriptionStepScreenView(screen, Modifier.padding(innerPadding))
+                modifier = Modifier
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth(),
+                maxLines = 2,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Text
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        photosFocusRequester.requestFocus()
+                    }
+                )
+            )
+
+
+            Spacer(Modifier.height(12.dp))
+
+
+            val photos = screen.state.photos
+
+            val screenWidth = get.sources().platform.screenWidthDp
+
+            val scrollToEnd by screen.state.scrollPhotosToEnd.collectAsState()
+            val listState = rememberLazyListState()
+
+            LaunchedEffect(scrollToEnd) {
+                if (scrollToEnd) {
+                    screen.state.scrollPhotosToEnd.next(false)
+                    listState.scrollToItem(photos.size - 1)
+                }
             }
+            OutlinedCardLabel(
+                label = stringResource(R.string.photo_arg),
+                focusRequester = photosFocusRequester
+            ) {
+                //                        .background(MaterialTheme.colorScheme.secondaryContainer),
+
+                Column(
+                    Modifier.padding(10.dp)
+                ) {
+                    val height = 210.dp
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(height),
+                        //                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                        state = listState,
+                        contentPadding = PaddingValues(start = 8.dp)
+                    ) {
+                        itemsIndexed(photos) { index, bytes ->
+                            Box {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    AnimatedVisibility(true) {
+                                        ActualAsyncImage(
+                                            modifier = Modifier
+                                                .padding(end = 4.dp)
+                                                .width((screenWidth * 0.75f).dp)
+                                                .height(height),
+                                            byteArray = bytes
+                                        )
+                                    }
+                                }
+
+                                Text(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(8.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            backgroundLight
+                                        )
+                                        .padding(vertical = 4.dp, horizontal = 12.dp),
+                                    text = "${index + 1} / ${photos.size}"
+                                )
+
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "clear",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .padding(12.dp)
+                                        .align(Alignment.TopEnd)
+                                        .clip(CircleShape)
+                                        .size(24.dp)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .padding(4.dp)
+                                        .clickable {
+                                            screen.ClickToRemovePhotoUseCase(bytes)
+                                        },
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.size(8.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            screen.ClickToAddPhotoUseCase()
+                            photosFocusRequester.requestFocus()
+                        },
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(stringResource(R.string.add_photo_button))
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            val description by screen.state.description.collectAsState()
+            OutlinedTextField(
+                value = description,
+                onValueChange = { value ->
+                    screen.ChangeDescriptionUseCase(value)
+                },
+                label = {
+                    Text(stringResource(R.string.description_arg))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                minLines = 6,
+                maxLines = 6,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Text
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        localFocusManager.clearFocus()
+                    }
+                )
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            val isBargainingEnabled by screen.state.isBargainingEnabled.collectAsState()
+            CheckBoxLabel(
+                modifier = Modifier.padding(start = 16.dp),
+                label = stringResource(R.string.bargaining_enabled_checkbox),
+                checked = isBargainingEnabled
+            ) { checked ->
+                screen.ChangeIsBargainingUseCase(checked)
+            }
+
+            Spacer(Modifier.size(24.dp))
         }
 
         val imagePickerEnabled by screen.state.imagePickerEnabled.collectAsState()
@@ -108,196 +250,6 @@ fun DescriptionStepScreenProvider(screen: DescriptionStepScreen) {
             }
             pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
-    }
-
-    BackHandler {
-        screen.PressBackUseCase()
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun DescriptionStepScreenView(screen: DescriptionStepScreen, modifier: Modifier) = with(screen) {
-    val photosFocusRequester = remember { FocusRequester() }
-    val localFocusManager = LocalFocusManager.current
-
-    Column(
-        modifier = modifier
-            .imePadding()
-            .verticalScroll(rememberScrollState())
-    ) {
-        val title by screen.state.title.collectAsState()
-        OutlinedTextField(
-            value = title,
-            onValueChange = { value ->
-                screen.ChangeTitleUseCase(value)
-            },
-            label = {
-                Text(stringResource(R.string.title_arg))
-            },
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth(),
-            maxLines = 2,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Text
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    photosFocusRequester.requestFocus()
-                }
-            )
-        )
-
-
-        Spacer(Modifier.height(12.dp))
-
-
-        val photos = screen.state.photos
-
-        val screenWidth = get.sources().platform.screenWidthDp
-
-        val scrollToEnd by screen.state.scrollPhotosToEnd.collectAsState()
-        val listState = rememberLazyListState()
-
-        LaunchedEffect(scrollToEnd) {
-            if (scrollToEnd) {
-                screen.state.scrollPhotosToEnd.next(false)
-                listState.scrollToItem(photos.size - 1)
-            }
-        }
-        OutlinedCardLabel(
-            label = stringResource(R.string.photo_arg),
-            focusRequester = photosFocusRequester
-        ) {
-            //                        .background(MaterialTheme.colorScheme.secondaryContainer),
-
-            Column(
-                Modifier.padding(10.dp)
-            ) {
-                val height = 210.dp
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height),
-                    //                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                    state = listState,
-                    contentPadding = PaddingValues(start = 8.dp)
-                ) {
-                    itemsIndexed(photos) { index, bytes ->
-                        Box {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                AnimatedVisibility(true) {
-                                    ActualAsyncImage(
-                                        modifier = Modifier
-                                            .padding(end = 4.dp)
-                                            .width((screenWidth * 0.75f).dp)
-                                            .height(height),
-                                        byteArray = bytes
-                                    )
-                                }
-                            }
-
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        backgroundLight
-                                    )
-                                    .padding(vertical = 4.dp, horizontal = 12.dp),
-                                text = "${index + 1} / ${photos.size}"
-                            )
-
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "clear",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .align(Alignment.TopEnd)
-                                    .clip(CircleShape)
-                                    .size(24.dp)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .padding(4.dp)
-                                    .clickable {
-                                        screen.ClickToRemovePhotoUseCase(bytes)
-                                    },
-                            )
-                        }
-                    }
-                }
-
-                Spacer(Modifier.size(8.dp))
-
-                OutlinedButton(
-                    onClick = {
-                        screen.ClickToAddPhotoUseCase()
-                        photosFocusRequester.requestFocus()
-                    },
-                    Modifier
-                        .padding(horizontal = 16.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Text(stringResource(R.string.add_photo_button))
-                }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        val description by screen.state.description.collectAsState()
-        OutlinedTextField(
-            value = description,
-            onValueChange = { value ->
-                screen.ChangeDescriptionUseCase(value)
-            },
-            label = {
-                Text(stringResource(R.string.description_arg))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-            minLines = 6,
-            maxLines = 6,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Text
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    localFocusManager.clearFocus()
-                }
-            )
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        val isBargainingEnabled by screen.state.isBargainingEnabled.collectAsState()
-        CheckBoxLabel(
-            modifier = Modifier.padding(start = 16.dp),
-            label = stringResource(R.string.bargaining_enabled_checkbox),
-            checked = isBargainingEnabled
-        ) { checked ->
-            screen.ChangeIsBargainingUseCase(checked)
-        }
-
-        Spacer(Modifier.size(8.dp))
-
-        Button(
-            onClick = {
-                screen.ClickToNextUseCase()
-            },
-            Modifier
-                .padding(horizontal = 16.dp)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Text(stringResource(R.string.next_button))
-        }
-
-        Spacer(Modifier.size(24.dp))
     }
 
 }

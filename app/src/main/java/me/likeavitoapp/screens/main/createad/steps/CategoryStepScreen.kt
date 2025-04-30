@@ -1,6 +1,5 @@
 package me.likeavitoapp.screens.main.createad.steps
 
-import me.likeavitoapp.R
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.ScreensNavigator
@@ -23,41 +22,14 @@ class CategoryStepScreen(
 
     val state = State()
 
-    fun StartScreenUseCase() {
-        recordScenarioStep()
-
-    }
-
-    fun PressBackUseCase() {
-        recordScenarioStep()
-
-        get.sources().app.mainScreen.returnToActiveTab()
-    }
-
     fun SelectCategoryIdUseCase(categoryId: Int) {
         recordScenarioStep()
 
         state.selectedCategoryId.next(categoryId)
+        get.sources().app.activeCreateAdRequest!!.categoryId = categoryId
     }
 
-    fun ClickToDoneUseCase() {
-        recordScenarioStep()
 
-        val categoryId = state.selectedCategoryId.value
-
-        if (categoryId == null) {
-            val fieldName = get.sources().platform.getString(R.string.category_arg)
-            get.sources().app.message.next(
-                get.sources().platform.getString(R.string.fill_the_field_message, fieldName)
-            )
-
-        } else {
-            get.sources().app.activeCreateAdRequest?.categoryId = categoryId
-            navigator.startScreen(
-                DeliveryStepScreen(navigator)
-            )
-        }
-    }
 
     fun ChangeQueryUseCase(query: String) {
         recordScenarioStep(query)
@@ -75,11 +47,5 @@ class CategoryStepScreen(
         recordScenarioStep()
 
         ChangeQueryUseCase("")
-    }
-
-    fun ClickToNextUseCase() {
-        recordScenarioStep()
-
-        ClickToDoneUseCase()
     }
 }

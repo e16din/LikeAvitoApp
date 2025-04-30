@@ -181,14 +181,17 @@ data class PriceRange(var from: Int = 0, var to: Int = -1)
 data class PickupPointType(val name: String, val id: Int)
 
 data class CreateAdRequest(
-    var categoryId: Int?,
-    var selectedTypes: List<Int>,
-    var address: String?,
-    var title: String?,
-    var description: String?,
-    var photos: List<ByteArray>,
-    var isBargainingEnabled: Boolean,
-    var completed: Boolean
+    var categoryId: Int? = null,
+    var price: Int? = null,
+    var selectedPickupPointTypes: MutableList<Int> = mutableListOf(),
+    var address: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+    var photos: MutableList<ByteArray> = mutableListOf(),
+    var isBargainingEnabled: Boolean = false,
+    var isPremiumEnabled: Boolean = false,
+    var isAutoupdateEnabled: Boolean = false,
+    var completed: Boolean = false
 )
 
 data class OrderRequest(
