@@ -46,6 +46,7 @@ class DescriptionStepScreen(
 
         // test
         state.photos.add(ByteArray(1))
+        get.sources().app.activeCreateAdRequest!!.photos.add(ByteArray(1))
 
         state.scrollPhotosToEnd.next(true)
     }

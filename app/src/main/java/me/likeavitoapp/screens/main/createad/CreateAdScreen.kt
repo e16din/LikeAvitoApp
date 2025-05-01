@@ -30,23 +30,24 @@ class CreateAdScreen(
     class State {
         val activeStep = UpdatableState<CreateAdStep?>(null)
         val steps = UpdatableState(CreateAdStep.entries)
-        val isCreateAdEnabled = UpdatableState(false)
-
+        val errorStepIndex = UpdatableState<Int?>(null)
+        val doneEnabled = UpdatableState(false)
     }
 
     val state = State()
     val stepsNavigator = ScreensNavigator()
 
     init {
-        ClickToStepUseCase(CreateAdStep.Description)
+        if (get.sources().app.activeCreateAdRequest == null) {
+            get.sources().app.activeCreateAdRequest = CreateAdRequest()
+        }
+
+        selectStep(CreateAdStep.Description)
     }
 
     fun StartScreenUseCase() {
         recordScenarioStep()
 
-        if (get.sources().app.activeCreateAdRequest == null) {
-            get.sources().app.activeCreateAdRequest = CreateAdRequest()
-        }
     }
 
     fun PressBackUseCase() {
@@ -59,12 +60,19 @@ class CreateAdScreen(
         recordScenarioStep()
 
         with(get.sources().app.activeCreateAdRequest!!) {
-            if (price == 0) {
-                createAd()
-
-            } else {
-                get.sources().app.pay { success ->
+            if (
+                checkIsValid(CreateAdStep.Description)
+                && checkIsValid(CreateAdStep.Category)
+                && checkIsValid(CreateAdStep.PickupPoints)
+                && checkIsValid(CreateAdStep.Additions)
+            ) {
+                if (price == 0) {
                     createAd()
+
+                } else {
+                    get.sources().app.pay { success ->
+                        createAd()
+                    }
                 }
             }
         }
@@ -79,23 +87,26 @@ class CreateAdScreen(
     fun ClickToStepUseCase(step: CreateAdStep) {
         recordScenarioStep(step)
 
-        state.activeStep.next(step)
+        val steps = state.steps.value
+        val index = steps.indexOf(step)
+        val isPreviousStep = index < steps.indexOf(state.activeStep.value)
 
+        if (isPreviousStep) {
+            selectStep(step)
 
-        stepsNavigator.startScreen(
-            when (step) {
-                CreateAdStep.Description -> DescriptionStepScreen(stepsNavigator)
-                CreateAdStep.Category -> CategoryStepScreen(stepsNavigator)
-                CreateAdStep.PickupPoints -> DeliveryStepScreen(stepsNavigator)
-                CreateAdStep.Additions -> FinalStepScreen(stepsNavigator)
+        } else {
+            if (checkIsValid(state.activeStep.value!!)) {
+                selectStep(step)
             }
-        )
+        }
+
+        state.doneEnabled.next(index == state.steps.value.size - 1)
     }
 
-    private fun checkIsValid(): Boolean {
+    private fun checkIsValid(step: CreateAdStep = state.activeStep.value!!): Boolean {
         var fieldName: String? = null
         with(get.sources().app.activeCreateAdRequest!!) {
-            when (state.activeStep.value!!) {
+            when (step) {
                 CreateAdStep.Description -> {
                     fieldName = if (title.isNullOrEmpty()) {
                         get.sources().platform.getString(R.string.title_arg)
@@ -132,33 +143,52 @@ class CreateAdScreen(
         }
 
         fieldName?.let {
+            state.errorStepIndex.next(
+                state.steps.value.indexOf(step)
+            )
+
             get.sources().app.message.next(
                 get.sources().platform.getString(R.string.fill_the_field_message, fieldName)
             )
             return false
         }
 
+        state.errorStepIndex.next(null)
+
         return true
     }
 
     private fun createAd() {
-        if (checkIsValid()) {
-            get.sources().app.loading.next(true)
-            work {
-                val result = get.sources().backend.adsService.createAd(
-                    get.sources().app.activeCreateAdRequest!!
-                )
-                withContext(Dispatchers.Main) {
-                    get.sources().app.loading.next(false)
-                    if (result.getOrNull() == true) {
+        get.sources().app.loading.next(true)
+        work {
+            val result = get.sources().backend.adsService.createAd(
+                get.sources().app.activeCreateAdRequest!!
+            )
+            withContext(Dispatchers.Main) {
+                get.sources().app.loading.next(false)
+                if (result.getOrNull() == true) {
 
-                        get.sources().app.message.next(
-                            get.sources().platform.getString(R.string.create_ad_success_message)
-                        )
-                    }
+                    get.sources().app.message.next(
+                        get.sources().platform.getString(R.string.create_ad_success_message)
+                    )
                 }
             }
         }
     }
 
+    private fun selectStep(step: CreateAdStep) {
+        state.activeStep.next(step)
+
+        stepsNavigator.startScreen(
+            when (step) {
+                CreateAdStep.Description -> DescriptionStepScreen(stepsNavigator)
+                CreateAdStep.Category -> CategoryStepScreen(stepsNavigator)
+                CreateAdStep.PickupPoints -> DeliveryStepScreen(stepsNavigator)
+                CreateAdStep.Additions -> FinalStepScreen(stepsNavigator)
+            },
+            fromScreens = true
+        )
+    }
+
 }
+

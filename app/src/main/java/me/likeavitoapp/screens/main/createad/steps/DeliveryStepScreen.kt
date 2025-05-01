@@ -15,9 +15,6 @@ class DeliveryStepScreen(
     class State {
         val types = UpdatableState(get.sources().app.pickupPointTypes)
         val selectedTypes = mutableStateListOf<Int>()  // <PickupPointType.id>
-            .apply {
-                addAll(types.value.map { it.id })
-            }
 
         val address = UpdatableState("")
     }

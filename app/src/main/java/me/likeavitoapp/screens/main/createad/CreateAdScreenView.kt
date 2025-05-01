@@ -53,6 +53,7 @@ fun CreateAdScreenProvider(screen: CreateAdScreen) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(modifier = Modifier.fillMaxSize()) {
+            val doneEnabled by screen.state.doneEnabled.collectAsState()
             ActionTopBar(
                 title = stringResource(R.string.add_new_ad_title),
                 onDone = {
@@ -61,7 +62,7 @@ fun CreateAdScreenProvider(screen: CreateAdScreen) {
                 onClose = {
                     screen.PressBackUseCase()
                 },
-                withDoneButton = true
+                withDoneButton = doneEnabled
             ) { innerPadding ->
                 CreateAdScreenView(screen, Modifier.padding(innerPadding))
             }
@@ -79,103 +80,124 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
     val steps by screen.state.steps.collectAsState()
     val activeStep by screen.state.activeStep.collectAsState()
     val stepScreen by screen.stepsNavigator.screen.collectAsState()
-    val isCreateAdEnabled by screen.state.isCreateAdEnabled.collectAsState()
+    val errorStepIndex by screen.state.errorStepIndex.collectAsState()
+    val doneEnabled by screen.state.doneEnabled.collectAsState()
 
     Column(modifier.imePadding()) {
         LazyColumn {
             var activeIndex = 0
             itemsIndexed(steps) { i, step ->
-                if (step == activeStep) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, start = 2.dp, end = 2.dp)
-                            .background(
-                                MaterialTheme.colorScheme.inverseSurface
-                            )
-                            .clickable {
-                                screen.ClickToStepUseCase(step)
-                            }
-                            .border(
-                                2.dp,
-                                MaterialTheme.colorScheme.inverseSurface,
-                                RoundedCornerShape(
-                                    topStart = 2.dp,
-                                    topEnd = 2.dp,
-                                    bottomEnd = 0.dp,
-                                    bottomStart = 0.dp
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                        .border(
+                            if (errorStepIndex == i) 2.dp else 0.dp,
+                            MaterialTheme.colorScheme.error,
+                            RoundedCornerShape(2.dp)
+                        )
+                ) {
+                    if (step == activeStep) {
+                        Column {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.inverseSurface
+                                    )
+                                    .clickable {
+                                        screen.ClickToStepUseCase(step)
+                                    }
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.inverseSurface,
+                                        RoundedCornerShape(
+                                            topStart = 2.dp,
+                                            topEnd = 2.dp,
+                                            bottomEnd = 0.dp,
+                                            bottomStart = 0.dp
+                                        )
+                                    )
+
+                            ) {
+
+                                Text(
+                                    step.label, color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .weight(1f)
                                 )
-                            )
-
-                    ) {
-
-                        Text(
-                            step.label, color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f)
-                        )
-                    }
-
-                    activeIndex = i
-                    when (step) {
-                        CreateAdStep.Description ->
-                            DescriptionStepScreenView(stepScreen as DescriptionStepScreen, Modifier)
-
-                        CreateAdStep.Category ->
-                            CategoryStepScreenView(stepScreen as CategoryStepScreen, Modifier)
-
-                        CreateAdStep.PickupPoints ->
-                            DeliveryStepScreenView(stepScreen as DeliveryStepScreen, Modifier)
-
-                        CreateAdStep.Additions ->
-                            FinalStepScreenView(stepScreen as FinalStepScreen, Modifier)
-                    }
-
-                } else {
-                    val isNotNext = i - 1 != activeIndex
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, start = 3.dp, end = 3.dp)
-                            .background(
-                                if (isNotNext)
-                                    MaterialTheme.colorScheme.background
-                                else
-                                    MaterialTheme.colorScheme.primary
-                            )
-                            .clickable {
-                                screen.ClickToStepUseCase(step)
                             }
-                            .border(
-                                2.dp,
-                                MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(2.dp)
-                            )
 
-                    ) {
-                        val tintColor = if (isNotNext)
-                            MaterialTheme.colorScheme.onBackground
-                        else
-                            MaterialTheme.colorScheme.onPrimary
-                        Text(
-                            step.label, color = tintColor,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f)
-                        )
-                        Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowRight, "arrow",
-                            tint = tintColor,
-                            modifier = Modifier
-                                .padding(8.dp)
-                        )
+                            activeIndex = i
+                            when (step) {
+                                CreateAdStep.Description ->
+                                    DescriptionStepScreenView(
+                                        stepScreen as DescriptionStepScreen,
+                                        Modifier
+                                    )
+
+                                CreateAdStep.Category ->
+                                    CategoryStepScreenView(
+                                        stepScreen as CategoryStepScreen,
+                                        Modifier
+                                    )
+
+                                CreateAdStep.PickupPoints ->
+                                    DeliveryStepScreenView(
+                                        stepScreen as DeliveryStepScreen,
+                                        Modifier
+                                    )
+
+                                CreateAdStep.Additions ->
+                                    FinalStepScreenView(stepScreen as FinalStepScreen, Modifier)
+                            }
+                        }
+
+                    } else {
+                        val isNotNext = i - 1 != activeIndex
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (isNotNext)
+                                        MaterialTheme.colorScheme.background
+                                    else
+                                        MaterialTheme.colorScheme.primary
+                                )
+                                .clickable {
+                                    screen.ClickToStepUseCase(step)
+                                }
+                                .border(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.primary,
+                                    RoundedCornerShape(2.dp)
+                                )
+
+                        ) {
+                            val tintColor = if (isNotNext)
+                                MaterialTheme.colorScheme.onBackground
+                            else
+                                MaterialTheme.colorScheme.onPrimary
+                            Text(
+                                step.label, color = tintColor,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .weight(1f)
+                            )
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight, "arrow",
+                                tint = tintColor,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                            )
+                        }
                     }
                 }
             }
-
+            
             item {
-                AnimatedVisibility(isCreateAdEnabled) {
+                AnimatedVisibility(doneEnabled) {
                     Box(
                         Modifier
                             .fillMaxWidth()
@@ -191,7 +213,6 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
                         }
                     }
                 }
-
             }
 
             item {

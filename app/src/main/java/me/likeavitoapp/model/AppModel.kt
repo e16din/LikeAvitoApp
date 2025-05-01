@@ -54,7 +54,7 @@ class AppModel {
         }
     }
 
-    fun pay(onDone: (success:Boolean)->Unit){
+    fun pay(onDone: (success: Boolean) -> Unit) {
         onDone(false)
     }
 }
@@ -71,6 +71,7 @@ class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
         screen: IScreen,
         clearAll: Boolean = false,
         clearAfterFirst: Boolean = false,
+        fromScreens: Boolean = false,
         onResume: (() -> Unit)? = null
     ) {
         this.onResume = onResume
@@ -84,11 +85,17 @@ class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
             screens.add(first)
         }
 
-        log("$tag.startScreen: ${screen.className()}")
-        screens.add(screen)
+        val nextScreen = if (fromScreens) {
+            screens.firstOrNull { it.className() == screen.className() } ?: screen
+        } else {
+            screen
+        }
+
+        log("$tag.startScreen: ${nextScreen.className()}")
+        screens.add(nextScreen)
 
         log("screens: $screens")
-        this@ScreensNavigator.screen.next(screen)
+        this@ScreensNavigator.screen.next(nextScreen)
     }
 
     fun backToPrevious() {
