@@ -71,7 +71,9 @@ class CreateAdScreen(
 
                 } else {
                     get.sources().app.pay { success ->
-                        createAd()
+                        if (success) {
+                            createAd()
+                        }
                     }
                 }
             }
@@ -158,24 +160,6 @@ class CreateAdScreen(
         return true
     }
 
-    private fun createAd() {
-        get.sources().app.loading.next(true)
-        work {
-            val result = get.sources().backend.adsService.createAd(
-                get.sources().app.activeCreateAdRequest!!
-            )
-            withContext(Dispatchers.Main) {
-                get.sources().app.loading.next(false)
-                if (result.getOrNull() == true) {
-
-                    get.sources().app.message.next(
-                        get.sources().platform.getString(R.string.create_ad_success_message)
-                    )
-                }
-            }
-        }
-    }
-
     private fun selectStep(step: CreateAdStep) {
         state.activeStep.next(step)
 
@@ -188,6 +172,27 @@ class CreateAdScreen(
             },
             fromScreens = true
         )
+    }
+
+    private fun createAd() {
+        get.sources().app.loading.next(true)
+        work {
+            val result = get.sources().backend.adsService.createAd(
+                get.sources().app.activeCreateAdRequest!!
+            )
+            val newOwnAd = result.getOrNull()
+
+            withContext(Dispatchers.Main) {
+                get.sources().app.loading.next(false)
+
+                if (newOwnAd != null) {
+                    get.sources().app.ownAds.add(newOwnAd)
+                    get.sources().app.message.next(
+                        get.sources().platform.getString(R.string.create_ad_success_message)
+                    )
+                }
+            }
+        }
     }
 
 }

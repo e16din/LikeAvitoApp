@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.order.create.payment
+package me.likeavitoapp.screens.main.payment
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -379,7 +379,8 @@ private fun isRemove(
 fun PaymentScreenPreview() {
     get = mockMainSet()
     val screen = PaymentScreen(
-        navigator = mockScreensNavigator()
+        navigator = mockScreensNavigator(),
+        onDone = {}
     )
     LikeAvitoAppTheme {
         PaymentScreenProvider(

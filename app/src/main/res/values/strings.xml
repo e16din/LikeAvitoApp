@@ -96,5 +96,6 @@
     <string name="premium_checkbox">Премиум объявление</string>
     <string name="premium_label">Премиум</string>
     <string name="autoupdate_card_label">Автоматическое обновление</string>
+    <string name="own_ads_button">Мои объявления</string>
 
 </resources>

@@ -5,6 +5,7 @@ import me.likeavitoapp.get
 import me.likeavitoapp.launchCustomTabs
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
@@ -20,6 +21,7 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         val activeOrders = Worker<List<Order>>(emptyList())
         val tabIndex = UpdatableState<Int>(0)
         val archivedOrders = Worker<List<Order>>(emptyList())
+        val ownAds = Worker<List<OwnAd>>(emptyList())
     }
 
     val state = State()

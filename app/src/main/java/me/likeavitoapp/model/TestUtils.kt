@@ -84,7 +84,7 @@ fun mockMainSet() = MainSet().apply {
             return null
         }
 
-        override fun getString(resId: Int, vararg formatArgs: Any): String? {
+        override fun getString(resId: Int, vararg formatArgs: Any?): String? {
             return null
         }
 

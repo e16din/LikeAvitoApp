@@ -6,12 +6,13 @@ import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Chat
 import me.likeavitoapp.model.Contacts
+import me.likeavitoapp.model.CreateAdRequest
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.PickupPointType
 import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.TextMessage
-import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.User
 import kotlin.math.min
 
@@ -228,6 +229,25 @@ class MockDataProvider {
             userId = userId,
             isNew = isNew,
             dateMs = System.currentTimeMillis()
+        )
+    }
+
+    var ownAdsCount = 0L
+    fun createOwnAd(data: CreateAdRequest): OwnAd {
+        ownAdsCount++
+
+        return OwnAd(
+            id = ownAdsCount,
+            categoryId = data.categoryId!!,
+            price = data.price!!,
+            selectedPickupPointTypes = data.selectedPickupPointTypes,
+            address = data.address!!,
+            title = data.title!!,
+            description = data.description!!,
+            photos = data.photos,
+            isBargainingEnabled = data.isBargainingEnabled,
+            isPremiumEnabled = data.isPremiumEnabled,
+            isAutoupdateEnabled = data.isAutoupdateEnabled,
         )
     }
 

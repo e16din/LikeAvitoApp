@@ -1,19 +1,18 @@
 package me.likeavitoapp.model
 
 
+import androidx.compose.runtime.mutableStateListOf
 import com.yandex.mapkit.geometry.Point
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.likeavitoapp.className
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.log
 import me.likeavitoapp.model.Order.PickupPoint
 import me.likeavitoapp.model.Order.Type
 import me.likeavitoapp.screens.auth.AuthScreen
 import me.likeavitoapp.screens.main.MainScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreen
 import me.likeavitoapp.screens.root.RootScreen
-import kotlin.reflect.KClass
 
 
 class AppModel {
@@ -26,6 +25,8 @@ class AppModel {
     var categories = listOf<Category>()
     var regions = listOf<Region>()
     var pickupPointTypes = listOf<PickupPointType>()
+    var ownAds = mutableStateListOf<OwnAd>()
+
 
     var activeOrderRequest: OrderRequest? = null
     var activeCreateAdRequest: CreateAdRequest? = null
@@ -55,81 +56,12 @@ class AppModel {
     }
 
     fun pay(onDone: (success: Boolean) -> Unit) {
-        onDone(false)
+        val navigator = mainScreen.navigator
+        navigator.startScreen(
+            PaymentScreen(navigator, onDone),
+        )
     }
 }
-
-class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
-    val screens = if (initialScreen != null)
-        mutableListOf(initialScreen)
-    else
-        mutableListOf()
-    val screen = UpdatableState(initialScreen)
-    var onResume: (() -> Unit)? = null
-
-    fun startScreen(
-        screen: IScreen,
-        clearAll: Boolean = false,
-        clearAfterFirst: Boolean = false,
-        fromScreens: Boolean = false,
-        onResume: (() -> Unit)? = null
-    ) {
-        this.onResume = onResume
-
-        if (clearAll) {
-            screens.clear()
-        }
-        if (screens.size > 0 && clearAfterFirst) {
-            val first = screens[0]
-            screens.clear()
-            screens.add(first)
-        }
-
-        val nextScreen = if (fromScreens) {
-            screens.firstOrNull { it.className() == screen.className() } ?: screen
-        } else {
-            screen
-        }
-
-        log("$tag.startScreen: ${nextScreen.className()}")
-        screens.add(nextScreen)
-
-        log("screens: $screens")
-        this@ScreensNavigator.screen.next(nextScreen)
-    }
-
-    fun backToPrevious() {
-        val last = screens.removeAt(screens.lastIndex) // pop
-
-        if (screens.size == 0) {
-            screen.next(null)
-            log("$tag.backToPrevious: null")
-
-        } else {
-            val prev = screens.last()
-            screen.next(prev)
-            log("$tag.backToPrevious: ${prev.javaClass.simpleName}")
-        }
-
-        onResume?.invoke()
-    }
-
-    inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
-        return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
-    }
-
-    fun hasScreen(): Boolean {
-        val last = screens.lastOrNull()
-        return last != null
-    }
-
-    fun reset() {
-        screens.clear()
-        screen.next(null)
-    }
-}
-
-interface IScreen
 
 data class User(
     val id: Long,
@@ -198,7 +130,6 @@ data class CreateAdRequest(
     var isBargainingEnabled: Boolean = false,
     var isPremiumEnabled: Boolean = false,
     var isAutoupdateEnabled: Boolean = false,
-    var completed: Boolean = false
 )
 
 data class OrderRequest(
@@ -210,15 +141,15 @@ data class OrderRequest(
 )
 
 data class Order(
+    override val id: Long,
     val ad: Ad,
-    val id: Long,
     val number: String,
     val type: Type,
     val state: State,
     val createdMs: Long,
     val expectedArrivalMs: Long,
     val pickupPoint: PickupPoint?
-) {
+): ISource {
     enum class Type {
         Pickup,
         Delivery
@@ -277,5 +208,19 @@ data class TextMessage(
 
 
 data class MapItem(val name: String, val point: Point)
+
+data class OwnAd(
+    override val id: Long,
+    var categoryId: Int,
+    var price: Int,
+    var selectedPickupPointTypes: MutableList<Int>,
+    var address: String,
+    var title: String,
+    var description: String,
+    var photos: MutableList<ByteArray>,
+    var isBargainingEnabled: Boolean,
+    var isPremiumEnabled: Boolean,
+    var isAutoupdateEnabled: Boolean
+) : ISource
 
 

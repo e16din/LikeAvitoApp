@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -157,6 +158,18 @@ fun ProfileScreenView(screen: ProfileScreen) {
                     screen = screen
                 )
             }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedButton(
+            {
+                screen.ClickToOwnAds()
+            }, Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(stringResource(R.string.own_ads_button))
         }
 
         Spacer(Modifier.height(24.dp))

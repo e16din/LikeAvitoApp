@@ -281,9 +281,11 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             mockDataProvider.searchTips.add(0, tip)
         }
 
-        suspend fun createAd(data: CreateAdRequest): Result<Boolean> {
-            delay(400)
-            return Result.failure(Exception())
+        suspend fun createAd(data: CreateAdRequest): Result<OwnAd> {
+            delay(300)
+            return Result.success(
+                mockDataProvider.createOwnAd(data)
+            )
         }
 
     }

@@ -7,9 +7,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.likeavitoapp.R
+import me.likeavitoapp.className
 import me.likeavitoapp.developer.primitives.debug
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
+import me.likeavitoapp.log
 import kotlin.reflect.KClass
 
 
@@ -161,3 +163,70 @@ inline fun <T> Worker<T>.act(
     }
 
 }
+
+class ScreensNavigator(val tag: String = "", initialScreen: IScreen? = null) {
+    val screens = if (initialScreen != null)
+        mutableListOf(initialScreen)
+    else
+        mutableListOf()
+    val screen = UpdatableState(initialScreen)
+    var onResume: (() -> Unit)? = null
+
+    fun startScreen(
+        screen: IScreen,
+        clearAll: Boolean = false,
+        clearAfterFirst: Boolean = false,
+        fromScreens: Boolean = false,
+        onResume: (() -> Unit)? = null
+    ) {
+        this.onResume = onResume
+
+        if (clearAll) {
+            screens.clear()
+        }
+        if (screens.size > 0 && clearAfterFirst) {
+            val first = screens[0]
+            screens.clear()
+            screens.add(first)
+        }
+
+        val nextScreen = if (fromScreens) {
+            screens.firstOrNull { it.className() == screen.className() } ?: screen
+        } else {
+            screen
+        }
+
+        log("$tag.startScreen: ${nextScreen.className()}")
+        screens.add(nextScreen)
+
+        log("screens: $screens")
+        this@ScreensNavigator.screen.next(nextScreen)
+    }
+
+    fun backToPrevious() {
+        screens.removeAt(screens.lastIndex) // pop
+
+        if (screens.size == 0) {
+            screen.next(null)
+            log("$tag.backToPrevious: null")
+
+        } else {
+            val prev = screens.last()
+            screen.next(prev)
+            log("$tag.backToPrevious: ${prev.javaClass.simpleName}")
+        }
+
+        onResume?.invoke()
+    }
+
+    inline fun <reified T : IScreen> getScreenOrNull(klass: KClass<T>): T? {
+        return screens.firstOrNull { it.javaClass.simpleName == klass.simpleName } as T?
+    }
+
+    fun reset() {
+        screens.clear()
+        screen.next(null)
+    }
+}
+
+interface IScreen

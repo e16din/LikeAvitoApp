@@ -10,7 +10,7 @@ import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreen
 
 
 class SelectDeliveryAddressScreen(
@@ -77,7 +77,11 @@ class SelectDeliveryAddressScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         if (orderRequest.deliveryAddress != null) {
             navigator.startScreen(
-                PaymentScreen(navigator),
+                PaymentScreen(navigator) { isSuccess ->
+                    if (isSuccess) {
+                        get.sources().app.mainScreen.returnToOrdersTab()
+                    }
+                },
             )
 
         } else {

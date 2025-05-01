@@ -91,4 +91,10 @@ class ProfileScreen(
         )
     }
 
+    fun ClickToOwnAds() {
+        recordScenarioStep()
+
+        get.sources().app.mainScreen.returnToOrdersTab()
+    }
+
 }

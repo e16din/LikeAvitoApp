@@ -1,4 +1,4 @@
-package me.likeavitoapp.screens.main.order.create.payment
+package me.likeavitoapp.screens.main.payment
 
 
 import androidx.compose.ui.text.TextRange
@@ -23,7 +23,8 @@ import me.likeavitoapp.recordScenarioStep
 
 
 class PaymentScreen(
-    val navigator: ScreensNavigator
+    val navigator: ScreensNavigator,
+    val onDone: (Boolean) -> Unit
 ) : IScreen {
 
     class State() {
@@ -51,7 +52,7 @@ class PaymentScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        navigator.backToPrevious()
+        ClickToPayUseCase()
     }
 
     fun ClickToPayUseCase() {
@@ -85,11 +86,9 @@ class PaymentScreen(
                 }
             }
 
-            return@act Pair(Unit, isSuccess).also {
-                if (isSuccess) {
-                    get.sources().app.mainScreen.returnToOrdersTab()
-                }
-            }
+            onDone(isSuccess)
+
+            return@act Pair(Unit, isSuccess)
         }
     }
 

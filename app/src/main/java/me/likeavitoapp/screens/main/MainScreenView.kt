@@ -51,8 +51,8 @@ import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
-import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
-import me.likeavitoapp.screens.main.order.create.payment.PaymentScreenProvider
+import me.likeavitoapp.screens.main.payment.PaymentScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreen
 import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen

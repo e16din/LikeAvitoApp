@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -50,6 +52,7 @@ fun OrdersScreenProvider(screen: OrdersScreen, tabsNavigator: ScreensNavigator) 
 fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val activeOrders by state.activeOrders.output.collectAsState()
     val archivedOrders by state.archivedOrders.output.collectAsState()
+    val ownAds by state.ownAds.output.collectAsState()
     val tabIndex by state.tabIndex.collectAsState()
 
     val tabs = listOf(stringResource(R.string.active_tab), stringResource(R.string.archived_tab))
@@ -57,7 +60,8 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     Column(modifier = Modifier.fillMaxWidth()) {
         TabRow(selectedTabIndex = tabIndex) {
             tabs.forEachIndexed { index, title ->
-                Tab(text = { Text(title) },
+                Tab(
+                    text = { Text(title) },
                     selected = tabIndex == index,
                     onClick = {
                         screen.ClickToTabUseCase(index)
@@ -75,6 +79,7 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
                     )
                 }
             }
+
             1 -> LazyColumn {
                 items(archivedOrders.toMutableStateList()) {
                     OrderView(
@@ -82,6 +87,44 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
                         order = it,
                         newMessagesCount = remember { mutableIntStateOf(0) }
                     )
+                }
+            }
+
+            2 -> LazyColumn {
+                items(ownAds.toMutableStateList()) { ownAd ->
+                    Column {
+                        Text("${ownAd.title}")
+                        Text(
+                            "${ownAd.description}"
+                        )
+                        LazyRow(
+                            "${ownAd.photos}"
+                        )
+                        LazyRow(
+                            "${ownAd.selectedPickupPointTypes}"
+                        )
+                        Text("${ownAd.address
+                        }"
+                        )
+                        Text(
+                            "${ownAd.isAutoupdateEnabled
+                            }"
+                        )
+                        Text(
+                            "${ownAd.isPremiumEnabled}"
+                        )
+                        Text(
+                            "${ownAd.isBargainingEnabled}"
+                        )
+                        Button({ screen.ClickToEditToOwnAdUseCase(ownAd) }) {
+                            Text("Редактировать")
+                        }
+
+                        newMessagesCount = remember { mutableIntStateOf(0) }
+                        Button({ screen.ClickToOpenChatUseCase(ownAd) }) {
+                            Text("Редактировать")
+                        }
+                    }
                 }
             }
         }

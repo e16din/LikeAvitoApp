@@ -13,7 +13,7 @@ import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.order.create.payment.PaymentScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreen
 
 
 class SelectPickupPointScreen(
@@ -116,8 +116,13 @@ class SelectPickupPointScreen(
         val orderRequest = get.sources().app.activeOrderRequest!!
         if (orderRequest.pickupPoint != null) {
             navigator.startScreen(
-                PaymentScreen(navigator),
+                PaymentScreen(navigator) { isSuccess ->
+                    if (isSuccess) {
+                        get.sources().app.mainScreen.returnToOrdersTab()
+                    }
+                },
             )
+
         } else {
             get.sources().app.message.next(
                 get.sources().platform.getString(R.string.select_pickup_point_to_next_message)
