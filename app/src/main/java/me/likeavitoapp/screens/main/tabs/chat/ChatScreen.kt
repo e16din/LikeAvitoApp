@@ -7,7 +7,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.PreviewTextMessage
@@ -18,7 +17,8 @@ import me.likeavitoapp.recordScenarioStep
 
 
 class ChatScreen(
-    val ad: Ad,
+    val adId: Long, // Ad or OwnAd, common ids
+    val title: String,
     val navigator: ScreensNavigator,
     val initialMessages: List<TextMessage>? = null
 ) : IScreen {
@@ -39,7 +39,7 @@ class ChatScreen(
         get.sources().app.loading.next(true)
         work {
             if (initialMessages == null) {
-                val result = get.sources().backend.messagesService.loadChat(ad.id)
+                val result = get.sources().backend.messagesService.loadChat(adId)
                 withContext(Dispatchers.Main) {
                     get.sources().app.loading.next(false)
 
@@ -51,7 +51,7 @@ class ChatScreen(
             }
 
             get.sources().backend.messagesService
-                .listenChatUpdates(ad.id) { newMessages ->
+                .listenChatUpdates(adId) { newMessages ->
                     withContext(Dispatchers.Main) {
                         state.messages.addAll(newMessages)
                         state.scrollToEnd.next(true)
@@ -97,7 +97,7 @@ class ChatScreen(
 
         work<Unit> {
             val result = get.sources().backend.messagesService.sendMessage(
-                ad.id,
+                adId,
                 text
             )
             result.getOrNull()?.let {

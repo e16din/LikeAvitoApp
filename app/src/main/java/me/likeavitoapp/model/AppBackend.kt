@@ -8,7 +8,6 @@ import com.yandex.mapkit.search.SearchManagerType
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
 import me.likeavitoapp.mocks.MockDataProvider
-import kotlin.random.Random
 
 
 class AppBackend(val client: HttpClient = HttpClient()) {
@@ -32,7 +31,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             onUpdate: suspend (List<TextMessage>) -> Unit
         ) {
             delay(3000)
-            val chatWithUserId = mockDataProvider.chats.first { it.ad.id == addId }.ad.owner.id
+            val chatWithUserId = mockDataProvider.chats.first { it.adId == addId }.userId
             if (addId == 28L) {
                 onUpdate(
                     listOf(
@@ -83,11 +82,15 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
         suspend fun loadChat(adId: Long): Result<Chat> {
             delay(500)
+            val ad = mockDataProvider.ads.first { it.id == adId }
             return Result.success(
-                mockDataProvider.chats.firstOrNull() { it.ad.id == adId }
+                mockDataProvider.chats.firstOrNull { it.adId == adId }
                     ?: Chat(
                         id = 99,
-                        ad = mockDataProvider.ads.first { it.id == adId },
+                        adId = ad.id,
+                        userId = ad.owner.id,
+                        userName = ad.owner.name,
+                        title = ad.title,
                         messages = listOf()
                     ).apply {
                         mockDataProvider.chats.add(this)
@@ -106,7 +109,7 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             val result = mutableListOf<Pair<Long, Int>>()
             mockDataProvider.chats.forEach { chat ->
                 val count = chat.messages.count { it.isNew }
-                result.add(Pair(chat.ad.id, count))
+                result.add(Pair(chat.adId, count))
             }
             return Result.success(result)
         }
@@ -262,9 +265,14 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(mockDataProvider.getFavorites())
         }
 
-        suspend fun getNewMessagesCount(): Result<Int> {
+        suspend fun getNewMessagesCount(adId:Long): Result<Int> {
             delay(200)
-            val count = Random(5).nextInt()
+//            val count = Random(5).nextInt()
+            val count = mockDataProvider.ads.firstOrNull{
+                it.id == adId
+            }?.newMessagesCount?.data() ?: mockDataProvider.ownAds.firstOrNull{
+                it.id == adId
+            }?.newMessagesCount?.data() ?: 0
             return Result.success(count)
         }
 
@@ -281,11 +289,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             mockDataProvider.searchTips.add(0, tip)
         }
 
-        suspend fun createAd(data: CreateAdRequest): Result<OwnAd> {
+        suspend fun createAd(data: OwnAd): Result<Boolean> {
             delay(300)
-            return Result.success(
-                mockDataProvider.createOwnAd(data)
-            )
+
+            mockDataProvider.ownAds.add(data)
+
+            return Result.success(true)
         }
 
     }
@@ -346,6 +355,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
         suspend fun getArchivedOrders(): Result<List<Order>> {
             delay(900)
             val orders = mockDataProvider.orders.filter { it.state == Order.State.Archived }
+            return Result.success(orders)
+        }
+
+        suspend fun getOwnAds(): Result<List<OwnAd>> {
+            delay(900)
+            val orders = mockDataProvider.ownAds
             return Result.success(orders)
         }
 

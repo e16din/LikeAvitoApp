@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -55,7 +56,10 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
     val ownAds by state.ownAds.output.collectAsState()
     val tabIndex by state.tabIndex.collectAsState()
 
-    val tabs = listOf(stringResource(R.string.active_tab), stringResource(R.string.archived_tab))
+    val tabs = listOf(
+        stringResource(R.string.tab_buy),
+        stringResource(R.string.tab_sell)
+    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TabRow(selectedTabIndex = tabIndex) {
@@ -69,60 +73,50 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
                 )
             }
         }
+
         when (tabIndex) {
             0 -> LazyColumn {
-                items(activeOrders.toMutableStateList()) { order ->
+                items((activeOrders + archivedOrders).toMutableStateList()) { order ->
+                    val newMessagesCount = order.ad.newMessagesCount.output.collectAsState()
                     OrderView(
                         screen = screen,
                         order = order,
-                        newMessagesCount = order.ad.newMessagesCount.output.collectAsState()
+                        newMessagesCount = newMessagesCount
                     )
                 }
             }
 
             1 -> LazyColumn {
-                items(archivedOrders.toMutableStateList()) {
-                    OrderView(
-                        screen = screen,
-                        order = it,
-                        newMessagesCount = remember { mutableIntStateOf(0) }
-                    )
-                }
-            }
-
-            2 -> LazyColumn {
                 items(ownAds.toMutableStateList()) { ownAd ->
                     Column {
                         Text("${ownAd.title}")
-                        Text(
-                            "${ownAd.description}"
-                        )
-                        LazyRow(
-                            "${ownAd.photos}"
-                        )
-                        LazyRow(
-                            "${ownAd.selectedPickupPointTypes}"
-                        )
-                        Text("${ownAd.address
-                        }"
-                        )
-                        Text(
-                            "${ownAd.isAutoupdateEnabled
-                            }"
-                        )
-                        Text(
-                            "${ownAd.isPremiumEnabled}"
-                        )
-                        Text(
-                            "${ownAd.isBargainingEnabled}"
-                        )
-                        Button({ screen.ClickToEditToOwnAdUseCase(ownAd) }) {
-                            Text("Редактировать")
+                        Text("${ownAd.description}")
+                        LazyRow {
+                            itemsIndexed(ownAd.photos) { i, photo ->
+
+                            }
+                        }
+                        LazyRow {
+                            items(ownAd.selectedPickupPointTypes) { type ->
+
+                            }
                         }
 
-                        newMessagesCount = remember { mutableIntStateOf(0) }
-                        Button({ screen.ClickToOpenChatUseCase(ownAd) }) {
-                            Text("Редактировать")
+                        Text("${ownAd.address}")
+                        Text("${ownAd.isAutoupdateEnabled}")
+                        Text("${ownAd.isPremiumEnabled}")
+                        Text("${ownAd.isBargainingEnabled}")
+                        Button({
+                            screen.ClickToEditToOwnAdUseCase(ownAd)
+                        }) {
+                            Text(stringResource(R.string.edit_own_ad_button))
+                        }
+
+                        val newMessagesCount = remember { mutableIntStateOf(0) }
+                        Button({
+                            screen.ClickToOpenChatUseCase(ownAd)
+                        }) {
+                            Text(stringResource(R.string.move_to_chat_button))
                         }
                     }
                 }

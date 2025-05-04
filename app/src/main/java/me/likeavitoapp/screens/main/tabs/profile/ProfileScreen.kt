@@ -79,7 +79,7 @@ class ProfileScreen(
         recordScenarioStep()
 
         navigator.startScreen(
-            ChatScreen(chat.ad, navigator),
+            ChatScreen(chat.adId, chat.title, navigator),
             onResume = {
                 val current = state.chats.output.value
                 state.chats.output.next(emptyList())

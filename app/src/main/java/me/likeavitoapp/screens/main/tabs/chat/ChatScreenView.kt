@@ -33,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.likeavitoapp.R
 import me.likeavitoapp.get
-import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.IMessage
 import me.likeavitoapp.model.PreviewTextMessage
 import me.likeavitoapp.model.TextMessage
@@ -54,7 +53,7 @@ fun ChatScreenProvider(screen: ChatScreen) {
         modifier = Modifier.fillMaxSize()
     ) {
         DetailsTopBar(
-            title = screen.ad.title,
+            title = screen.title,
             onBack = {
                 screen.PressBackUseCase()
             },
@@ -198,7 +197,8 @@ fun TextMessageView(isMy: Boolean, message: IMessage) {
 fun ChatScreenPreview() {
     get = mockMainSet()
     val screen = ChatScreen(
-        ad = MockDataProvider().ads.first(),
+        adId = -1,
+        title = "Title",
         navigator = mockScreensNavigator(),
     )
 

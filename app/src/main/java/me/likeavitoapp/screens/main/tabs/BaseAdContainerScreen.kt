@@ -91,7 +91,7 @@ open class BaseAdContainerScreen(
         recordScenarioStep(ad)
 
         navigator.startScreen(
-            ChatScreen(ad, navigator),
+            ChatScreen(ad.id, ad.title, navigator),
         )
     }
 

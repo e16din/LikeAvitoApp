@@ -50,8 +50,8 @@
     <string name="delivary_address_label">Заказ доставят по адресу:</string>
     <string name="pickup_point_address_label">Заказ доставят в пункт выдачи:</string>
     <string name="order_in_place_label">Заказ пришел на пункт выдачи</string>
-    <string name="active_tab">Активные</string>
-    <string name="archived_tab">Выполненные</string>
+    <string name="tab_buy">Покупаю</string>
+    <string name="tab_sell">Продаю</string>
     <string name="order_active_state_label">Активен</string>
     <string name="done_order_status_label">Выполнен</string>
     <string name="select_region_lable">Выбрать регион:</string>
@@ -97,5 +97,6 @@
     <string name="premium_label">Премиум</string>
     <string name="autoupdate_card_label">Автоматическое обновление</string>
     <string name="own_ads_button">Мои объявления</string>
+    <string name="edit_own_ad_button">Редактировать</string>
 
 </resources>

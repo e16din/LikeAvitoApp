@@ -203,7 +203,7 @@ fun OrderView(
                     modifier = Modifier
                         .align(Alignment.End)
                 ) {
-                    val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
+                    val newMessagesCounters by get.sources().app.totalNewMessagesCount.collectAsState()
 
                     Row(
                         modifier = Modifier

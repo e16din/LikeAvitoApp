@@ -158,7 +158,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
             overflow = TextOverflow.Ellipsis
         )
 
-        if (!ad.isOrdered) {
+        if (!ad.isOrdered()) {
             Row(modifier = Modifier) {
                 Button(
                     modifier = Modifier
@@ -173,7 +173,7 @@ fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(scre
 
                 if (ad.isBargainingEnabled) {
                     Box(modifier = Modifier) {
-                        val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
+                        val newMessagesCounters by get.sources().app.totalNewMessagesCount.collectAsState()
 
                         Button(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),

@@ -130,13 +130,17 @@ inline fun <T> Worker<T>.load(
     working.repostTo(get.sources().app.loading)
     fail.listen { failed ->
         if (failed) {
-            get.sources().app.message.next(
-                get.sources().platform.getString(R.string.data_loading_failed_message)
-            )
+            showMessageDataLoadingFailed()
         }
     }
 
     this.act(onDone, task)
+}
+
+fun showMessageDataLoadingFailed() {
+    get.sources().app.message.next(
+        get.sources().platform.getString(R.string.data_loading_failed_message)
+    )
 }
 
 // NOTE: act - действуй!

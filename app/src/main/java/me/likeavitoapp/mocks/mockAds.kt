@@ -23,7 +23,8 @@ fun mockAds() = listOf(
         owner = mockOwners[0],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 2,
@@ -43,7 +44,8 @@ fun mockAds() = listOf(
         owner = mockOwners[1],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 3,
@@ -68,7 +70,8 @@ fun mockAds() = listOf(
         owner = mockOwners[2],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 4,
@@ -88,7 +91,8 @@ fun mockAds() = listOf(
         owner = mockOwners[3],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 5,
@@ -108,7 +112,8 @@ fun mockAds() = listOf(
         owner = mockOwners[4],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 6,
@@ -128,7 +133,8 @@ fun mockAds() = listOf(
         owner = mockOwners[5],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 7,
@@ -148,7 +154,8 @@ fun mockAds() = listOf(
         owner = mockOwners[6],
         isFavorite = UpdatableState(true),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 8,
@@ -168,7 +175,8 @@ fun mockAds() = listOf(
         owner = mockOwners[7],
         isFavorite = UpdatableState(true),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 9,
@@ -188,7 +196,8 @@ fun mockAds() = listOf(
         owner = mockOwners[8],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 10,
@@ -208,7 +217,8 @@ fun mockAds() = listOf(
         owner = mockOwners[9],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 11,
@@ -228,7 +238,8 @@ fun mockAds() = listOf(
         owner = mockOwners[10],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 12,
@@ -249,7 +260,7 @@ fun mockAds() = listOf(
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
         reservedTimeMs = null,
-        isOrdered = true
+        state = 1,
     ),
     Ad(
         id = 13,
@@ -269,7 +280,8 @@ fun mockAds() = listOf(
         owner = mockOwners[12],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 14,
@@ -289,7 +301,8 @@ fun mockAds() = listOf(
         owner = mockOwners[13],
         isFavorite = UpdatableState(true),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 15,
@@ -309,7 +322,8 @@ fun mockAds() = listOf(
         owner = mockOwners[14],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 16,
@@ -330,7 +344,7 @@ fun mockAds() = listOf(
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
         reservedTimeMs = null,
-        isOrdered = true
+        state = 1,
     ),
     Ad(
         id = 17,
@@ -350,7 +364,8 @@ fun mockAds() = listOf(
         owner = mockOwners[16],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 18,
@@ -370,7 +385,8 @@ fun mockAds() = listOf(
         owner = mockOwners[17],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 19,
@@ -390,7 +406,8 @@ fun mockAds() = listOf(
         owner = mockOwners[18],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 20,
@@ -410,7 +427,8 @@ fun mockAds() = listOf(
         owner = mockOwners[19],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 21,
@@ -430,7 +448,8 @@ fun mockAds() = listOf(
         owner = mockOwners[20],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 22,
@@ -450,7 +469,8 @@ fun mockAds() = listOf(
         owner = mockOwners[21],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 23,
@@ -470,7 +490,8 @@ fun mockAds() = listOf(
         owner = mockOwners[22],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 24,
@@ -490,7 +511,8 @@ fun mockAds() = listOf(
         owner = mockOwners[23],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 25,
@@ -510,7 +532,8 @@ fun mockAds() = listOf(
         owner = mockOwners[24],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 26,
@@ -530,7 +553,8 @@ fun mockAds() = listOf(
         owner = mockOwners[25],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 27,
@@ -550,7 +574,8 @@ fun mockAds() = listOf(
         owner = mockOwners[26],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 28,
@@ -570,7 +595,8 @@ fun mockAds() = listOf(
         owner = mockOwners[27],
         isFavorite = UpdatableState(true),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 29,
@@ -590,7 +616,8 @@ fun mockAds() = listOf(
         owner = mockOwners[28],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 0,
@@ -610,7 +637,8 @@ fun mockAds() = listOf(
         owner = mockOwners[29],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     ),
     Ad(
         id = 30,
@@ -630,6 +658,7 @@ fun mockAds() = listOf(
         owner = mockOwners[30],
         isFavorite = UpdatableState(false),
         timerLabel = UpdatableState(""),
-        reservedTimeMs = null
+        reservedTimeMs = null,
+        state = 0,
     )
 )

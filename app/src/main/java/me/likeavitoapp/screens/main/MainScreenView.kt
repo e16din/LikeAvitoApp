@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,12 +52,12 @@ import me.likeavitoapp.screens.main.createad.CreateAdScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreenProvider
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
 import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
-import me.likeavitoapp.screens.main.payment.PaymentScreen
-import me.likeavitoapp.screens.main.payment.PaymentScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreen
 import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreenProvider
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
 import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreenProvider
+import me.likeavitoapp.screens.main.payment.PaymentScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreenProvider
 import me.likeavitoapp.screens.main.tabs.NextTabProvider
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
 import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
@@ -68,9 +69,7 @@ import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
 import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import me.likeavitoapp.ui.theme.onPrimaryContainerLightMediumContrast
-import me.likeavitoapp.ui.theme.onSecondaryContainerLight
 import me.likeavitoapp.ui.theme.primaryContainerLightMediumContrast
-import me.likeavitoapp.ui.theme.primaryLight
 import me.likeavitoapp.ui.theme.primaryLightMediumContrast
 import me.likeavitoapp.ui.theme.secondaryContainerLight
 
@@ -112,7 +111,7 @@ val tabBarHeight = 58.dp
 
 @Composable
 fun MainScreenView(screen: MainScreen) {
-    val newMessagesCounters by get.sources().app.newMessagesCount.collectAsState()
+    val newMessagesCounters by get.sources().app.totalNewMessagesCount.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -202,7 +201,9 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .weight(1f)
                 .background(
                     if (tabScreen.value is SearchScreen)
-                        primaryLight else secondaryContainerLight
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
                 )
                 .clickable(onClick = {
                     screen.ClickToSearchUseCase()
@@ -210,16 +211,20 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 }), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is SearchScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
             Icon(
                 Icons.Rounded.Search,
                 contentDescription = "search",
-                tint = onSecondaryContainerLight
+                tint = tint
             )
             Text(
                 text = stringResource(R.string.search_tab),
                 fontSize = 9.sp,
                 maxLines = 1,
-                color = onSecondaryContainerLight
+                color = tint
             )
         }
 
@@ -229,23 +234,29 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .weight(1f)
                 .background(
                     if (tabScreen.value is FavoritesScreen)
-                        primaryLight else secondaryContainerLight
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
                 )
                 .clickable(onClick = {
                     screen.ClickToFavoritesUseCase()
                 }), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is FavoritesScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
             Icon(
                 Icons.Rounded.Favorite,
                 contentDescription = "favorite",
-                tint = onSecondaryContainerLight
+                tint = tint
             )
             Text(
                 text = stringResource(R.string.favorite_tab),
                 fontSize = 9.sp,
                 maxLines = 1,
-                color = onSecondaryContainerLight
+                color = tint
             )
         }
 
@@ -255,7 +266,9 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .weight(0.45f)
                 .background(
                     if (tabScreen.value is FavoritesScreen)
-                        primaryLight else secondaryContainerLight
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
                 )
                 .height(tabBarHeight)
         )
@@ -264,7 +277,9 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .weight(0.45f)
                 .background(
                     if (tabScreen.value is OrdersScreen)
-                        primaryLight else secondaryContainerLight
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
                 )
                 .height(tabBarHeight)
         )
@@ -275,7 +290,9 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 .weight(1f)
                 .background(
                     if (tabScreen.value is OrdersScreen)
-                        primaryLight else secondaryContainerLight
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
                 )
                 .clickable {
                     screen.ClickToCartUseCase()
@@ -283,16 +300,20 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 }, horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is OrdersScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
             Icon(
                 Icons.Rounded.ShoppingCart,
                 contentDescription = "cart",
-                tint = onSecondaryContainerLight
+                tint = tint
             )
             Text(
                 text = stringResource(R.string.cart_tab),
                 fontSize = 9.sp,
                 maxLines = 1,
-                color = onSecondaryContainerLight
+                color = tint
             )
         }
 
@@ -307,7 +328,9 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                     .fillMaxWidth()
                     .background(
                         if (tabScreen.value is ProfileScreen)
-                            primaryLight else secondaryContainerLight
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer
                     )
                     .clickable {
                         screen.ClickToProfileUseCase()
@@ -316,16 +339,20 @@ private fun BoxScope.TabsView(screen: MainScreen) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.size(8.dp))
+                val tint = if (tabScreen.value is ProfileScreen)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSecondaryContainer
                 Icon(
                     Icons.Rounded.Person,
                     contentDescription = "profile",
-                    tint = onSecondaryContainerLight
+                    tint = tint
                 )
                 Text(
                     text = stringResource(R.string.profile_tab),
                     fontSize = 9.sp,
                     maxLines = 1,
-                    color = onSecondaryContainerLight
+                    color = tint
                 )
             }
         }

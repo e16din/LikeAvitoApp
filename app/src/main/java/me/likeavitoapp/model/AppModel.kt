@@ -2,6 +2,7 @@ package me.likeavitoapp.model
 
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.yandex.mapkit.geometry.Point
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,16 +26,15 @@ class AppModel {
     var categories = listOf<Category>()
     var regions = listOf<Region>()
     var pickupPointTypes = listOf<PickupPointType>()
-    var ownAds = mutableStateListOf<OwnAd>()
 
 
     var activeOrderRequest: OrderRequest? = null
-    var activeCreateAdRequest: CreateAdRequest? = null
+    var activeCreateAdRequest: OwnAd? = null
 
     val loading = UpdatableState(false)
     val message = UpdatableState<String?>(null)
 
-    val newMessagesCount = UpdatableState(listOf<Pair<Long, Int>>()) // <adId, count>
+    val totalNewMessagesCount = UpdatableState(listOf<Pair<Long, Int>>()) // <adId, count>
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
@@ -50,7 +50,7 @@ class AppModel {
             val result = get.sources().backend.messagesService.getAllNewMessagesCount()
             val pairs = result.getOrNull() ?: emptyList()
             withContext(Dispatchers.Main) {
-                get.sources().app.newMessagesCount.next(pairs)
+                get.sources().app.totalNewMessagesCount.next(pairs)
             }
         }
     }
@@ -67,8 +67,8 @@ data class User(
     val id: Long,
     var name: String,
     var contacts: Contacts,
-    var ownAds: List<Ad>,
-    var photoUrl: String
+    var photoUrl: String,
+    var ownAds: SnapshotStateList<OwnAd> = mutableStateListOf<OwnAd>()
 )
 
 data class Contacts(
@@ -103,8 +103,8 @@ data class Ad(
     val isFavorite: UpdatableState<Boolean> = UpdatableState(false),
     val timerLabel: UpdatableState<String> = UpdatableState(""),
     var reservedTimeMs: Long?,
-    var isOrdered: Boolean = false,
-    var newMessagesCount: Worker<Int> = Worker<Int>(0)
+    var newMessagesCount: Worker<Int> = Worker(0),
+    var state: Int
 ) : ISource {
     data class Address(val data: String)
     data class Owner(
@@ -112,6 +112,10 @@ data class Ad(
         var name: String,
         var contacts: Contacts
     )
+
+    fun isActive() = state == 0
+    fun isOrdered() = state == 1
+    fun isArchived() = state == 2
 }
 
 data class Region(val name: String, val id: Int)
@@ -119,18 +123,6 @@ data class PriceRange(var from: Int = 0, var to: Int = -1)
 
 data class PickupPointType(val name: String, val id: Int)
 
-data class CreateAdRequest(
-    var categoryId: Int? = null,
-    var price: Int? = null,
-    var selectedPickupPointTypes: MutableList<Int> = mutableListOf(),
-    var address: String? = null,
-    var title: String? = null,
-    var description: String? = null,
-    var photos: MutableList<ByteArray> = mutableListOf(),
-    var isBargainingEnabled: Boolean = false,
-    var isPremiumEnabled: Boolean = false,
-    var isAutoupdateEnabled: Boolean = false,
-)
 
 data class OrderRequest(
     var ad: Ad,
@@ -176,7 +168,10 @@ data class Order(
 
 data class Chat(
     override val id: Long,
-    val ad: Ad,
+    val adId: Long,
+    val userId: Long,
+    val userName: String,
+    val title: String,
     val messages: List<TextMessage>
 ) : ISource
 
@@ -209,18 +204,25 @@ data class TextMessage(
 
 data class MapItem(val name: String, val point: Point)
 
+// todo: it is possible to use Ad class instead of AdOwn?
 data class OwnAd(
     override val id: Long,
-    var categoryId: Int,
-    var price: Int,
-    var selectedPickupPointTypes: MutableList<Int>,
-    var address: String,
-    var title: String,
-    var description: String,
-    var photos: MutableList<ByteArray>,
-    var isBargainingEnabled: Boolean,
-    var isPremiumEnabled: Boolean,
-    var isAutoupdateEnabled: Boolean
-) : ISource
+    var categoryId: Int? = null,
+    var price: Int? = null,
+    var selectedPickupPointTypes: MutableList<Int> = mutableListOf(),
+    var address: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+    var photos: MutableList<ByteArray> = mutableListOf(),
+    var isBargainingEnabled: Boolean = false,
+    var isPremiumEnabled: Boolean = false,
+    var isAutoupdateEnabled: Boolean = false,
+    var newMessagesCount: Worker<Int> = Worker(0),
+    var state: Int = 0
+) : ISource {
+    fun isActive() = state == 0
+    fun isOrdered() = state == 1
+    fun isArchived() = state == 2
+}
 
 

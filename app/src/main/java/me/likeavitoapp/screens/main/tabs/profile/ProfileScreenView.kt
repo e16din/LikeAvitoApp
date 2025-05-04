@@ -201,14 +201,14 @@ fun ProfileScreenView(screen: ProfileScreen) {
                             Row {
                                 Icon(Icons.Default.ShoppingCart, "ad")
                                 Text(
-                                    chat.ad.title,
+                                    chat.title,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 12.dp)
                                 )
                             }
                             Row(Modifier.padding(top = 4.dp)) {
                                 Icon(Icons.Default.Person, "person")
-                                Text(chat.ad.owner.name, Modifier.padding(horizontal = 12.dp))
+                                Text(chat.userName, Modifier.padding(horizontal = 12.dp))
                             }
 
                             Row(Modifier.padding(top = 6.dp)) {

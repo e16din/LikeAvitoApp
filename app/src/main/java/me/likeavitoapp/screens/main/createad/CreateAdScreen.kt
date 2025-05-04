@@ -5,8 +5,8 @@ import kotlinx.coroutines.withContext
 import me.likeavitoapp.R
 import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
-import me.likeavitoapp.model.CreateAdRequest
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
@@ -24,7 +24,8 @@ enum class CreateAdStep(val label: String) {
 }
 
 class CreateAdScreen(
-    val navigator: ScreensNavigator
+    val navigator: ScreensNavigator,
+    var activeCreateAdRequest: OwnAd
 ) : IScreen {
 
     class State {
@@ -38,10 +39,6 @@ class CreateAdScreen(
     val stepsNavigator = ScreensNavigator()
 
     init {
-        if (get.sources().app.activeCreateAdRequest == null) {
-            get.sources().app.activeCreateAdRequest = CreateAdRequest()
-        }
-
         selectStep(CreateAdStep.Description)
     }
 
@@ -59,7 +56,7 @@ class CreateAdScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        with(get.sources().app.activeCreateAdRequest!!) {
+        with(activeCreateAdRequest) {
             if (
                 checkIsValid(CreateAdStep.Description)
                 && checkIsValid(CreateAdStep.Category)
@@ -107,7 +104,7 @@ class CreateAdScreen(
 
     private fun checkIsValid(step: CreateAdStep = state.activeStep.value!!): Boolean {
         var fieldName: String? = null
-        with(get.sources().app.activeCreateAdRequest!!) {
+        with(activeCreateAdRequest) {
             when (step) {
                 CreateAdStep.Description -> {
                     fieldName = if (title.isNullOrEmpty()) {
@@ -178,7 +175,7 @@ class CreateAdScreen(
         get.sources().app.loading.next(true)
         work {
             val result = get.sources().backend.adsService.createAd(
-                get.sources().app.activeCreateAdRequest!!
+                activeCreateAdRequest
             )
             val newOwnAd = result.getOrNull()
 
@@ -186,7 +183,7 @@ class CreateAdScreen(
                 get.sources().app.loading.next(false)
 
                 if (newOwnAd != null) {
-                    get.sources().app.ownAds.add(newOwnAd)
+                    get.sources().app.user.value!!.ownAds.add(activeCreateAdRequest)
                     get.sources().app.message.next(
                         get.sources().platform.getString(R.string.create_ad_success_message)
                     )

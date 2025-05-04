@@ -3,6 +3,7 @@ package me.likeavitoapp.screens.main
 import me.likeavitoapp.className
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
@@ -52,9 +53,19 @@ class MainScreen() : IScreen {
     fun ClickToCreateAdUseCase() {
         recordScenarioStep()
 
-        navigator.startScreen(
-            CreateAdScreen(navigator)
-        )
+
+        with(get.sources().app) {
+            if (activeCreateAdRequest == null) {
+                activeCreateAdRequest = OwnAd(-1)
+            }
+
+            navigator.startScreen(
+                CreateAdScreen(
+                    navigator,
+                    activeCreateAdRequest!!
+                )
+            )
+        }
     }
 
     fun ClickToCartUseCase() {

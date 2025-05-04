@@ -1,12 +1,12 @@
 package me.likeavitoapp.mocks
 
+import androidx.compose.runtime.mutableStateListOf
 import me.likeavitoapp.log
 import me.likeavitoapp.model.Ad
 import me.likeavitoapp.model.AppModel
 import me.likeavitoapp.model.Category
 import me.likeavitoapp.model.Chat
 import me.likeavitoapp.model.Contacts
-import me.likeavitoapp.model.CreateAdRequest
 import me.likeavitoapp.model.Order
 import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.PickupPointType
@@ -14,6 +14,7 @@ import me.likeavitoapp.model.PriceRange
 import me.likeavitoapp.model.Region
 import me.likeavitoapp.model.TextMessage
 import me.likeavitoapp.model.User
+import me.likeavitoapp.model.Worker
 import kotlin.math.min
 
 class MockDataProvider {
@@ -27,7 +28,7 @@ class MockDataProvider {
                 telegram = "@alex_ku_san",
                 email = "a.kundryukov@gmail.com"
             ),
-            ownAds = emptyList(),
+            ownAds = mutableStateListOf(),
             photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
         )
     )
@@ -44,6 +45,27 @@ class MockDataProvider {
         "Квартира",
     )
     var ads = mockAds()
+
+    var ownAdsCount = 0L
+    var ownAds = mutableListOf<OwnAd>(
+        OwnAd(
+            id = ownAdsCount,
+            categoryId = 1,
+            price = 500,
+            selectedPickupPointTypes = mutableListOf(2,3),
+            address = "",
+            title = "Футбольный мяч",
+            description = "В отличном состоянии!",
+            photos = mutableListOf(),
+            isBargainingEnabled = false,
+            isPremiumEnabled = true,
+            isAutoupdateEnabled = true,
+            newMessagesCount = Worker(3),
+            state = 0
+        ).also {
+            ownAdsCount++
+        }
+    )
     var orders = mutableListOf<Order>(
         createOrder(12, Order.Type.Delivery, Order.State.Active),
         createOrder(16, Order.Type.Pickup, Order.State.Archived),
@@ -52,17 +74,17 @@ class MockDataProvider {
     var pickupPoints = mockPickupPoints()
 
     val chats = mutableListOf(
-        Chat(
-            id = 99,
-            ad = ads[30],
-            messages = listOf(
+        createChat(
+            99,
+            ads[30],
+            listOf(
                 createMessage(mockOwners[10].id, "Товар еще в наличии?"),
                 createMessage(activeUser?.id ?: 0, "Да")
             )
         ),
-        Chat(
+        createChat(
             id = 100,
-            ad = ads[27],
+            ads[27],
             listOf(
                 createMessage(mockOwners[26].id, "Привет!"),
                 createMessage(
@@ -73,22 +95,31 @@ class MockDataProvider {
                 createMessage(activeUser?.id ?: 0, "Покупаешь?"),
             )
         ),
-        Chat(
+        createChat(
             id = 101,
-            ad = ads[29],
+            ads[29],
             messages = listOf(
                 createMessage(mockOwners[11].id, "Бла бла бла\n\nбла"),
                 createMessage(activeUser?.id ?: 0, "Бла бла"),
                 createMessage(mockOwners[11].id, "Бла", true)
             )
         ),
-        Chat(
+        createChat(
             id = 102,
-            ad = ads[28],
+            ads[28],
             messages = listOf(
                 createMessage(mockOwners[12].id, "Покупаю, сейчас оплачу", true)
             )
         )
+    )
+
+    private fun createChat(id: Long, ad: Ad, messages: List<TextMessage>) = Chat(
+        id = id,
+        adId = ad.id,
+        userId = ad.owner.id,
+        userName = ad.owner.name,
+        title = ad.title,
+        messages = messages,
     )
 
     init {
@@ -151,7 +182,7 @@ class MockDataProvider {
     fun createOrder(adId: Long, type: Order.Type, state: Order.State = Order.State.Active): Order {
         return Order(
             ad = ads.first { it.id == adId }.apply {
-                isOrdered = true
+                this.state = 1
             },
             type = type,
             state = state,
@@ -176,7 +207,7 @@ class MockDataProvider {
     ): List<Ad> {
         log("getNextAdsPage")
         val filterCondition: (Ad) -> Boolean = { it ->
-            !it.isOrdered
+            !it.isOrdered()
                     && ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
                     && ((regionId == null || regionId == 0) || it.regionId == regionId)
                     && ((query == null || query.isEmpty()) || it.title.contains(
@@ -232,23 +263,6 @@ class MockDataProvider {
         )
     }
 
-    var ownAdsCount = 0L
-    fun createOwnAd(data: CreateAdRequest): OwnAd {
-        ownAdsCount++
 
-        return OwnAd(
-            id = ownAdsCount,
-            categoryId = data.categoryId!!,
-            price = data.price!!,
-            selectedPickupPointTypes = data.selectedPickupPointTypes,
-            address = data.address!!,
-            title = data.title!!,
-            description = data.description!!,
-            photos = data.photos,
-            isBargainingEnabled = data.isBargainingEnabled,
-            isPremiumEnabled = data.isPremiumEnabled,
-            isAutoupdateEnabled = data.isAutoupdateEnabled,
-        )
-    }
 
 }
