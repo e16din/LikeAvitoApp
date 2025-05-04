@@ -184,6 +184,7 @@ class CreateAdScreen(
 
                 if (newOwnAd != null) {
                     get.sources().app.user.value!!.ownAds.add(activeCreateAdRequest)
+                    get.sources().app.mainScreen.returnToOrdersTab(1)
                     get.sources().app.message.next(
                         get.sources().platform.getString(R.string.create_ad_success_message)
                     )

@@ -47,21 +47,22 @@ class MockDataProvider {
     var ads = mockAds()
 
     var ownAdsCount = 0L
-    var ownAds = mutableListOf<OwnAd>(
+    var ownAds = mutableListOf(
         OwnAd(
             id = ownAdsCount,
             categoryId = 1,
             price = 500,
-            selectedPickupPointTypes = mutableListOf(2,3),
+            selectedPickupPointTypes = mutableListOf(2, 3),
             address = "",
             title = "Футбольный мяч",
             description = "В отличном состоянии!",
-            photos = mutableListOf(),
+            photoUrls = listOf("http://photo1"),
             isBargainingEnabled = false,
             isPremiumEnabled = true,
             isAutoupdateEnabled = true,
             newMessagesCount = Worker(3),
-            state = 0
+            state = 0,
+            createdMs = System.currentTimeMillis()
         ).also {
             ownAdsCount++
         }

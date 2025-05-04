@@ -205,7 +205,7 @@ data class TextMessage(
 data class MapItem(val name: String, val point: Point)
 
 // todo: it is possible to use Ad class instead of AdOwn?
-data class OwnAd(
+data class OwnAdRequest(
     override val id: Long,
     var categoryId: Int? = null,
     var price: Int? = null,
@@ -217,9 +217,26 @@ data class OwnAd(
     var isBargainingEnabled: Boolean = false,
     var isPremiumEnabled: Boolean = false,
     var isAutoupdateEnabled: Boolean = false,
+) : ISource
+
+data class OwnAd(
+    override val id: Long,
+    var categoryId: Int? = null,
+    var price: Int? = null,
+    var selectedPickupPointTypes: MutableList<Int> = mutableListOf(),
+    var address: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+    var photoUrls: List<String> = listOf(),
+    var isBargainingEnabled: Boolean = false,
+    var isPremiumEnabled: Boolean = false,
+    var isAutoupdateEnabled: Boolean = false,
     var newMessagesCount: Worker<Int> = Worker(0),
+    val createdMs: Long,
     var state: Int = 0
 ) : ISource {
+    var photos: MutableList<ByteArray> = mutableListOf()
+
     fun isActive() = state == 0
     fun isOrdered() = state == 1
     fun isArchived() = state == 2

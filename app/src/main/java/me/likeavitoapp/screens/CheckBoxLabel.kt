@@ -22,21 +22,26 @@ fun CheckBoxLabel(
     modifier: Modifier = Modifier,
     label: String,
     checked: Boolean = false,
-    onCheckChanged: (Boolean) -> Unit
+    enabled: Boolean = true,
+    onCheckChanged: (Boolean) -> Unit = {}
 ) {
     var checkedState by remember { mutableStateOf(checked) }
 
     Row(
         modifier
-            .clip(CircleShape)
-            .clickable {
-                checkedState = !checkedState
-                onCheckChanged(checkedState)
+            .clip(CircleShape).apply {
+                if (enabled) {
+                    this.clickable {
+                        checkedState = !checkedState
+                        onCheckChanged(checkedState)
+                    }
+                }
             }
 
     ) {
         Checkbox(
             checked = checkedState,
+            enabled = enabled,
             onCheckedChange = {
                 checkedState = it
                 onCheckChanged(it)

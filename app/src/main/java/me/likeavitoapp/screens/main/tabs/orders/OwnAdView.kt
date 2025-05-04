@@ -10,12 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,41 +41,45 @@ import me.likeavitoapp.developer.primitives.Colors
 import me.likeavitoapp.get
 import me.likeavitoapp.mocks.MockDataProvider
 import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.collectAsState
 import me.likeavitoapp.model.mockMainSet
 import me.likeavitoapp.model.mockScreensNavigator
 import me.likeavitoapp.screens.ActualAsyncImage
+import me.likeavitoapp.screens.CheckBoxLabel
 import me.likeavitoapp.ui.theme.AppTypography
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
 import java.text.SimpleDateFormat
 
 @Composable
-fun OrderView(
+fun OwnAdView(
     screen: OrdersScreen,
-    order: Order,
+    ownAd: OwnAd,
     newMessagesCount: State<Int>
 ) {
     @Composable
-    fun getOrderState(state: Order.State): String {
+    fun getStateName(state: Int): String {
         return when (state) {
-            Order.State.Init -> throw IllegalArgumentException("Use .Active or .Archived here")
-            Order.State.Active -> stringResource(R.string.order_active_state_label)
-            Order.State.Archived -> stringResource(R.string.done_order_status_label)
+            0 -> stringResource(R.string.order_active_state_label)
+            1 -> stringResource(R.string.done_order_status_label)
+            else -> throw IllegalArgumentException("Use 0 or 1 here")
         }
     }
 
-    val isActive = order.state == Order.State.Active
+    val isActive = ownAd.isActive()
     Card(
         modifier = Modifier
             .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-            .border(if(isActive) 2.dp else 0.dp, color = Colors.Green)
+            .border(if (isActive) 2.dp else 0.dp, color = Colors.Green)
     ) {
-        Column(Modifier.background(
-            if (isActive)
-                MaterialTheme.colorScheme.surface
-            else
-                MaterialTheme.colorScheme.surfaceVariant
-        )) {
+        Column(
+            Modifier.background(
+                if (isActive)
+                    MaterialTheme.colorScheme.surface
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,8 +88,8 @@ fun OrderView(
                     buildAnnotatedString {
                         append(
                             stringResource(
-                                R.string.order_title,
-                                "${order.number} | "
+                                R.string.own_ad_title,
+                                "${ownAd.id} | "
                             )
                         )
                         val color = if (isActive)
@@ -95,7 +97,7 @@ fun OrderView(
                         else
                             MaterialTheme.colorScheme.outline
                         withStyle(style = SpanStyle(color = color)) {
-                            append(getOrderState(order.state))
+                            append(getStateName(ownAd.state))
                         }
                     },
                 style = AppTypography.titleMedium,
@@ -103,112 +105,85 @@ fun OrderView(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Row(
-                modifier = Modifier
-                    .padding(start = 4.dp, end = 4.dp, bottom = 12.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary)
-                    .border(2.dp, MaterialTheme.colorScheme.primary)
-                    .fillMaxWidth()
-                    .clickable {
-                        screen.ClickToAdUseCase(order)
-                    }
-            ) {
-                ActualAsyncImage(
+            Box {
+                Row(
                     modifier = Modifier
-                        .height(64.dp)
-                        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
-                    url = order.ad.photoUrls.first(),
-                    contentScale = ContentScale.FillHeight
-                )
+                        .padding(start = 4.dp, end = 4.dp, bottom = 12.dp)
+                        .background(MaterialTheme.colorScheme.onPrimary)
+                        .border(2.dp, MaterialTheme.colorScheme.primary)
+                        .fillMaxWidth()
+                        .clickable {
+                            screen.ClickToOwnAdUseCase(ownAd)
+                        }
+                ) {
+                    ActualAsyncImage(
+                        modifier = Modifier
+                            .height(64.dp)
+                            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+                        url = ownAd.photoUrls.first(),
+                        contentScale = ContentScale.FillHeight
+                    )
+
+                    Text(
+                        text = ownAd.title!!,
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 16.dp)
+                            .align(Alignment.CenterVertically),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Text(
-                    text = order.ad.title,
+                    stringResource(R.string.edit_own_ad_button),
+                    style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp)
-                        .align(Alignment.CenterVertically),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 20.dp, end = 12.dp)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
+
             }
 
             val createdDate = remember {
                 SimpleDateFormat("dd.MM.yyyy", Locale.current.platformLocale)
-                    .format(order.createdMs)
-            }
-            val expectedArrivalDate = remember {
-                SimpleDateFormat("dd.MM.yyyy", Locale.current.platformLocale)
-                    .format(order.expectedArrivalMs)
+                    .format(ownAd.createdMs)
             }
 
             Text(
-                text = stringResource(R.string.order_created_label, createdDate),
+                text = stringResource(R.string.own_ad_created_label, createdDate),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
-            if (order.pickupPoint?.isInPlace == true) {
+            if (!ownAd.address.isNullOrEmpty()) {
                 Text(
-                    text = stringResource(R.string.order_in_place_label),
+                    text = stringResource(R.string.own_ad_order_address_label, ownAd.address!!),
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
-
-            } else {
-                Text(
-                    text = stringResource(R.string.expected_arrival_label, expectedArrivalDate),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                )
             }
 
-            val context = LocalContext.current
-            Row(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
-                IconButton(
-                    onClick = {
-                        val address = if (order.pickupPoint != null)
-                            order.pickupPoint.address
-                        else
-                            order.ad.address?.data ?: ""
-                        screen.ClickToAddressUseCase(address, context)
-                    },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Icon(
-                        Icons.Filled.LocationOn,
-                        "location",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-
-                Column(modifier = Modifier.padding(start = 12.dp)) {
-                    if (order.pickupPoint != null) {
-                        Text(
-                            text = stringResource(R.string.pickup_point_address_label),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier,
-                        )
-                        Text(
-                            text = "${order.ad.address?.data}",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier,
-                        )
-
-                    } else {
-                        Text(
-                            text = stringResource(R.string.delivary_address_label),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier,
-                        )
-                        Text(
-                            text = "${order.ad.address?.data}",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier,
-                        )
-                    }
-                }
-            }
+            CheckBoxLabel(
+                label = stringResource(R.string.autoupdate_checkbox),
+                checked = ownAd.isAutoupdateEnabled,
+                enabled = false
+            )
+            CheckBoxLabel(
+                label = stringResource(R.string.premium_checkbox),
+                checked = ownAd.isPremiumEnabled,
+                enabled = false
+            )
+            CheckBoxLabel(
+                label = stringResource(R.string.bargaining_enabled_checkbox),
+                checked = ownAd.isBargainingEnabled,
+                enabled = false
+            )
 
             if (isActive) {
                 Box(
@@ -224,7 +199,7 @@ fun OrderView(
                             .background(MaterialTheme.colorScheme.primary)
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                             .clickable {
-                                screen.ClickToOrderMessagesUseCase(order)
+                                screen.ClickToOwnAdMessagesUseCase(ownAd)
                             }
                     ) {
                         Text(
@@ -244,7 +219,7 @@ fun OrderView(
                     }
 
                     if (newMessagesCounters.size > 0) {
-                        val pair = newMessagesCounters.firstOrNull { it.first == order.ad.id }
+                        val pair = newMessagesCounters.firstOrNull { it.first == ownAd.id }
                         val count = pair?.second ?: 0
                         if (count > 0) {
                             Text(
@@ -267,7 +242,7 @@ fun OrderView(
 
 @Preview(showBackground = true)
 @Composable
-fun OrderViewPreview() {
+fun OwnAdViewPreview() {
     get = mockMainSet()
     LikeAvitoAppTheme {
         val screen = OrdersScreen(navigator = mockScreensNavigator())

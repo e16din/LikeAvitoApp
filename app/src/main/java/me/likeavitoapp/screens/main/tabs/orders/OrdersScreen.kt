@@ -1,9 +1,6 @@
 package me.likeavitoapp.screens.main.tabs.orders
 
 import android.content.Context
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
 import me.likeavitoapp.launchCustomTabs
 import me.likeavitoapp.model.IScreen
@@ -13,7 +10,6 @@ import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.load
-import me.likeavitoapp.model.showMessageDataLoadingFailed
 import me.likeavitoapp.recordScenarioStep
 import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
 import me.likeavitoapp.screens.main.createad.CreateAdScreen
@@ -26,7 +22,7 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         val activeOrders = Worker<List<Order>>(emptyList())
         val archivedOrders = Worker<List<Order>>(emptyList())
         val ownAds = Worker<List<OwnAd>>(emptyList())
-        val tabIndex = UpdatableState<Int>(0)
+        val tabIndex = UpdatableState(0)
     }
 
     val state = State()
@@ -84,11 +80,19 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         )
     }
 
-    fun ClickToMessagesUseCase(order: Order) {
+    fun ClickToOrderMessagesUseCase(order: Order) {
         recordScenarioStep(order)
 
         navigator.startScreen(
             ChatScreen(order.ad.id, order.ad.title, navigator),
+        )
+    }
+
+    fun ClickToOwnAdMessagesUseCase(ownAd: OwnAd) {
+        recordScenarioStep(ownAd)
+
+        navigator.startScreen(
+            ChatScreen(ownAd.id, ownAd.title!!, navigator),
         )
     }
 
@@ -98,39 +102,14 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         state.tabIndex.next(tabIndex)
     }
 
-    fun ClickToEditToOwnAdUseCase(ownAd: OwnAd) {
+    fun ClickToOwnAdUseCase(ownAd: OwnAd) {
         recordScenarioStep(ownAd)
 
         navigator.startScreen(
             CreateAdScreen(
                 navigator = navigator,
-                activeCreateAdRequest = ownAd,
+                activeCreateAdRequest = ownAd
             )
         )
-    }
-
-    fun ClickToOpenChatUseCase(ownAd: OwnAd) {
-        recordScenarioStep(ownAd)
-        get.sources().app.loading.next(true)
-
-        work<Unit> {
-            val adId = ownAd.id
-            val chatResult = get.sources().backend.messagesService.loadChat(adId)
-
-
-            withContext(Dispatchers.Main) {
-                get.sources().app.loading.next(false)
-
-                chatResult.getOrNull()?.let { chat ->
-                    navigator.startScreen(
-                        ChatScreen(adId, chat.title, navigator, chat.messages)
-                    )
-
-                } ?: run {
-                    showMessageDataLoadingFailed()
-                }
-            }
-        }
-
     }
 }

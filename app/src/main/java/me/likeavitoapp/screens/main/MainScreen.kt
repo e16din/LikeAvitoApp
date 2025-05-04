@@ -56,7 +56,10 @@ class MainScreen() : IScreen {
 
         with(get.sources().app) {
             if (activeCreateAdRequest == null) {
-                activeCreateAdRequest = OwnAd(-1)
+                activeCreateAdRequest = OwnAd(
+                    -1,
+                    createdMs = System.currentTimeMillis()
+                )
             }
 
             navigator.startScreen(
@@ -97,9 +100,13 @@ class MainScreen() : IScreen {
         }
     }
 
-    fun returnToOrdersTab() {
+    fun returnToOrdersTab(tabIndex: Int = 0) { // 0 - buy, 1 - sell
         navigator.reset()
-        tabsRootScreen.navigator.startScreen(ordersScreen)
+        tabsRootScreen.navigator.startScreen(ordersScreen.apply {
+            if (tabIndex > 0) {
+                state.tabIndex.next(tabIndex)
+            }
+        })
     }
 
     fun returnToActiveTab() {
