@@ -3,12 +3,9 @@ package me.likeavitoapp.screens.main.payment
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.likeavitoapp.checkLuhnAlgorithm
 import me.likeavitoapp.develop
 import me.likeavitoapp.format
-import me.likeavitoapp.get
 import me.likeavitoapp.isDigitsOnly
 import me.likeavitoapp.log
 import me.likeavitoapp.model.IScreen
@@ -24,11 +21,10 @@ import me.likeavitoapp.recordScenarioStep
 
 class PaymentScreen(
     val navigator: ScreensNavigator,
-    val onDone: (Boolean) -> Unit
+    val onPay: (cardNumber: String, mmYy: String, cvvCvc: String) -> Unit
 ) : IScreen {
 
     class State() {
-        val payment = Worker(Unit)
         val validationEnabled = UpdatableState(false)
         val cardNumber = Worker(TextFieldValue("")) // 1111 1111 1111 1111
         val mmYy = Worker(TextFieldValue("")) // mm/yy
@@ -36,6 +32,7 @@ class PaymentScreen(
     }
 
     val state = State()
+
 
     fun PressBackUseCase() {
         recordScenarioStep()
@@ -67,29 +64,11 @@ class PaymentScreen(
 
         state.validationEnabled.next(false)
 
-        state.payment.worker().act {
-            val activeOrderRequest = get.sources().app.activeOrderRequest!!
-            val result = get.sources().backend.orderService.order(
-                adId = activeOrderRequest.ad.id,
-                type = activeOrderRequest.type,
-                cardNumber = state.cardNumber.data().text,
-                mmYy = state.mmYy.data().text,
-                cvvCvc = state.cvvCvc.data().text,
-            )
-
-            val order = result.getOrNull()
-            val isSuccess = order != null
-
-            if (isSuccess) {
-                withContext(Dispatchers.Main) {
-                    get.sources().app.activeOrderRequest = null
-                }
-            }
-
-            onDone(isSuccess)
-
-            return@act Pair(Unit, isSuccess)
-        }
+        onPay(
+            state.cardNumber.data().text,
+            state.mmYy.data().text,
+            state.cvvCvc.data().text
+        )
     }
 
     fun reformat(

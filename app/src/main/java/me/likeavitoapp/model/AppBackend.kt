@@ -265,12 +265,12 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             return Result.success(mockDataProvider.getFavorites())
         }
 
-        suspend fun getNewMessagesCount(adId:Long): Result<Int> {
+        suspend fun getNewMessagesCount(adId: Long): Result<Int> {
             delay(200)
 //            val count = Random(5).nextInt()
-            val count = mockDataProvider.ads.firstOrNull{
+            val count = mockDataProvider.ads.firstOrNull {
                 it.id == adId
-            }?.newMessagesCount?.data() ?: mockDataProvider.ownAds.firstOrNull{
+            }?.newMessagesCount?.data() ?: mockDataProvider.ownAds.firstOrNull {
                 it.id == adId
             }?.newMessagesCount?.data() ?: 0
             return Result.success(count)
@@ -289,8 +289,16 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             mockDataProvider.searchTips.add(0, tip)
         }
 
-        suspend fun createAd(data: OwnAd): Result<Boolean> {
+        suspend fun createAd(
+            data: OwnAd,
+            cardNumber: String? = null,
+            mmYy: String? = null,
+            cvvCvc: String? = null
+        ): Result<Boolean> {
             delay(300)
+
+            val price = data.price
+            data.photoUrls = data.photoBytes.mapIndexed { i,  it -> "url$i" }
 
             mockDataProvider.ownAds.add(data)
 

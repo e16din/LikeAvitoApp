@@ -69,6 +69,8 @@ fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
     }
 
     DisposableEffect(Unit) {
+        screen.StartScreenUseCase()
+
         onDispose {
             screen.CloseScreenUseCase()
         }

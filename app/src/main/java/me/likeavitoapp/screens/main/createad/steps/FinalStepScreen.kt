@@ -1,30 +1,34 @@
 package me.likeavitoapp.screens.main.createad.steps
 
-import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
 
 
 class FinalStepScreen(
+    val ownAd: OwnAd,
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State {
-        val isPremiumEnabled = UpdatableState(false) // 300r
-        val isAutoupdateEnabled = UpdatableState(false) // 90r
+    inner class State {
+        val isPremiumEnabled = UpdatableState(ownAd.isPremiumEnabled) // 300r
+        val isAutoupdateEnabled = UpdatableState(ownAd.isAutoupdateEnabled) // 90r
         val price = UpdatableState(0)
     }
 
     val state = State()
 
+    init {
+        updatePrice()
+    }
 
     fun ChangeIsPremiumUseCase(enabled: Boolean) {
         recordScenarioStep(enabled)
 
         state.isPremiumEnabled.next(enabled)
-        get.sources().app.activeCreateAdRequest!!.isPremiumEnabled = enabled
+        ownAd.isPremiumEnabled = enabled
         updatePrice()
     }
 
@@ -32,7 +36,7 @@ class FinalStepScreen(
         recordScenarioStep(enabled)
 
         state.isAutoupdateEnabled.next(enabled)
-        get.sources().app.activeCreateAdRequest!!.isAutoupdateEnabled = enabled
+        ownAd.isAutoupdateEnabled = enabled
         updatePrice()
     }
 
@@ -41,12 +45,12 @@ class FinalStepScreen(
         if (state.isPremiumEnabled.value) {
             sum += 300
         }
-        if(state.isAutoupdateEnabled.value){
+        if (state.isAutoupdateEnabled.value) {
             sum += 90
         }
 
         state.price.next(sum)
-        get.sources().app.activeCreateAdRequest!!.price = sum
+        ownAd.price = sum
     }
 
 }

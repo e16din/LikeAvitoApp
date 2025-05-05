@@ -3,7 +3,10 @@ package me.likeavitoapp.screens.main.order.create.selectpickup
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.yandex.mapkit.geometry.Point
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.likeavitoapp.R
+import me.likeavitoapp.developer.primitives.work
 import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
 import me.likeavitoapp.model.Order
@@ -13,7 +16,6 @@ import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.model.Worker
 import me.likeavitoapp.model.load
 import me.likeavitoapp.recordScenarioStep
-import me.likeavitoapp.screens.main.payment.PaymentScreen
 
 
 class SelectPickupPointScreen(
@@ -115,13 +117,28 @@ class SelectPickupPointScreen(
 
         val orderRequest = get.sources().app.activeOrderRequest!!
         if (orderRequest.pickupPoint != null) {
-            navigator.startScreen(
-                PaymentScreen(navigator) { isSuccess ->
+            get.sources().app.pay { cardNumber, mmYy, cvvCvc ->
+                val activeOrderRequest = get.sources().app.activeOrderRequest!!
+                work {
+                    val result = get.sources().backend.orderService.order(
+                        adId = activeOrderRequest.ad.id,
+                        type = activeOrderRequest.type,
+                        cardNumber = cardNumber,
+                        mmYy = mmYy,
+                        cvvCvc = cvvCvc,
+                    )
+
+                    val order = result.getOrNull()
+                    val isSuccess = order != null
+
                     if (isSuccess) {
-                        get.sources().app.mainScreen.returnToOrdersTab()
+                        withContext(Dispatchers.Main) {
+                            get.sources().app.activeOrderRequest = null
+                            get.sources().app.mainScreen.returnToOrdersTab()
+                        }
                     }
-                },
-            )
+                }
+            }
 
         } else {
             get.sources().app.message.next(

@@ -38,6 +38,7 @@ class AppModel {
 
     lateinit var rootScreen: RootScreen
     lateinit var mainScreen: MainScreen
+    var paymentScreen: PaymentScreen? = null
 
     fun onLogoutException() {
         if (rootScreen.navigator.screen.value !is AuthScreen) {
@@ -55,11 +56,11 @@ class AppModel {
         }
     }
 
-    fun pay(onDone: (success: Boolean) -> Unit) {
+    fun pay(onPay: (cardNumber: String, mmYy: String, cvvCvc: String) -> Unit) {
+
         val navigator = mainScreen.navigator
-        navigator.startScreen(
-            PaymentScreen(navigator, onDone),
-        )
+        paymentScreen = PaymentScreen(navigator, onPay)
+        navigator.startScreen(paymentScreen!!)
     }
 }
 
@@ -141,7 +142,7 @@ data class Order(
     val createdMs: Long,
     val expectedArrivalMs: Long,
     val pickupPoint: PickupPoint?
-): ISource {
+) : ISource {
     enum class Type {
         Pickup,
         Delivery
@@ -223,7 +224,7 @@ data class OwnAd(
     override val id: Long,
     var categoryId: Int? = null,
     var price: Int? = null,
-    var selectedPickupPointTypes: MutableList<Int> = mutableListOf(),
+    var selectedPickupPointTypes: SnapshotStateList<Int> = mutableStateListOf(),
     var address: String? = null,
     var title: String? = null,
     var description: String? = null,
@@ -235,7 +236,7 @@ data class OwnAd(
     val createdMs: Long,
     var state: Int = 0
 ) : ISource {
-    var photos: MutableList<ByteArray> = mutableListOf()
+    var photoBytes: SnapshotStateList<ByteArray> = mutableStateListOf()
 
     fun isActive() = state == 0
     fun isOrdered() = state == 1

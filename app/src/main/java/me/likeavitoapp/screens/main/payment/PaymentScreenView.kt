@@ -380,7 +380,7 @@ fun PaymentScreenPreview() {
     get = mockMainSet()
     val screen = PaymentScreen(
         navigator = mockScreensNavigator(),
-        onDone = {}
+        onPay = { _, _, _ -> }
     )
     LikeAvitoAppTheme {
         PaymentScreenProvider(

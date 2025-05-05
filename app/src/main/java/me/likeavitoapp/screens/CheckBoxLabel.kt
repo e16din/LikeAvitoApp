@@ -29,12 +29,11 @@ fun CheckBoxLabel(
 
     Row(
         modifier
-            .clip(CircleShape).apply {
+            .clip(CircleShape)
+            .clickable {
                 if (enabled) {
-                    this.clickable {
-                        checkedState = !checkedState
-                        onCheckChanged(checkedState)
-                    }
+                    checkedState = !checkedState
+                    onCheckChanged(checkedState)
                 }
             }
 

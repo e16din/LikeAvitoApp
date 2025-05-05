@@ -17,15 +17,11 @@ import me.likeavitoapp.screens.main.createad.steps.FinalStepScreen
 
 
 enum class CreateAdStep(val label: String) {
-    Description("Описание"),
-    Category("Категория"),
-    PickupPoints("Пункты выдачи"),
-    Additions("Дополнения"),
+    Description("Описание"), Category("Категория"), PickupPoints("Пункты выдачи"), Additions("Дополнения"),
 }
 
 class CreateAdScreen(
-    val navigator: ScreensNavigator,
-    var activeCreateAdRequest: OwnAd
+    val navigator: ScreensNavigator, var activeCreateAdRequest: OwnAd
 ) : IScreen {
 
     class State {
@@ -57,20 +53,18 @@ class CreateAdScreen(
         recordScenarioStep()
 
         with(activeCreateAdRequest) {
-            if (
-                checkIsValid(CreateAdStep.Description)
-                && checkIsValid(CreateAdStep.Category)
-                && checkIsValid(CreateAdStep.PickupPoints)
-                && checkIsValid(CreateAdStep.Additions)
+            if (checkIsValid(CreateAdStep.Description) && checkIsValid(CreateAdStep.Category) && checkIsValid(
+                    CreateAdStep.PickupPoints
+                ) && checkIsValid(CreateAdStep.Additions)
             ) {
                 if (price == 0) {
                     createAd()
 
                 } else {
-                    get.sources().app.pay { success ->
-                        if (success) {
-                            createAd()
-                        }
+                    get.sources().app.pay { cardNumber, mmYy, cvvCvc ->
+                        createAd(
+                            cardNumber, mmYy, cvvCvc
+                        )
                     }
                 }
             }
@@ -111,7 +105,7 @@ class CreateAdScreen(
                         get.sources().platform.getString(R.string.title_arg)
                     } else if (description.isNullOrEmpty()) {
                         get.sources().platform.getString(R.string.description_arg)
-                    } else if (photos.isEmpty()) {
+                    } else if (photoBytes.isEmpty()) {
                         get.sources().platform.getString(R.string.photo_arg)
                     } else {
                         null
@@ -162,20 +156,32 @@ class CreateAdScreen(
 
         stepsNavigator.startScreen(
             when (step) {
-                CreateAdStep.Description -> DescriptionStepScreen(stepsNavigator)
-                CreateAdStep.Category -> CategoryStepScreen(stepsNavigator)
-                CreateAdStep.PickupPoints -> DeliveryStepScreen(stepsNavigator)
-                CreateAdStep.Additions -> FinalStepScreen(stepsNavigator)
-            },
-            fromScreens = true
+                CreateAdStep.Description -> DescriptionStepScreen(
+                    ownAd = activeCreateAdRequest, stepsNavigator
+                )
+
+                CreateAdStep.Category -> CategoryStepScreen(
+                    ownAd = activeCreateAdRequest, stepsNavigator
+                )
+
+                CreateAdStep.PickupPoints -> DeliveryStepScreen(
+                    ownAd = activeCreateAdRequest, stepsNavigator
+                )
+
+                CreateAdStep.Additions -> FinalStepScreen(
+                    ownAd = activeCreateAdRequest, stepsNavigator
+                )
+            }, fromScreens = true
         )
     }
 
-    private fun createAd() {
+    private fun createAd(
+        cardNumber: String? = null, mmYy: String? = null, cvvCvc: String? = null
+    ) {
         get.sources().app.loading.next(true)
         work {
             val result = get.sources().backend.adsService.createAd(
-                activeCreateAdRequest
+                activeCreateAdRequest, cardNumber, mmYy, cvvCvc
             )
             val newOwnAd = result.getOrNull()
 

@@ -44,7 +44,7 @@ open class BaseAdContainerScreen(
 
         val createOrderScreen = CreateOrderScreen(ad, navigator)
         if (ad.reservedTimeMs != null) {
-            navigator.startScreen(createOrderScreen,)
+            navigator.startScreen(createOrderScreen)
             return
         }
 
@@ -52,7 +52,7 @@ open class BaseAdContainerScreen(
             if (success) {
                 ad.reservedTimeMs = System.currentTimeMillis()
                 timersMap[ad.id] = startReserveTimer(ad)
-                navigator.startScreen(createOrderScreen,)
+                navigator.startScreen(createOrderScreen)
 
             } else {
 
@@ -84,6 +84,13 @@ open class BaseAdContainerScreen(
                 )
             } ?: "")
             delay(1000)
+
+            if (!ad.isActive()) {
+                ad.reservedTimeMs = null
+                ad.timerLabel.next("")
+                timersMap.remove(ad.id)
+                state.reserve.output.next(false)
+            }
         }
     }
 

@@ -1,25 +1,28 @@
 package me.likeavitoapp.screens.main.createad.steps
 
-import androidx.compose.runtime.mutableStateListOf
-import me.likeavitoapp.get
 import me.likeavitoapp.model.IScreen
+import me.likeavitoapp.model.OwnAd
 import me.likeavitoapp.model.ScreensNavigator
 import me.likeavitoapp.model.UpdatableState
 import me.likeavitoapp.recordScenarioStep
 
 
 class DescriptionStepScreen(
+    val ownAd: OwnAd,
     val navigator: ScreensNavigator
 ) : IScreen {
 
-    class State {
-        val title = UpdatableState("")
-        val description = UpdatableState("")
+    inner class State {
 
-        val photos = mutableStateListOf<ByteArray>() // <file path>
+        val title = UpdatableState(ownAd.title ?: "")
+        val description = UpdatableState(ownAd.description ?: "")
+
+        val photos = ownAd.photoBytes
         val imagePickerEnabled = UpdatableState(false)
         val scrollPhotosToEnd = UpdatableState(false)
-        val isBargainingEnabled = UpdatableState(false)
+        val isBargainingEnabled = UpdatableState(
+            ownAd.isBargainingEnabled
+        )
 
     }
 
@@ -29,14 +32,14 @@ class DescriptionStepScreen(
         recordScenarioStep()
 
         state.description.next(description)
-        get.sources().app.activeCreateAdRequest!!.description = description
+        ownAd.description = description
     }
 
     fun ChangeTitleUseCase(title: String) {
         recordScenarioStep()
 
         state.title.next(title)
-        get.sources().app.activeCreateAdRequest!!.title = title
+        ownAd.title = title
     }
 
     fun ClickToAddPhotoUseCase() {
@@ -46,7 +49,6 @@ class DescriptionStepScreen(
 
         // test
         state.photos.add(ByteArray(1))
-        get.sources().app.activeCreateAdRequest!!.photos.add(ByteArray(1))
 
         state.scrollPhotosToEnd.next(true)
     }
@@ -57,7 +59,7 @@ class DescriptionStepScreen(
         state.imagePickerEnabled.next(false)
         bytes?.let {
             state.photos.add(it)
-            get.sources().app.activeCreateAdRequest!!.photos.add(it)
+            ownAd.photoBytes.add(it)
             state.scrollPhotosToEnd.next(true)
         }
     }
@@ -66,14 +68,14 @@ class DescriptionStepScreen(
         recordScenarioStep(bytes)
 
         state.photos.remove(bytes)
-        get.sources().app.activeCreateAdRequest!!.photos.remove(bytes)
+        ownAd.photoBytes.remove(bytes)
     }
 
     fun ChangeIsBargainingUseCase(enabled: Boolean) {
         recordScenarioStep(enabled)
 
         state.isBargainingEnabled.next(enabled)
-        get.sources().app.activeCreateAdRequest!!.isBargainingEnabled = enabled
+        ownAd.isBargainingEnabled = enabled
     }
 
 }

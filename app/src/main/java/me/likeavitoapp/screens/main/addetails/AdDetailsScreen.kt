@@ -16,6 +16,11 @@ class AdDetailsScreen(
     class State(
     ) : BaseAdContainerState()
 
+    fun StartScreenUseCase() {
+        recordScenarioStep()
+
+    }
+
     fun PressBackUseCase() {
         recordScenarioStep()
 

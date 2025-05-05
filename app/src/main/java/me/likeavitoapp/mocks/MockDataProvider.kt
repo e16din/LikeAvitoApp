@@ -52,7 +52,7 @@ class MockDataProvider {
             id = ownAdsCount,
             categoryId = 1,
             price = 500,
-            selectedPickupPointTypes = mutableListOf(2, 3),
+            selectedPickupPointTypes = mutableStateListOf(2, 3),
             address = "",
             title = "Футбольный мяч",
             description = "В отличном состоянии!",
@@ -65,6 +65,7 @@ class MockDataProvider {
             createdMs = System.currentTimeMillis()
         ).also {
             ownAdsCount++
+            it.photoBytes.add(ByteArray(0))
         }
     )
     var orders = mutableListOf<Order>(
