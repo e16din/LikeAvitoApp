@@ -86,7 +86,7 @@ fun OrdersScreenView(screen: OrdersScreen) = with(screen) {
             }
 
             1 -> LazyColumn {
-                items(ownAds.toMutableStateList()) { ownAd ->
+                items(ownAds, key = { it.updatedMs }) { ownAd ->
                     val newMessagesCount = ownAd.newMessagesCount.output.collectAsState()
                     OwnAdView(
                         screen = screen,

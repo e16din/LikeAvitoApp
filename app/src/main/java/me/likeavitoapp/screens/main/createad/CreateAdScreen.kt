@@ -21,7 +21,9 @@ enum class CreateAdStep(val label: String) {
 }
 
 class CreateAdScreen(
-    val navigator: ScreensNavigator, var activeCreateAdRequest: OwnAd
+    val navigator: ScreensNavigator,
+    var ownAd: OwnAd,
+    val editing: Boolean = false
 ) : IScreen {
 
     class State {
@@ -52,17 +54,25 @@ class CreateAdScreen(
     fun ClickToDoneUseCase() {
         recordScenarioStep()
 
-        with(activeCreateAdRequest) {
+        if (editing) {
+            updateAd()
+        } else {
+            createAd()
+        }
+    }
+
+    private fun updateAd() {
+        with(ownAd) {
             if (checkIsValid(CreateAdStep.Description) && checkIsValid(CreateAdStep.Category) && checkIsValid(
                     CreateAdStep.PickupPoints
                 ) && checkIsValid(CreateAdStep.Additions)
             ) {
                 if (price == 0) {
-                    createAd()
+                    requestUpdateAd()
 
                 } else {
                     get.sources().app.pay { cardNumber, mmYy, cvvCvc ->
-                        createAd(
+                        requestUpdateAd(
                             cardNumber, mmYy, cvvCvc
                         )
                     }
@@ -71,10 +81,36 @@ class CreateAdScreen(
         }
     }
 
+    private fun createAd() {
+        with(ownAd) {
+            if (checkIsValid(CreateAdStep.Description) && checkIsValid(CreateAdStep.Category) && checkIsValid(
+                    CreateAdStep.PickupPoints
+                ) && checkIsValid(CreateAdStep.Additions)
+            ) {
+                if (price == 0) {
+                    requestCreateAd()
+
+                } else {
+                    get.sources().app.pay { cardNumber, mmYy, cvvCvc ->
+                        requestCreateAd(
+                            cardNumber, mmYy, cvvCvc
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun ClickToUpdateAdUseCase() {
+        recordScenarioStep()
+
+        updateAd()
+    }
+
     fun ClickToCreateAdUseCase() {
         recordScenarioStep()
 
-        ClickToDoneUseCase()
+        createAd()
     }
 
     fun ClickToStepUseCase(step: CreateAdStep) {
@@ -98,7 +134,7 @@ class CreateAdScreen(
 
     private fun checkIsValid(step: CreateAdStep = state.activeStep.value!!): Boolean {
         var fieldName: String? = null
-        with(activeCreateAdRequest) {
+        with(ownAd) {
             when (step) {
                 CreateAdStep.Description -> {
                     fieldName = if (title.isNullOrEmpty()) {
@@ -157,31 +193,31 @@ class CreateAdScreen(
         stepsNavigator.startScreen(
             when (step) {
                 CreateAdStep.Description -> DescriptionStepScreen(
-                    ownAd = activeCreateAdRequest, stepsNavigator
+                    ownAd = ownAd, stepsNavigator
                 )
 
                 CreateAdStep.Category -> CategoryStepScreen(
-                    ownAd = activeCreateAdRequest, stepsNavigator
+                    ownAd = ownAd, stepsNavigator
                 )
 
                 CreateAdStep.PickupPoints -> DeliveryStepScreen(
-                    ownAd = activeCreateAdRequest, stepsNavigator
+                    ownAd = ownAd, stepsNavigator
                 )
 
                 CreateAdStep.Additions -> FinalStepScreen(
-                    ownAd = activeCreateAdRequest, stepsNavigator
+                    ownAd = ownAd, stepsNavigator
                 )
             }, fromScreens = true
         )
     }
 
-    private fun createAd(
+    private fun requestCreateAd(
         cardNumber: String? = null, mmYy: String? = null, cvvCvc: String? = null
     ) {
         get.sources().app.loading.next(true)
         work {
             val result = get.sources().backend.adsService.createAd(
-                activeCreateAdRequest, cardNumber, mmYy, cvvCvc
+                ownAd, cardNumber, mmYy, cvvCvc
             )
             val newOwnAd = result.getOrNull()
 
@@ -189,10 +225,35 @@ class CreateAdScreen(
                 get.sources().app.loading.next(false)
 
                 if (newOwnAd != null) {
-                    get.sources().app.user.value!!.ownAds.add(activeCreateAdRequest)
+                    get.sources().app.user.value!!.ownAds.add(ownAd)
                     get.sources().app.mainScreen.returnToOrdersTab(1)
                     get.sources().app.message.next(
                         get.sources().platform.getString(R.string.create_ad_success_message)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun requestUpdateAd(
+        cardNumber: String? = null, mmYy: String? = null, cvvCvc: String? = null
+    ) {
+        get.sources().app.loading.next(true)
+        work {
+            val result = get.sources().backend.adsService.updateAd(
+                ownAd, cardNumber, mmYy, cvvCvc
+            )
+            val newOwnAd = result.getOrNull()
+
+            withContext(Dispatchers.Main) {
+                get.sources().app.loading.next(false)
+
+                if (newOwnAd != null) {
+                    get.sources().app.mainScreen.returnToOrdersTab(1)
+                    get.sources().app.message.next(
+                        get.sources().platform.getString(
+                            R.string.update_ad_success_message
+                        )
                     )
                 }
             }

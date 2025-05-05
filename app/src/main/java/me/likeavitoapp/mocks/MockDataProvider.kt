@@ -62,6 +62,7 @@ class MockDataProvider {
             isAutoupdateEnabled = true,
             newMessagesCount = Worker(3),
             state = 0,
+            updatedMs = System.currentTimeMillis(),
             createdMs = System.currentTimeMillis()
         ).also {
             ownAdsCount++

@@ -298,9 +298,28 @@ class AppBackend(val client: HttpClient = HttpClient()) {
             delay(300)
 
             val price = data.price
-            data.photoUrls = data.photoBytes.mapIndexed { i,  it -> "url$i" }
+            data.photoUrls = data.photoBytes.mapIndexed { i, it -> "url$i" }
+            mockDataProvider.ownAds.add(
+                0,
+                data.copy(id = mockDataProvider.ownAdsCount.also {
+                    mockDataProvider.ownAdsCount++
+                }).apply {
+                    photoBytes = data.photoBytes
+                }
+            )
 
-            mockDataProvider.ownAds.add(data)
+            return Result.success(true)
+        }
+
+        suspend fun updateAd(
+            data: OwnAd,
+            cardNumber: String? = null,
+            mmYy: String? = null,
+            cvvCvc: String? = null
+        ): Result<Boolean> {
+            delay(200)
+
+            data.photoUrls = data.photoBytes.mapIndexed { i, it -> "url$i" }
 
             return Result.success(true)
         }
@@ -374,30 +393,3 @@ class AppBackend(val client: HttpClient = HttpClient()) {
 
     }
 }
-
-//fun main() {
-//    val mockDataProvider = MockDataProvider()
-//    mockDataProvider.getNextAdsPage(
-//        range = PriceRange(),
-//        regionId = null,
-//        categoryId = 4,
-//        query = "диван",
-//        resetPage = true,
-//    ) // ожидаю 1 объявление с диваном
-//
-//    mockDataProvider.getNextAdsPage(
-//        range = PriceRange(),
-//        regionId = null,
-//        categoryId = null,
-//        query = null,
-//        resetPage = false,
-//    ) // ожидаю 1-ю страницу
-//
-//    mockDataProvider.getNextAdsPage(
-//        range = PriceRange(),
-//        regionId = null,
-//        categoryId = null,
-//        query = null,
-//        resetPage = false,
-//    ) // ожидаю 2-ю страницу
-//}

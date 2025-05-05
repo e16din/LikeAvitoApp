@@ -234,6 +234,7 @@ data class OwnAd(
     var isAutoupdateEnabled: Boolean = false,
     var newMessagesCount: Worker<Int> = Worker(0),
     val createdMs: Long,
+    val updatedMs: Long,
     var state: Int = 0
 ) : ISource {
     var photoBytes: SnapshotStateList<ByteArray> = mutableStateListOf()

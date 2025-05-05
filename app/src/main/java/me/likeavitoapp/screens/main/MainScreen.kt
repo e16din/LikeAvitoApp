@@ -58,6 +58,7 @@ class MainScreen() : IScreen {
             if (activeCreateAdRequest == null) {
                 activeCreateAdRequest = OwnAd(
                     -1,
+                    updatedMs = System.currentTimeMillis(),
                     createdMs = System.currentTimeMillis()
                 )
             }
@@ -106,7 +107,9 @@ class MainScreen() : IScreen {
             if (tabIndex > 0) {
                 state.tabIndex.next(tabIndex)
             }
-        })
+
+            StartScreenUseCase()
+        }, fromScreens = true)
     }
 
     fun returnToActiveTab() {

@@ -108,7 +108,8 @@ class OrdersScreen(val navigator: ScreensNavigator) : IScreen {
         navigator.startScreen(
             CreateAdScreen(
                 navigator = navigator,
-                activeCreateAdRequest = ownAd
+                ownAd = ownAd,
+                editing = true
             )
         )
     }

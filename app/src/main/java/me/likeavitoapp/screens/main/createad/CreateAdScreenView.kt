@@ -195,7 +195,7 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
                     }
                 }
             }
-            
+
             item {
                 AnimatedVisibility(doneEnabled) {
                     Box(
@@ -205,11 +205,21 @@ fun CreateAdScreenView(screen: CreateAdScreen, modifier: Modifier) = with(screen
                     ) {
                         Button(
                             onClick = {
-                                screen.ClickToCreateAdUseCase()
+                                if (screen.editing) {
+                                    screen.ClickToUpdateAdUseCase()
+                                } else {
+                                    screen.ClickToCreateAdUseCase()
+                                }
                             },
                             Modifier.align(Alignment.Center)
                         ) {
-                            Text(stringResource(R.string.create_ad_button))
+                            Text(
+                                if (screen.editing) {
+                                    stringResource(R.string.update_ad_button)
+                                } else {
+                                    stringResource(R.string.create_ad_button)
+                                }
+                            )
                         }
                     }
                 }
