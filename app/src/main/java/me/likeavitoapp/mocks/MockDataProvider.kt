@@ -1,0 +1,271 @@
+package me.likeavitoapp.mocks
+
+import androidx.compose.runtime.mutableStateListOf
+import me.likeavitoapp.log
+import me.likeavitoapp.model.Ad
+import me.likeavitoapp.model.AppModel
+import me.likeavitoapp.model.Category
+import me.likeavitoapp.model.Chat
+import me.likeavitoapp.model.Contacts
+import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.OwnAd
+import me.likeavitoapp.model.PickupPointType
+import me.likeavitoapp.model.PriceRange
+import me.likeavitoapp.model.Region
+import me.likeavitoapp.model.TextMessage
+import me.likeavitoapp.model.User
+import me.likeavitoapp.model.Worker
+import kotlin.math.min
+
+class MockDataProvider {
+    var activeUser: User? = null
+    var token = "dsdgHIHKE#U&HpFJN@ASDsADDASSASADASDadsgfff"
+    var users = listOf(
+        User(
+            id = 0,
+            name = "Кундрюков Александр",
+            contacts = Contacts(
+                telegram = "@alex_ku_san",
+                email = "a.kundryukov@gmail.com"
+            ),
+            ownAds = mutableStateListOf(),
+            photoUrl = "https://ybis.ru/wp-content/uploads/2023/09/milye-kotiki-16.webp"
+        )
+    )
+
+    val addresses = mockAddresses()
+
+    val categories = mockCategories()
+    val regions = mockRegions()
+
+    val pickupPointTypes = mockPickupPointTypes()
+    var searchTips = mutableListOf(
+        "Mac Book",
+        "Диван",
+        "Квартира",
+    )
+    var ads = mockAds()
+
+    var ownAdsCount = 0L
+    var ownAds = mutableListOf(
+        OwnAd(
+            id = ownAdsCount,
+            categoryId = 1,
+            price = 500,
+            selectedPickupPointTypes = mutableStateListOf(2, 3),
+            address = "",
+            title = "Футбольный мяч",
+            description = "В отличном состоянии!",
+            photoUrls = listOf("http://photo1"),
+            isBargainingEnabled = false,
+            isPremiumEnabled = true,
+            isAutoupdateEnabled = true,
+            newMessagesCount = Worker(3),
+            state = 0,
+            updatedMs = System.currentTimeMillis(),
+            createdMs = System.currentTimeMillis()
+        ).also {
+            ownAdsCount++
+            it.photoBytes.add(ByteArray(0))
+        }
+    )
+    var orders = mutableListOf<Order>(
+        createOrder(12, Order.Type.Delivery, Order.State.Active),
+        createOrder(16, Order.Type.Pickup, Order.State.Archived),
+    )
+    var lastDeliveryAddresses = mutableListOf<String>()
+    var pickupPoints = mockPickupPoints()
+
+    val chats = mutableListOf(
+        createChat(
+            99,
+            ads[30],
+            listOf(
+                createMessage(mockOwners[10].id, "Товар еще в наличии?"),
+                createMessage(activeUser?.id ?: 0, "Да")
+            )
+        ),
+        createChat(
+            id = 100,
+            ads[27],
+            listOf(
+                createMessage(mockOwners[26].id, "Привет!"),
+                createMessage(
+                    mockOwners[26].id,
+                    "Ты еще продаешь эту штуковину?"
+                ),
+                createMessage(activeUser?.id ?: 0, "Да, продаю"),
+                createMessage(activeUser?.id ?: 0, "Покупаешь?"),
+            )
+        ),
+        createChat(
+            id = 101,
+            ads[29],
+            messages = listOf(
+                createMessage(mockOwners[11].id, "Бла бла бла\n\nбла"),
+                createMessage(activeUser?.id ?: 0, "Бла бла"),
+                createMessage(mockOwners[11].id, "Бла", true)
+            )
+        ),
+        createChat(
+            id = 102,
+            ads[28],
+            messages = listOf(
+                createMessage(mockOwners[12].id, "Покупаю, сейчас оплачу", true)
+            )
+        )
+    )
+
+    private fun createChat(id: Long, ad: Ad, messages: List<TextMessage>) = Chat(
+        id = id,
+        adId = ad.id,
+        userId = ad.owner.id,
+        userName = ad.owner.name,
+        title = ad.title,
+        messages = messages,
+    )
+
+    init {
+        repeat(5) {
+            lastDeliveryAddresses.add("г.Москва, ул.Ленина, д.45, к.$it")
+        }
+    }
+
+    fun mockPickupPointTypes(): List<PickupPointType> {
+        return listOf(
+            PickupPointType(name = "Адрес продавца", id = 0),
+            PickupPointType(name = "Почта России", id = 1),
+            PickupPointType(name = "CDEK", id = 2),
+            PickupPointType(name = "Boxberry", id = 3),
+            PickupPointType(name = "Yandex", id = 4),
+        )
+    }
+
+    fun mockCategories(): List<Category> {
+        return listOf(
+            Category(name = "Все категории", id = 0),
+            Category(name = "Квартиры", id = 1),
+            Category(name = "Авто", id = 2),
+            Category(name = "Ноутбуки", id = 3),
+            Category(name = "Мебель", id = 4),
+            Category(name = "Книги", id = 5),
+            Category(name = "Телефоны", id = 6),
+            Category(name = "Мониторы", id = 7),
+            Category(name = "Бытовая техника", id = 8),
+        )
+    }
+
+    fun mockRegions(): List<Region> {
+        return listOf(
+            Region("Все регионы", 0),
+            Region("Москва", 1),
+            Region("Санкт-Петербург", 2),
+            Region("Ростов-на-Дону", 3),
+            Region("Екатеринбург", 4),
+            Region("Омск", 5),
+            Region("Новосибирск", 6),
+            Region("Чебоксары", 7),
+            Region("Калининград", 8),
+            Region("Сочи", 9),
+        )
+    }
+
+    fun getSuccessOrFail(success: Boolean): Result<Boolean> {
+        return if (success)
+            Result.success(true)
+        else
+            Result.failure(Exception("Request failed"))
+    }
+
+    fun getFavorites(): List<Ad> {
+        return ads.filter { it.isFavorite.value }
+    }
+
+
+    fun createOrder(adId: Long, type: Order.Type, state: Order.State = Order.State.Active): Order {
+        return Order(
+            ad = ads.first { it.id == adId }.apply {
+                this.state = 1
+            },
+            type = type,
+            state = state,
+            id = 0,
+            number = "123-1234-${adId}",
+            createdMs = System.currentTimeMillis(),
+            expectedArrivalMs = System.currentTimeMillis() + 3 * 24 * 60 * 60 * 60 * 1000,
+            pickupPoint = null
+        )
+    }
+
+    private val paged = mutableSetOf<Long>()
+    private var pageCounter = 0
+
+    fun getNextAdsPage(
+        range: PriceRange,
+        regionId: Int?,
+        categoryId: Int?,
+        query: String?,
+        resetPage: Boolean = false,
+        pageSize: Int = AppModel.adsPageSize
+    ): List<Ad> {
+        log("getNextAdsPage")
+        val filterCondition: (Ad) -> Boolean = { it ->
+            !it.isOrdered()
+                    && ((categoryId == null || categoryId == 0) || it.categoryId == categoryId)
+                    && ((regionId == null || regionId == 0) || it.regionId == regionId)
+                    && ((query == null || query.isEmpty()) || it.title.contains(
+                query,
+                ignoreCase = true
+            ))
+                    && (it.price >= range.from && (range.to <= range.from || it.price <= range.to))
+        }
+
+        val filtered = ads.filter(filterCondition)
+
+        val maxPages = 20
+        if (resetPage || pageCounter > maxPages) {
+            paged.clear()
+            pageCounter = 0
+        }
+
+        pageCounter += 1
+
+        if (filtered.size < pageSize) {
+            return filtered
+        }
+
+        val result = mutableListOf<Ad>()
+        log("pageCounter: $pageCounter")
+        for (i in (pageCounter - 1) * pageSize until min(
+            (pageCounter - 1) * pageSize + pageSize,
+            filtered.size
+        )) {
+            val ad = filtered[i]
+            if (!paged.contains(ad.id)) {
+                paged.add(ad.id)
+                result.add(ad)
+            }
+        }
+        return result
+    }
+
+    var messagesCounter = 0L
+    fun createMessage(
+        userId: Long,
+        message: String,
+        isNew: Boolean = false
+    ): TextMessage {
+        messagesCounter++
+
+        return TextMessage(
+            text = message,
+            id = messagesCounter,
+            userId = userId,
+            isNew = isNew,
+            dateMs = System.currentTimeMillis()
+        )
+    }
+
+
+
+}

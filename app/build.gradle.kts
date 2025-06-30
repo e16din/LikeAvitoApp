@@ -1,7 +1,17 @@
+import org.gradle.kotlin.dsl.debugImplementation
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+val localProps = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProps.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -10,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "me.likeavitoapp"
-        minSdk = 29
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -19,12 +29,19 @@ android {
     }
 
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            buildConfigField("String", "MAPKIT_API_KEY", "\"${localProps["MAPKIT_API_KEY"]}\"")
+        }
+
+        debug {
+            buildConfigField("String", "MAPKIT_API_KEY", "\"${localProps["MAPKIT_API_KEY"]}\"")
         }
     }
     compileOptions {
@@ -37,19 +54,23 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation(libs.androidx.browser)
+    debugImplementation(libs.leakcanary.android)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.yandex.maps.mobile)
+    implementation(libs.coil3.coil.network.ktor3)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.lottie.compose)
     implementation(libs.ktor.client.android)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -57,8 +78,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

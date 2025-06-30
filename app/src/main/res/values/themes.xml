@@ -3,7 +3,13 @@
     <style name="Base.Theme.LikeAvitoApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowSplashScreenBackground">@color/white</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_anim</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/white</item>
+        <item name="android:windowSplashScreenAnimationDuration">1000</item>
+
     </style>
 
     <style name="Theme.LikeAvitoApp" parent="Base.Theme.LikeAvitoApp" />
+
 </resources>

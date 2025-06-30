@@ -1,0 +1,234 @@
+package me.likeavitoapp.screens.main.addetails
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import me.likeavitoapp.R
+import me.likeavitoapp.get
+import me.likeavitoapp.mocks.MockDataProvider
+import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.model.mockMainSet
+import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.ActualAsyncImage
+import me.likeavitoapp.screens.ClosableMessage
+import me.likeavitoapp.screens.DetailsTopBar
+import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+import me.likeavitoapp.ui.theme.backgroundLight
+
+
+@Composable
+fun AdDetailsScreenProvider(screen: AdDetailsScreen) {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        DetailsTopBar(
+            title = screen.ad.title,
+            onBack = {
+                screen.PressBackUseCase()
+            },
+        ) { innerPadding ->
+            AdDetailsScreenView(screen, Modifier.padding(innerPadding))
+        }
+    }
+
+    BackHandler {
+        screen.PressBackUseCase()
+    }
+
+    DisposableEffect(Unit) {
+        screen.StartScreenUseCase()
+
+        onDispose {
+            screen.CloseScreenUseCase()
+        }
+    }
+}
+
+@Composable
+fun AdDetailsScreenView(screen: AdDetailsScreen, modifier: Modifier) = with(screen.state) {
+    val favoriteSelected by screen.ad.isFavorite.collectAsState()
+    val timerLabel = screen.ad.timerLabel.collectAsState(AdDetailsScreen::class)
+    val ad = screen.ad
+
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        Box {
+            val pagerState = rememberPagerState(pageCount = {
+                ad.photoUrls.size
+            })
+            Box {
+                HorizontalPager(state = pagerState) { page ->
+                    val url = ad.photoUrls[page]
+                    ActualAsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(210.dp)
+                            .clickable {
+                                screen.ClickToPhotoUseCase(url)
+                            },
+                        url = url
+                    )
+                }
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            backgroundLight
+                        )
+                        .padding(vertical = 4.dp, horizontal = 12.dp),
+                    text = "${pagerState.currentPage + 1} / ${pagerState.pageCount}"
+                )
+            }
+
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .clip(CircleShape)
+                    .background(Color.Transparent),
+                onClick = {
+                    screen.ClickToFavoriteUseCase(ad)
+                }
+            ) {
+                Icon(
+                    imageVector = if (favoriteSelected)
+                        Icons.Default.Favorite
+                    else
+                        Icons.Default.FavoriteBorder,
+                    contentDescription = "favorite",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Red
+                )
+            }
+        }
+
+        AnimatedVisibility(timerLabel.value.isNotEmpty() && timerLabel.value != "00:00") {
+            ClosableMessage(
+                text = stringResource(R.string.continue_order_label, timerLabel.value),
+                onCloseClick = {
+                    screen.ClickToCloseTimerLabel(ad)
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 16.dp, horizontal = 16.dp)
+                    .clickable {
+                        screen.ClickToBuyUseCase(ad)
+                    }
+            )
+        }
+
+        Text(
+            text = ad.description,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        if (!ad.isOrdered()) {
+            Row(modifier = Modifier) {
+                Button(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    onClick = {
+                        screen.ClickToBuyUseCase(ad)
+                    }) {
+                    Text(text = stringResource(R.string.buy_button, ad.price))
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                if (ad.isBargainingEnabled) {
+                    Box(modifier = Modifier) {
+                        val newMessagesCounters by get.sources().app.totalNewMessagesCount.collectAsState()
+
+                        Button(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            onClick = {
+                                screen.ClickToBargainingUseCase(ad)
+                            }) {
+                            Text(text = stringResource(R.string.bargaining_button))
+                        }
+
+                        if (newMessagesCounters.size > 0) {
+                            val pair = newMessagesCounters.firstOrNull { it.first == screen.ad.id }
+                            val count = pair?.second ?: 0
+                            if (count > 0) {
+                                Text(
+                                    "$count",
+                                    color = Color.White,
+                                    modifier = Modifier
+                                        .padding(end = 6.dp, top = 4.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Red)
+                                        .padding(horizontal = 8.dp)
+                                        .align(Alignment.TopEnd)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Button(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                enabled = false,
+                onClick = {
+                    screen.ClickToBuyUseCase(ad)
+                }) {
+                Text(stringResource(R.string.ordered_button))
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AdDetailsScreenPreview() {
+    get = mockMainSet()
+    LikeAvitoAppTheme {
+        AdDetailsScreenView(
+            AdDetailsScreen(
+                ad = MockDataProvider().ads.first(),
+                navigator = mockScreensNavigator(),
+            ),
+            Modifier.padding(56.dp)
+        )
+    }
+}

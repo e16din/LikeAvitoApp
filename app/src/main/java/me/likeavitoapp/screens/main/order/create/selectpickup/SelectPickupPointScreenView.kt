@@ -1,0 +1,226 @@
+package me.likeavitoapp.screens.main.order.create.selectpickup
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.location.LocationListener
+import com.yandex.mapkit.location.LocationStatus
+import me.likeavitoapp.R
+import me.likeavitoapp.get
+import me.likeavitoapp.isPreviewMode
+import me.likeavitoapp.mocks.mockAds
+import me.likeavitoapp.model.Order
+import me.likeavitoapp.model.Order.PickupPoint
+import me.likeavitoapp.model.OrderRequest
+import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.model.mockMainSet
+import me.likeavitoapp.model.mockScreensNavigator
+import me.likeavitoapp.screens.ActionTopBar
+import me.likeavitoapp.screens.Chip
+import me.likeavitoapp.screens.main.YandexMapView
+import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectPickupPointScreenProvider(screen: SelectPickupPointScreen) {
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        ActionTopBar(
+            title = stringResource(R.string.select_pickup_point),
+            onClose = {
+                screen.ClickToCloseUseCase()
+            },
+            onDone = {
+                screen.ClickToDoneUseCase()
+            },
+            withDoneButton = true
+        ) { innerPadding ->
+            SelectPickupPointScreenView(screen, Modifier.padding(innerPadding))
+        }
+    }
+
+    DisposableEffect(Unit) {
+        MapKitFactory.getInstance().onStart()
+        onDispose {
+            MapKitFactory.getInstance().onStop()
+        }
+    }
+
+    BackHandler {
+        screen.PressBackUseCase()
+    }
+}
+
+@Composable
+fun SelectPickupPointScreenView(screen: SelectPickupPointScreen, modifier: Modifier) =
+    with(screen) {
+        val query by screen.state.query.collectAsState()
+        val selectedTypeId by screen.state.typeId.collectAsState()
+        val selectedPoint = get.sources().app.activeOrderRequest!!.pickupPoint
+
+        Column(modifier = modifier.fillMaxSize()) {
+            val addressText by screen.state.query.collectAsState()
+            val points by screen.state.points.output.collectAsState()
+            val tabIndex by screen.state.tabIndex.collectAsState()
+
+            Column {
+                TextField(
+                    value = query,
+                    onValueChange = { newText ->
+                        screen.ChangeQueryUseCase(newText)
+                    },
+                    label = { Text(stringResource(R.string.enter_address_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        if (addressText.text.isNotEmpty()) {
+                            IconButton(onClick = {
+                                screen.ClickToClearAddressUseCase()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Очистить",
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                )
+
+                val types = screen.enabledTypes
+                Row(Modifier.horizontalScroll(rememberScrollState())) {
+                    types.forEach { type ->
+                        Chip(
+                            startIcon = {
+                                if (selectedTypeId == type.id) Icons.Default.Check else null
+                            },
+                            startIconTint = Color.Black.copy(alpha = 0.5f),
+                            contentDescription = type.name,
+                            label = type.name,
+                            isClickable = true,
+                            onClick = {
+                                screen.SelectPickupPointTypeUseCase(type.id)
+                            }
+                        )
+                    }
+                }
+
+                val tabs = listOf("Список", "Карта")
+
+                TabRow(selectedTabIndex = tabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            text = { Text(title) },
+                            selected = tabIndex == index,
+                            onClick = {
+                                screen.ClickToTabUseCase(index)
+                            }
+                        )
+                    }
+                }
+
+                when (tabIndex) {
+                    0 -> LazyColumn {
+                        items(points) { point ->
+                            Row(Modifier.clickable {
+                                screen.ClickToPickupPointUseCase(point)
+                            }) {
+                                Text(
+                                    text = point.address,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(16.dp)
+                                )
+                                AnimatedVisibility(point == selectedPoint) {
+                                    Icon(
+                                        Icons.Filled.Check,
+                                        "selected",
+                                        modifier = Modifier.padding(12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    1 -> if (!isPreviewMode()) {
+                        val locationListener = object : LocationListener {
+                            override fun onLocationUpdated(location: com.yandex.mapkit.location.Location) {
+                                screen.ChangeAreaPointUseCase(location.position)
+                            }
+
+                            override fun onLocationStatusUpdated(status: LocationStatus) {
+                            }
+                        }
+                        val areaPoint = screen.state.areaPoint.collectAsState()
+                        YandexMapView(
+                            points,
+                            areaPoint,
+                            locationListener,
+                            {
+                                screen.PressBackUseCase()
+                            }
+                        )
+                    }
+                }
+
+
+            }
+        }
+    }
+
+
+@Preview
+@Composable
+fun SelectPickupScreenPreview() {
+    get = mockMainSet()
+    get.sources().app.activeOrderRequest = OrderRequest(
+        ad = mockAds().first(),
+        type = Order.Type.Delivery,
+        pickupPoint = PickupPoint(
+            id = 0,
+            typeId = 1,
+            address = "г.Москва, пр-т.Ленина, д.48",
+            openingHoursFrom = 8,
+            openingHoursTo = 21,
+            point = PickupPoint.Point(0.0, 0.0),
+            isInPlace = true
+        )
+    )
+    LikeAvitoAppTheme {
+        SelectPickupPointScreenProvider(
+            screen = SelectPickupPointScreen(
+                enabledTypes = emptyList(),
+                navigator = mockScreensNavigator(),
+            )
+        )
+    }
+}

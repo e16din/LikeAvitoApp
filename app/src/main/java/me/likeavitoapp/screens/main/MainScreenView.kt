@@ -1,31 +1,360 @@
 package me.likeavitoapp.screens.main
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import me.likeavitoapp.Ad
-import me.likeavitoapp.Contacts
-
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import me.likeavitoapp.R
+import me.likeavitoapp.className
+import me.likeavitoapp.get
+import me.likeavitoapp.log
+import me.likeavitoapp.model.collectAsState
+import me.likeavitoapp.model.mockMainSet
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreen
+import me.likeavitoapp.screens.main.addetails.AdDetailsScreenProvider
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreen
+import me.likeavitoapp.screens.main.addetails.photo.PhotoScreenProvider
+import me.likeavitoapp.screens.main.createad.CreateAdScreen
+import me.likeavitoapp.screens.main.createad.CreateAdScreenProvider
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreen
+import me.likeavitoapp.screens.main.order.create.CreateOrderScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreen
+import me.likeavitoapp.screens.main.order.create.selectdelivery.SelectDeliveryAddressScreenProvider
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreen
+import me.likeavitoapp.screens.main.order.create.selectpickup.SelectPickupPointScreenProvider
+import me.likeavitoapp.screens.main.payment.PaymentScreen
+import me.likeavitoapp.screens.main.payment.PaymentScreenProvider
+import me.likeavitoapp.screens.main.tabs.NextTabProvider
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreen
+import me.likeavitoapp.screens.main.tabs.chat.ChatScreenProvider
+import me.likeavitoapp.screens.main.tabs.favorites.FavoritesScreen
+import me.likeavitoapp.screens.main.tabs.orders.OrdersScreen
+import me.likeavitoapp.screens.main.tabs.profile.ProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreen
+import me.likeavitoapp.screens.main.tabs.profile.edit.EditProfileScreenProvider
+import me.likeavitoapp.screens.main.tabs.search.SearchScreen
 import me.likeavitoapp.ui.theme.LikeAvitoAppTheme
-
+import me.likeavitoapp.ui.theme.onPrimaryContainerLightMediumContrast
+import me.likeavitoapp.ui.theme.primaryContainerLightMediumContrast
+import me.likeavitoapp.ui.theme.primaryLightMediumContrast
+import me.likeavitoapp.ui.theme.secondaryContainerLight
 
 @Composable
-fun MainScreenView(viewModel:MainViewModel = viewModel()) {
-    val adsState = viewModel.uiState.adsState.collectAsState()
+fun MainScreenProvider(screen: MainScreen) {
+    val nextScreen = screen.navigator.screen.collectAsState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(adsState.value.size) { index ->
-            val item = adsState.value[index]
-            Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
+    LaunchedEffect(Unit) {
+        screen.StartScreenUseCase()
+    }
+
+
+    Surface(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        MainScreenView(screen)
+
+        with(nextScreen.value) {
+            when (this) {
+                is AdDetailsScreen -> AdDetailsScreenProvider(this)
+                is CreateOrderScreen -> CreateOrderScreenProvider(this)
+                is EditProfileScreen -> EditProfileScreenProvider(this)
+                is PhotoScreen -> PhotoScreenProvider(this)
+                is ChatScreen -> ChatScreenProvider(this)
+                is SelectPickupPointScreen -> SelectPickupPointScreenProvider(this)
+                is SelectDeliveryAddressScreen -> SelectDeliveryAddressScreenProvider(this)
+                is PaymentScreen -> PaymentScreenProvider(this)
+                is CreateAdScreen -> CreateAdScreenProvider(this)
+            }
+        }
+    }
+
+    BackHandler {
+        screen.PressBackUseCase()
+    }
+}
+
+val tabBarHeight = 58.dp
+
+@Composable
+fun MainScreenView(screen: MainScreen) {
+    val newMessagesCounters by get.sources().app.totalNewMessagesCount.collectAsState()
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Box(modifier = Modifier.padding(bottom = tabBarHeight)) {
+            NextTabProvider(screen, screen.tabsRootScreen.navigator)
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+        ) {
+            TabsView(screen)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(y = (16).dp)
+            ) {
+                ButtonCreateNewView(screen)
+            }
+
+            if (newMessagesCounters.size > 0) {
+                var count = 0
+                newMessagesCounters.forEach {
+                    count += it.second
+                }
+                Text(
+                    "${count}",
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(top = 18.dp, end = 8.dp)
+                        .clip(CircleShape)
+                        .background(Color.Red)
+                        .padding(horizontal = 8.dp)
+                        .align(Alignment.TopEnd)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BoxScope.ButtonCreateNewView(screen: MainScreen) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .size(86.dp)
+            .clip(CircleShape)
+            .background(primaryContainerLightMediumContrast)
+            .border(width = 1.dp, color = primaryLightMediumContrast, shape = CircleShape)
+            .clickable {
+                screen.ClickToCreateAdUseCase()
+
+            }
+    ) {
+        Icon(
+            Icons.Rounded.Add,
+            contentDescription = "create_ad",
+            tint = onPrimaryContainerLightMediumContrast,
+            modifier = Modifier.size(40.dp)
+        )
+        //                Text(text = stringResource(R.string.create_new_tab), fontSize = 9.sp, maxLines = 1)
+        Spacer(modifier = Modifier.size(8.dp))
+    }
+}
+
+@Composable
+private fun BoxScope.TabsView(screen: MainScreen) {
+    val tabScreen = screen.tabsRootScreen.navigator.screen.collectAsState()
+
+    log("Tab: ${tabScreen.value?.className()}")
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(tabBarHeight)
+            .background(secondaryContainerLight)
+            .align(Alignment.BottomStart),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        val modifier = Modifier
+        // Search
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is SearchScreen)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
+                )
+                .clickable(onClick = {
+                    screen.ClickToSearchUseCase()
+
+                }), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is SearchScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
+            Icon(
+                Icons.Rounded.Search,
+                contentDescription = "search",
+                tint = tint
+            )
+            Text(
+                text = stringResource(R.string.search_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = tint
+            )
+        }
+
+        // Favorites
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is FavoritesScreen)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
+                )
+                .clickable(onClick = {
+                    screen.ClickToFavoritesUseCase()
+                }), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is FavoritesScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
+            Icon(
+                Icons.Rounded.Favorite,
+                contentDescription = "favorite",
+                tint = tint
+            )
+            Text(
+                text = stringResource(R.string.favorite_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = tint
+            )
+        }
+
+        // CreateAd Stub
+        Box(
+            modifier = Modifier
+                .weight(0.45f)
+                .background(
+                    if (tabScreen.value is FavoritesScreen)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
+                )
+                .height(tabBarHeight)
+        )
+        Box(
+            modifier = Modifier
+                .weight(0.45f)
+                .background(
+                    if (tabScreen.value is OrdersScreen)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
+                )
+                .height(tabBarHeight)
+        )
+
+        // Cart
+        Column(
+            modifier = modifier
+                .weight(1f)
+                .background(
+                    if (tabScreen.value is OrdersScreen)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondaryContainer
+                )
+                .clickable {
+                    screen.ClickToCartUseCase()
+
+                }, horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            val tint = if (tabScreen.value is OrdersScreen)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
+            Icon(
+                Icons.Rounded.ShoppingCart,
+                contentDescription = "cart",
+                tint = tint
+            )
+            Text(
+                text = stringResource(R.string.cart_tab),
+                fontSize = 9.sp,
+                maxLines = 1,
+                color = tint
+            )
+        }
+
+        // Profile
+        Box(
+            modifier = modifier
+                .weight(1f)
+        ) {
+
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (tabScreen.value is ProfileScreen)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer
+                    )
+                    .clickable {
+                        screen.ClickToProfileUseCase()
+
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.size(8.dp))
+                val tint = if (tabScreen.value is ProfileScreen)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                Icon(
+                    Icons.Rounded.Person,
+                    contentDescription = "profile",
+                    tint = tint
+                )
+                Text(
+                    text = stringResource(R.string.profile_tab),
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    color = tint
+                )
+            }
         }
     }
 }
@@ -33,7 +362,10 @@ fun MainScreenView(viewModel:MainViewModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
+    get = mockMainSet()
     LikeAvitoAppTheme {
-        MainScreenView()
+        MainScreenView(
+            screen = MainScreen()
+        )
     }
 }
